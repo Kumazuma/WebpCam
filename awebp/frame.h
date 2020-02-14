@@ -1,27 +1,25 @@
 #pragma once
 #include <wx/wx.h>
 #include "UIDesign.h"
+#include "presenter.h"
 enum WidgetID {
 	BTN_START = 1000,
 	BTN_STOP
 };
 class CaptureRegionFrame : public wxFrame
 {
-	friend class AWebpApp;
 	wxDECLARE_EVENT_TABLE();
 public:
-	CaptureRegionFrame(wxWindow* parent, const wxString& title);
+	CaptureRegionFrame(wxWindow* parent,AppPresenter* presenter,  const wxString& title);
 	virtual ~CaptureRegionFrame();
 protected:
 	void OnMoved(wxMoveEvent& event);
 	void OnSized(wxSizeEvent& event);
 private:
-	
+	AppPresenter* m_presenter;
 };
 class CommandFrame : public UIRecordFrame
 {
-	friend class AWebpApp;
-
 public:
 	CommandFrame(const wxString& title);
 	virtual ~CommandFrame();
@@ -33,6 +31,9 @@ protected:
 	void OnSpinHeigt(wxSpinEvent& event);
 	void OnChoiceFPS(wxCommandEvent& event);
 	void OnChangeChkUsingTemoFile(wxCommandEvent& event);
-private:
+	void OnClickSave(wxCommandEvent& event);
+	void OnRefleshView(wxCommandEvent& event);
 	
+private:
+	AppPresenter* m_presenter;
 };

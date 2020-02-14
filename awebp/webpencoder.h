@@ -6,17 +6,14 @@
 class WebpEncoder : public IEncoder
 {
 public:
-	bool BeginEncode(wxEvtHandler* handler, uint32_t width, uint32_t height) override;
-	bool AddFrame(const wxImage& frame, uint32_t duration) override;
-	bool EndEncode() override;
+	void Encode(wxEvtHandler* handler, const wxString filePath, const IImageStore& imageStore) override;
+	wxString GetFileFilter() override;
+	wxString GetFileExtension() override;
 private:
 	WebPAnimEncoder* m_encoder;
 	WebPAnimEncoderOptions m_encoderOption;
 	WebPConfig m_config;
 	WebPPicture m_frame;
-	uint32_t m_timestamp;
-	uint32_t m_duration;
-	wxLongLong m_prevTick;
 	wxMessageQueue<std::pair<wxImage, uint32_t>> m_queue;
 	wxThread* m_loopThread;
 };

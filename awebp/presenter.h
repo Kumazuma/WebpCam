@@ -8,8 +8,13 @@ class AppPresenter : public wxEvtHandler
 	wxDECLARE_DYNAMIC_CLASS(AppPresenter);
 private:
 	Model m_model;
+	wxEvtHandler* m_view;
+	wxTimer* m_timer;
+	ICapturer* m_capturer;
+	IImageStore* m_imageStore;
 public:
-	AppPresenter();
+	AppPresenter() {}
+	AppPresenter(wxEvtHandler* view);
 	~AppPresenter();
 	bool IsRecording() { return m_model.IsResording(); }
 	
@@ -23,11 +28,9 @@ public:
 	const IImageStore& GetImageStore() const;
 	FPS  GetFPS() { return m_model.GetFPS(); }
 	void SetFPS(FPS fps) { m_model.SetFPS(fps); }
+	void StartEncodeAndSave();
 protected:
-	wxTimer* m_timer;
-	ICapturer* m_capturer;
-	//IEncoder* m_recorder;
-	IImageStore* m_imageStore;
+	
 	void OnModelPropertyChanged(wxCommandEvent& event);
 	void OnTimer(wxTimerEvent& event);
 	void OnCompleteRecord(wxCommandEvent& event);

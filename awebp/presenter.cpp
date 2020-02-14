@@ -7,11 +7,12 @@
 #include "memoryimagestore.h"
 wxDEFINE_EVENT(EVT_RefreshView, wxCommandEvent);
 wxIMPLEMENT_DYNAMIC_CLASS(AppPresenter, wxEvtHandler);
-AppPresenter::AppPresenter():
+AppPresenter::AppPresenter(wxEvtHandler * view):
 	wxEvtHandler(),
 	m_timer(new wxTimer(this)),
 	m_capturer(nullptr),
-	m_imageStore(nullptr)
+	m_imageStore(nullptr),
+	m_view(view)
 {
 	m_model.LinkPresenter(this);
 	this->Bind(EVT_PropertyChanged, &AppPresenter::OnModelPropertyChanged, this,ModelPropertyId::IsRecording);
@@ -74,9 +75,14 @@ const IImageStore& AppPresenter::GetImageStore() const
 	return *m_imageStore;
 }
 
+void AppPresenter::StartEncodeAndSave()
+{
+
+}
+
 void AppPresenter::OnModelPropertyChanged(wxCommandEvent& event)
 {
-	wxTheApp->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	m_view->QueueEvent(new wxCommandEvent(EVT_RefreshView));
 }
 
 void AppPresenter::OnTimer(wxTimerEvent& event)

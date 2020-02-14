@@ -8,66 +8,14 @@
 #pragma comment(lib,"libwebpdemux.lib")
 #pragma comment(lib,"libwebpmux.lib")
 
-class WebPProcessingThread : public wxThread
+void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, const IImageStore& imageStore)
 {
-public:
-	WebPAnimEncoder* m_encoder;
-	WebPAnimEncoderOptions m_encoderOption;
-	WebPConfig m_config;
-	WebPPicture m_frame;
-	uint32_t m_timestamp;
-	wxMessageQueue<std::pair<wxImage,uint32_t>>* m_queue;
-	wxEvtHandler* m_evtHandler;
-protected:
-	void* Entry() override
-	{
-		std::pair<wxImage, uint32_t> data;
-		while (true)
-		{
-			auto err = m_queue->ReceiveTimeout(1000, data);
-			if (err == wxMSGQUEUE_TIMEOUT)
-			{
-				break;
-			}
-			auto rgbData = data.first.GetData();
-			WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
-			WebPAnimEncoderAdd(m_encoder, &m_frame, m_timestamp, &m_config);
-			m_timestamp += data.second;
-		}
-
-		WebPData webpData;
-		WebPDataInit(&webpData);
-		//끝나면 NULL프레임을 집어넣는다.
-		WebPAnimEncoderAdd(m_encoder, nullptr, m_timestamp, nullptr);
-		WebPAnimEncoderAssemble(m_encoder, &webpData);
-
-		auto webpMux = WebPMuxCreate(&webpData, 1);
-		WebPDataClear(&webpData);
-		WebPMuxAssemble(webpMux, &webpData);
-
-		wxFileOutputStream* wfos = new wxFileOutputStream(wxT("temp.webp"));
-		wfos->WriteAll(webpData.bytes, webpData.size);
-		wfos->Close();
-		delete wfos;
-		WebPPictureFree(&m_frame);
-		WebPDataClear(&webpData);
-		WebPMuxDelete(webpMux);
-		WebPAnimEncoderDelete(m_encoder);
-
-		wxCommandEvent* event = new wxCommandEvent(EVT_CompleteRecord);
-		m_evtHandler->QueueEvent(event);
-		return nullptr;
-	}
-};
-
-
-bool WebpEncoder::BeginEncode(wxEvtHandler* handler, uint32_t width, uint32_t height)
-{
-	m_timestamp = 0;
 	WebPConfigInit(&m_config);
 	WebPAnimEncoderOptionsInit(&m_encoderOption);
-	
-	
+	auto image = imageStore[0].first;
+	uint32_t width = image.GetWidth();
+	uint32_t height = image.GetHeight();
+	uint32_t timestamp = 0;
 	//WebP Config세팅
 	m_config.quality = 80.f;
 	m_config.thread_level = 1;//멀티 스레드 사용
@@ -86,27 +34,49 @@ bool WebpEncoder::BeginEncode(wxEvtHandler* handler, uint32_t width, uint32_t he
 	m_frame.height = height;
 	m_frame.use_argb = 1;
 	WebPPictureAlloc(&m_frame);
+	for(int i = 0 ; i < imageStore.GetSize(); i++)
+	{
+		auto data = imageStore[i];
+		auto rgbData = data.first.GetData();
+		WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
+		WebPAnimEncoderAdd(m_encoder, &m_frame, timestamp, &m_config);
+		timestamp += data.second;
 
-	auto thread = new WebPProcessingThread();
-	thread->m_timestamp = 0;
-	thread->m_config = m_config;
-	thread->m_encoder = m_encoder;
-	thread->m_encoderOption = m_encoderOption;
-	thread->m_frame = m_frame;
-	thread->m_queue = &m_queue;
-	thread->m_evtHandler = handler;
-	thread->Run();
-	return true;
+		auto* event = new wxCommandEvent(EVT_ADDED_A_FRAME);
+		event->SetInt(i);
+		handler->QueueEvent(event);
+	}
+
+	WebPData webpData;
+	WebPDataInit(&webpData);
+	//끝나면 NULL프레임을 집어넣는다.
+	WebPAnimEncoderAdd(m_encoder, nullptr, timestamp, nullptr);
+	WebPAnimEncoderAssemble(m_encoder, &webpData);
+
+	auto webpMux = WebPMuxCreate(&webpData, 1);
+	WebPDataClear(&webpData);
+	WebPMuxAssemble(webpMux, &webpData);
+
+	wxFileOutputStream* wfos = new wxFileOutputStream(filePath);
+	wfos->WriteAll(webpData.bytes, webpData.size);
+	wfos->Close();
+	delete wfos;
+	WebPPictureFree(&m_frame);
+	WebPDataClear(&webpData);
+	WebPMuxDelete(webpMux);
+	WebPAnimEncoderDelete(m_encoder);
+
+	auto* event = new wxCommandEvent(EVT_FINISH_ENCODE);
+	handler->QueueEvent(event);
 }
 
-bool WebpEncoder::AddFrame(const wxImage& frame, uint32_t duration)
+wxString WebpEncoder::GetFileFilter()
 {
-	m_queue.Post(std::pair<wxImage, uint32_t>{frame, duration});
-	return true;
+	//TODO:
+	return wxString();
 }
 
-bool WebpEncoder::EndEncode()
+wxString WebpEncoder::GetFileExtension()
 {
-	return true;
+	return wxT("webp");
 }
-

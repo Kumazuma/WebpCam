@@ -13,15 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\capture">
+      <UniqueIdentifier>{a9e12a57-652a-4faf-a407-94e28df1a1bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\capture">
+      <UniqueIdentifier>{4bc7b45d-98f0-4eb2-886a-ec96a6fb9ae2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="frame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="presenter.cpp">
@@ -40,6 +43,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="UIDesign.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="frame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,6 +78,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="UIDesign.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EncorderPresenter.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+/.vs
+/awebp/x64
+/awebp/temp6.webp
+/awebp/temp5.webp
+/awebp/temp4.webp
+/awebp/temp3.webp
+/awebp/temp2.webp
+/awebp/temp.webp
+/awebp/temp.gif
+/awebp/temp.bmp
+/awebp/oneroom-2.webp
+/awebp/oneroom-1.webp
+/packages/wxWidgetsTemplate.2.5.3/build/wxWidgetsNuGetCreatePCH.cpp
+/x64
