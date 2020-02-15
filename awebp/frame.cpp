@@ -151,8 +151,12 @@ void CommandFrame::OnSpinHeigt(wxSpinEvent& event)
 
 void CommandFrame::OnChoiceFPS(wxCommandEvent& event)
 {
-	FPS fps = (FPS)(int)event.GetClientData();
-	m_presenter->SetFPS(fps);
+	int data = (int)event.GetClientData();
+	if (data != 0)
+	{
+		FPS fps = (FPS)data;
+		m_presenter->SetFPS(fps);
+	}
 }
 
 void CommandFrame::OnChangeChkUsingTemoFile(wxCommandEvent& event)

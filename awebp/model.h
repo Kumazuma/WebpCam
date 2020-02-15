@@ -31,7 +31,7 @@ public:
 	void SetUsingTemporalFile(bool isUsingTemporalFile) { m_isUsingTemporalFile = isUsingTemporalFile; }
 	bool IsUsingTemporalFile() { return m_isUsingTemporalFile; }
 	FPS  GetFPS() { return m_fps; }
-	void SetFPS(FPS fps) { m_fps = fps; }
+	void SetFPS(FPS fps);
 private:
 	void UpdateNotify(ModelPropertyId id);
 	std::set<wxEvtHandler*> m_representers;

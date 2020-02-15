@@ -24,7 +24,7 @@ protected:
 		{
 			auto now = wxGetLocalTimeMillis();
 			auto delta = (now - pre).GetValue();
-			if (delta >= (int)m_fps)
+			if (delta >= (long long)m_fps)
 			{
 				if (isStop == false)
 				{

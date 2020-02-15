@@ -5,7 +5,7 @@ wxDEFINE_EVENT(EVT_PropertyChanged, wxCommandEvent);
 Model::Model()
 {
 	m_isRecording = false;
-	FPS m_fps = FPS::_10;
+	m_fps = FPS::_10;
 	m_isUsingTemporalFile = true;
 	m_recordedRect = wxRect();
 }
@@ -32,6 +32,11 @@ void Model::UnlinkPresenter(wxEvtHandler* handler)
 	{
 		representers.erase(it);
 	}
+}
+
+void Model::SetFPS(FPS fps)
+{ 
+	m_fps = fps;
 }
 
 void Model::UpdateNotify(ModelPropertyId id)
