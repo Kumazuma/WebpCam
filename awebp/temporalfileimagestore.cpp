@@ -3,7 +3,7 @@
 #include <wx/mstream.h>
 FileImageStore::FileImageStore(wxString fileName,
 	decltype(m_imageHeight) height,
-	decltype(m_imageWidth) width, std::vector<uint32_t>&& durations) :
+	decltype(m_imageWidth) width, const std::vector<uint32_t> & durations) :
 	m_imageHeight(height),
 	m_imageWidth(width),
 	m_fileIStream(fileName),
@@ -19,6 +19,12 @@ FileImageStore::FileImageStore(wxString fileName,
 }
 
 
+FileImageStore::~FileImageStore()
+{
+	Clear();
+	
+}
+
 std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 {
 	auto entry = m_store[index].first;
@@ -31,8 +37,6 @@ std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 
 	auto image = wxImage(m_imageWidth, m_imageHeight);
 	image.SetData(buffer);
-
-	
 	return std::pair<wxImage, uint32_t>(std::move(image), m_store[index].second);
 }
 
@@ -124,5 +128,5 @@ IImageStore* FileImageStoreBuilder::BuildStore()
 	m_taroutputStream.Close();
 	m_fileOStream.Close();
 	
-	return new FileImageStore(m_fileName,m_imageHeight,m_imageWidth, std::move(m_durations));
+	return new FileImageStore(m_fileName,m_imageHeight,m_imageWidth, m_durations);
 }

@@ -4,6 +4,8 @@
 struct GDICapturer : public ICapturer
 {
 public:
+	GDICapturer();
+	virtual ~GDICapturer();
 	virtual void BeginCapture(wxEvtHandler* handler, const wxRect& rect, uint32_t duration) override;
 	virtual wxImage CaptureFrame()  override;
 	virtual void EndCapture()  override;

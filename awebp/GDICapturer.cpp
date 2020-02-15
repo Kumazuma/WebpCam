@@ -1,6 +1,21 @@
 #include "wx/wxprec.h"
 #include "GDICapturer.h"
 
+
+GDICapturer::GDICapturer():
+	m_memDC(nullptr)
+{
+
+}
+
+GDICapturer::~GDICapturer()
+{
+	if (m_memDC != nullptr)
+	{
+		m_memDC = nullptr;
+	}
+}
+
 void GDICapturer::BeginCapture(wxEvtHandler* handler, const wxRect& rect , uint32_t duration)
 {
 	m_rect = rect;
@@ -20,4 +35,5 @@ wxImage GDICapturer::CaptureFrame()
 void GDICapturer::EndCapture()
 {
 	delete m_memDC;
+	m_memDC = nullptr;
 }

@@ -43,6 +43,7 @@ AppPresenter::AppPresenter(wxEvtHandler * view):
 	wxEvtHandler(),
 	m_capturer(nullptr),
 	m_imageStoreBuilder(nullptr),
+	m_captureThreadHelper(nullptr),
 	m_view(view)
 {
 	m_model.LinkPresenter(this);
@@ -65,7 +66,14 @@ AppPresenter::~AppPresenter()
 		delete m_imageStoreBuilder;
 		m_imageStoreBuilder = nullptr;
 	}
-	
+	if (m_captureThreadHelper != nullptr)
+	{
+		if (m_captureThreadHelper->GetThread() != nullptr)
+		{
+			m_captureThreadHelper->GetThread()->Wait();
+		}
+		delete m_captureThreadHelper;
+	}
 }
 
 void AppPresenter::StartRecording()
@@ -78,9 +86,11 @@ void AppPresenter::StartRecording()
 	auto recordedRect = m_model.GetRecordedRect();
 	auto size = recordedRect.GetSize();
 	m_capturer = new GDICapturer();
+
+	m_imageStoreBuilder = new FileImageStoreBuilder();
 	if (m_model.IsUsingTemporalFile())
 	{
-		m_imageStoreBuilder = new FileImageStoreBuilder();
+		
 	}	
 	else
 	{
@@ -109,13 +119,16 @@ void AppPresenter::StopRecording()
 	m_model.SetRecording(false);
 	m_capturer->EndCapture();
 	delete m_capturer;
+	delete m_captureThreadHelper;
 	m_capturer = nullptr;
+	m_captureThreadHelper = nullptr;
 }
 
 IImageStore* AppPresenter::BuildImageStore()
 {
 	auto store = m_imageStoreBuilder->BuildStore();
 	delete m_imageStoreBuilder;
+	m_imageStoreBuilder = nullptr;
 	return store;
 }
 

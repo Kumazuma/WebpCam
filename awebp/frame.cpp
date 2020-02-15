@@ -121,8 +121,6 @@ void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 	panel->SetScrollRate(5, 5);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	sizer = new wxBoxSizer(wxVERTICAL);
-
 	panel->SetSizer(sizer);
 	panel->Layout();
 	sizer->Fit(panel);

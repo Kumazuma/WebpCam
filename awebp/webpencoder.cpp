@@ -8,6 +8,11 @@
 #pragma comment(lib,"libwebpdemux.lib")
 #pragma comment(lib,"libwebpmux.lib")
 
+WebpEncoder::~WebpEncoder()
+{
+
+}
+
 void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore)
 {
 	WebPConfigInit(&m_config);
@@ -63,9 +68,10 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	delete wfos;
 	WebPPictureFree(&m_frame);
 	WebPDataClear(&webpData);
+	
 	WebPMuxDelete(webpMux);
 	WebPAnimEncoderDelete(m_encoder);
-
+	
 	auto* event = new wxCommandEvent(EVT_FINISH_ENCODE);
 	handler->QueueEvent(event);
 }

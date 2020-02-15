@@ -48,12 +48,9 @@ public:
 	FileImageStore(wxString fileName,
 		decltype(m_imageHeight) height,
 		decltype(m_imageWidth) width, 
-		std::vector<uint32_t> && durations);
+		const std::vector<uint32_t> & durations);
 
-	virtual ~FileImageStore()
-	{
-		Clear();
-	}
+	virtual ~FileImageStore();
 	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
 	virtual size_t GetSize() const override
 	{
