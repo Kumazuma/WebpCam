@@ -11,7 +11,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+UIEditFrame::UIEditFrame( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
@@ -19,12 +19,17 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	bSizer1 = new wxBoxSizer( wxVERTICAL );
 
 	m_ribbonBar1 = new wxRibbonBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRIBBON_BAR_DEFAULT_STYLE );
-	m_ribbonBar1->SetArtProvider(new wxRibbonDefaultArtProvider);
+	m_ribbonBar1->SetArtProvider(new wxRibbonMSWArtProvider);
 	m_ribbonPage1 = new wxRibbonPage( m_ribbonBar1, wxID_ANY, wxT("편집") , wxNullBitmap , 0 );
 	m_ribbonPanel1 = new wxRibbonPanel( m_ribbonPage1, wxID_ANY, wxT("파일") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBar1 = new wxRibbonButtonBar( m_ribbonPanel1, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-	m_ribbonButtonBar1->AddButton( wxID_ANY, wxT("새로 촬영하기"), wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), wxEmptyString);
-	m_ribbonButtonBar1->AddButton( wxID_ANY, wxT("저장하기"), wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ), wxEmptyString);
+	m_ribbonButtonBar1->AddButton( ID_NEW_CAPTURE, wxT("새로 촬영하기"), wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), wxEmptyString);
+	m_ribbonButtonBar1->AddButton( ID_SAVE_FILE, wxT("저장하기"), wxArtProvider::GetBitmap( wxART_FILE_SAVE, wxART_TOOLBAR ), wxEmptyString);
+	m_ribbonPanel2 = new wxRibbonPanel( m_ribbonPage1, wxID_ANY, wxT("편집") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
+	m_ribbonButtonBar2 = new wxRibbonButtonBar( m_ribbonPanel2, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_ribbonButtonBar2->AddButton( wxID_ANY, wxT("되돌리기"), wxArtProvider::GetBitmap( wxART_UNDO, wxART_TOOLBAR ), wxEmptyString);
+	m_ribbonButtonBar2->AddButton( wxID_ANY, wxT("실행복귀"), wxArtProvider::GetBitmap( wxART_REDO, wxART_TOOLBAR ), wxEmptyString);
+	m_ribbonPage3 = new wxRibbonPage( m_ribbonBar1, wxID_ANY, wxT("테스트") , wxNullBitmap , 0 );
 	m_ribbonBar1->Realize();
 
 	bSizer1->Add( m_ribbonBar1, 0, wxEXPAND, 5 );
@@ -36,11 +41,11 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	this->Centre( wxBOTH );
 }
 
-MyFrame1::~MyFrame1()
+UIEditFrame::~UIEditFrame()
 {
 }
 
-MyPanel1::MyPanel1( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
@@ -58,10 +63,13 @@ MyPanel1::MyPanel1( wxWindow* parent, wxWindowID id, const wxPoint& pos, const w
 	bSizer2->Add( m_panel2, 1, wxEXPAND | wxALL, 5 );
 
 	wxBoxSizer* bSizer11;
-	bSizer11 = new wxBoxSizer( wxVERTICAL );
+	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_button3 = new wxButton( m_panel1, wxID_ANY, wxT("재생"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer11->Add( m_button3, 0, wxALL, 5 );
 
 	m_slider1 = new wxSlider( m_panel1, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	bSizer11->Add( m_slider1, 0, wxALL|wxEXPAND, 5 );
+	bSizer11->Add( m_slider1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 
 	bSizer2->Add( bSizer11, 0, wxEXPAND, 5 );
@@ -74,7 +82,7 @@ MyPanel1::MyPanel1( wxWindow* parent, wxWindowID id, const wxPoint& pos, const w
 	m_mgr.Update();
 }
 
-MyPanel1::~MyPanel1()
+UIEditForm::~UIEditForm()
 {
 	m_mgr.UnInit();
 

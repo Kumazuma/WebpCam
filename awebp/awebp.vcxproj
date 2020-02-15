@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="editframe.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
     <ClCompile Include="frame.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
+    <ClInclude Include="editframe.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
     <ClInclude Include="frame.h" />

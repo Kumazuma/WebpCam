@@ -27,22 +27,24 @@
 #include <wx/frame.h>
 #include <wx/listbox.h>
 #include <wx/panel.h>
+#include <wx/button.h>
 #include <wx/slider.h>
 #include <wx/aui/aui.h>
 #include <wx/stattext.h>
 #include <wx/spinctrl.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
-#include <wx/button.h>
 #include <wx/scrolwin.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
+#define ID_NEW_CAPTURE 1000
+#define ID_SAVE_FILE 1001
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MyFrame1
+/// Class UIEditFrame
 ///////////////////////////////////////////////////////////////////////////////
-class MyFrame1 : public wxFrame
+class UIEditFrame : public wxFrame
 {
 	private:
 
@@ -51,19 +53,22 @@ class MyFrame1 : public wxFrame
 		wxRibbonPage* m_ribbonPage1;
 		wxRibbonPanel* m_ribbonPanel1;
 		wxRibbonButtonBar* m_ribbonButtonBar1;
+		wxRibbonPanel* m_ribbonPanel2;
+		wxRibbonButtonBar* m_ribbonButtonBar2;
+		wxRibbonPage* m_ribbonPage3;
 
 	public:
 
-		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		UIEditFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
-		~MyFrame1();
+		~UIEditFrame();
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MyPanel1
+/// Class UIEditForm
 ///////////////////////////////////////////////////////////////////////////////
-class MyPanel1 : public wxPanel
+class UIEditForm : public wxPanel
 {
 	private:
 
@@ -71,13 +76,14 @@ class MyPanel1 : public wxPanel
 		wxListBox* m_listBox1;
 		wxPanel* m_panel1;
 		wxPanel* m_panel2;
+		wxButton* m_button3;
 		wxSlider* m_slider1;
 
 	public:
 
-		MyPanel1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString ); wxAuiManager m_mgr;
+		UIEditForm( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString ); wxAuiManager m_mgr;
 
-		~MyPanel1();
+		~UIEditForm();
 
 };
 

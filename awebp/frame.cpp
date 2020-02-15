@@ -2,6 +2,7 @@
 #include "frame.h"
 #include "app.h"
 #include "encoderview.h"
+#include "editframe.h"
 const auto CAPTURE_REGION_FRAME_STYPE =
 wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP |
 wxFRAME_SHAPED | wxFRAME_TOOL_WINDOW;
@@ -114,23 +115,9 @@ void CommandFrame::OnClickBtnStart(wxCommandEvent& event)
 void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 {
 	m_presenter->StopRecording();
-	wxFrame* tempFrame = new wxFrame(this,wxID_ANY, wxT("테스트"));
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
-	
-	wxScrolledWindow* panel = new wxScrolledWindow(tempFrame,wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL|wxALWAYS_SHOW_SB );
-	panel->SetScrollRate(5, 5);
-	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-
-	panel->SetSizer(sizer);
-	panel->Layout();
-	sizer->Fit(panel);
-	sizer1->Add(panel, 1, wxEXPAND);
-	auto btnSave =new wxButton(tempFrame, wxID_ANY, wxT("저장"));
-	btnSave->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickSave, this);
-	sizer1->Add(btnSave, 0, wxEXPAND);
-	tempFrame->SetSizer(sizer1);
-	tempFrame->Layout();
-	tempFrame->Show();
+	EditFrame* frame = new EditFrame(m_presenter->BuildImageStore());
+	frame->Show();
+	Close();
 }
 
 void CommandFrame::OnSpinWidth(wxSpinEvent& event)
@@ -173,9 +160,7 @@ void CommandFrame::OnChangeChkUsingTemoFile(wxCommandEvent& event)
 
 void CommandFrame::OnClickSave(wxCommandEvent& event)
 {
-	EncoderFrame* frame = new EncoderFrame(m_presenter->BuildImageStore());
-	frame->Show();
-	Close();
+	
 }
 void CommandFrame::OnRefleshView(wxCommandEvent& event)
 {

@@ -19,6 +19,12 @@
     <Filter Include="헤더 파일\capture">
       <UniqueIdentifier>{4bc7b45d-98f0-4eb2-886a-ec96a6fb9ae2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\edit">
+      <UniqueIdentifier>{7d71c2a3-4b5e-448d-a1ea-54ccb70825d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\edit">
+      <UniqueIdentifier>{6a73c487-806f-4a9f-a5f9-3dae28cb1d7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp">
@@ -53,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="temporalfileimagestore.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="editframe.cpp">
+      <Filter>소스 파일\edit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="encoderview.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="editframe.h">
+      <Filter>헤더 파일\edit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
