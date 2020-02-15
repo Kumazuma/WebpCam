@@ -1,6 +1,6 @@
 #pragma once
 #include<wx/wx.h>
-//Ä¸Ã³ ÀÌ¹ÌÁö µ¥ÀÌÅÍ¸¦ ÀÓ½Ã·Î º¸°üÇÏ´Â --ÀÎÅÍÆäÀÌ½º-- Ãß»óÅ¬·¡½º
+//ìº¡ì²˜ ì´ë¯¸ì§€ ë°ì´í„°ë¥¼ ì„ì‹œë¡œ ë³´ê´€í•˜ëŠ” --ì¸í„°í˜ì´ìŠ¤-- ì¶”ìƒí´ë˜ìŠ¤
 struct IImageStore
 {
 	virtual ~IImageStore() {}
@@ -24,11 +24,11 @@ struct IImageStoreBuilder
 	virtual size_t GetSize() const = 0;
 	virtual IImageStore* BuildStore() = 0;
 };
-//ÀÌ¹ÌÁö¸¦ ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¹ÌÁö·Î ¸¸µå´Â ÀÎÅÍÆäÀÌ½º
-wxDECLARE_EVENT(EVT_FINISH_ENCODE, wxCommandEvent);//ÀÎÄÚµùÀ» ¿Ï·áÇßÀ» ¶§
-wxDECLARE_EVENT(EVT_FAILED_ENCODE, wxCommandEvent);//ÀÎÄÚµùÀ» ½ÇÆĞÇßÀ» ¶§
-wxDECLARE_EVENT(EVT_ADDED_A_FRAME, wxCommandEvent);//ÇÁ·¹ÀÓ ÇÏ³ª¸¦ Ã³¸® ¿Ï·á ÇßÀ» ¶§
-//TODO: webp ÀÌ¿ÜÀÇ ÀÌ¹ÌÁö Æ÷¸ËÀ» Áö¿øÇØº¸ÀÚ.
+//ì´ë¯¸ì§€ë¥¼ ì• ë‹ˆë©”ì´ì…˜ ì´ë¯¸ì§€ë¡œ ë§Œë“œëŠ” ì¸í„°í˜ì´ìŠ¤
+wxDECLARE_EVENT(EVT_FINISH_ENCODE, wxCommandEvent);//ì¸ì½”ë”©ì„ ì™„ë£Œí–ˆì„ ë•Œ
+wxDECLARE_EVENT(EVT_FAILED_ENCODE, wxCommandEvent);//ì¸ì½”ë”©ì„ ì‹¤íŒ¨í–ˆì„ ë•Œ
+wxDECLARE_EVENT(EVT_ADDED_A_FRAME, wxCommandEvent);//í”„ë ˆì„ í•˜ë‚˜ë¥¼ ì²˜ë¦¬ ì™„ë£Œ í–ˆì„ ë•Œ
+//TODO: webp ì´ì™¸ì˜ ì´ë¯¸ì§€ í¬ë§·ì„ ì§€ì›í•´ë³´ì.
 struct IEncoder
 {
 	virtual void Encode(wxEvtHandler * handler, const wxString filePath, IImageStore& imageStore) = 0;
@@ -36,8 +36,8 @@ struct IEncoder
 	virtual wxString GetFileExtension() = 0;
 	virtual ~IEncoder() {}
 };
-//È­¸éÀ» Ä¸ÃÄÇÏ´Â ÀÎÅÍÆäÀÌ½º
-//TODO: DirectX¸¦ ÀÌ¿ëÇÑ Ä¸Ã³ Å¬·¡½º¸¦ ¸¸µç´Ù.
+//í™”ë©´ì„ ìº¡ì³í•˜ëŠ” ì¸í„°í˜ì´ìŠ¤
+//TODO: DirectXë¥¼ ì´ìš©í•œ ìº¡ì²˜ í´ë˜ìŠ¤ë¥¼ ë§Œë“ ë‹¤.
 struct ICapturer
 {
 	virtual void BeginCapture(wxEvtHandler* handler, const wxRect& rect, uint32_t duration) = 0;

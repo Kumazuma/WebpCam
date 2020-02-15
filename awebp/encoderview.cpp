@@ -2,7 +2,7 @@
 #include "encoderview.h"
 #include<wx/filedlg.h>
 EncoderFrame::EncoderFrame(IImageStore* store):
-	wxFrame(nullptr, wxID_ANY, wxT("ÀÎÄÚµù")),
+	wxFrame(nullptr, wxID_ANY, wxT("ì¸ì½”ë”©")),
 	m_presenter(new EncoderPresenter( this, store))
 {
 	Center();

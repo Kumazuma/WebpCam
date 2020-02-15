@@ -21,19 +21,19 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	uint32_t width = image.GetWidth();
 	uint32_t height = image.GetHeight();
 	uint32_t timestamp = 0;
-	//WebP Config¼¼ÆÃ
+	//WebP Configì„¸íŒ…
 	m_config.quality = 80.f;
-	m_config.thread_level = 1;//¸ÖÆ¼ ½º·¹µå »ç¿ë
-	m_config.lossless = 0;//¼Õ½ÇÆ÷¸Ë
+	m_config.thread_level = 1;//ë©€í‹° ìŠ¤ë ˆë“œ ì‚¬ìš©
+	m_config.lossless = 0;//ì†ì‹¤í¬ë§·
 	m_config.low_memory = 0;
-	m_config.filter_strength = 0;//ÇÊÅÍ Àß ¸ğ¸£°Ú½À 
-	m_config.method = 6;//¾ĞÃà·ü ÃÖ´ë
-	//Å°ÇÁ·¹ÀÓ ÃÖ¼Ò¿Í ÃÖ´ë;
+	m_config.filter_strength = 0;//í•„í„° ì˜ ëª¨ë¥´ê² ìŠµ 
+	m_config.method = 6;//ì••ì¶•ë¥  ìµœëŒ€
+	//í‚¤í”„ë ˆì„ ìµœì†Œì™€ ìµœëŒ€;
 	m_encoderOption.kmin = 1;
 	m_encoderOption.kmax = 40;
-	//ÀÎÄÚ´õ¸¦ ÃÊ±âÈ­
+	//ì¸ì½”ë”ë¥¼ ì´ˆê¸°í™”
 	m_encoder = WebPAnimEncoderNew(width, height,&m_encoderOption);
-	//ÇÁ·¹ÀÓÀ» ÃÊ±âÈ­ÇÑ´Ù
+	//í”„ë ˆì„ì„ ì´ˆê¸°í™”í•œë‹¤
 	WebPPictureInit(&m_frame);
 	m_frame.width = width;
 	m_frame.height = height;
@@ -54,7 +54,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 
 	WebPData webpData;
 	WebPDataInit(&webpData);
-	//³¡³ª¸é NULLÇÁ·¹ÀÓÀ» Áı¾î³Ö´Â´Ù.
+	//ëë‚˜ë©´ NULLí”„ë ˆì„ì„ ì§‘ì–´ë„£ëŠ”ë‹¤.
 	WebPAnimEncoderAdd(m_encoder, nullptr, timestamp, nullptr);
 	WebPAnimEncoderAssemble(m_encoder, &webpData);
 
@@ -79,7 +79,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 wxString WebpEncoder::GetFileFilter()
 {
 	//TODO:
-	return wxT("webp ÀÌ¹ÌÁö ÆÄÀÏ (*.webp)|*.webp");
+	return wxT("webp ì´ë¯¸ì§€ íŒŒì¼ (*.webp)|*.webp");
 }
 
 wxString WebpEncoder::GetFileExtension()

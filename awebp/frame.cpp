@@ -86,7 +86,7 @@ CommandFrame::CommandFrame(const wxString& title):
 	UIRecordFrame(nullptr, wxID_ANY, title)
 {
 	m_presenter = new AppPresenter(this);
-	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("Ä¸Ã³¿µ¿ª"));
+	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("ìº¡ì²˜ì˜ì—­"));
 	ui_regionFrame->Show();
 	ui_btnStart->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStart, this);
 	ui_btnStop->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStop, this);

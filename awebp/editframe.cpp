@@ -5,7 +5,7 @@ wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFileClick)
 wxEND_EVENT_TABLE();
 EditFrame::EditFrame(IImageStore* imageStore):
-	UIEditFrame(nullptr, wxID_ANY, wxT("ÆíÁýÃ¢")),
+	UIEditFrame(nullptr, wxID_ANY, wxT("íŽ¸ì§‘ì°½")),
 	m_imageStore(imageStore)
 {
 	ui_editForm = new EditForm(this);
