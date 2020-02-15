@@ -103,6 +103,7 @@ CommandFrame::CommandFrame(const wxString& title):
 CommandFrame::~CommandFrame()
 {
 	ui_regionFrame->Close(true);
+	delete m_presenter;
 }
 
 void CommandFrame::OnClickBtnStart(wxCommandEvent& event)

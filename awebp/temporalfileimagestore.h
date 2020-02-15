@@ -10,11 +10,11 @@
 class FileSaveThread : public wxThreadHelper
 {
 	wxTarOutputStream& m_store;
-	wxMessageQueue<std::pair<wxImage, uint32_t>>& m_mqueue;
+	wxMessageQueue<std::pair<wxImage*, uint32_t>>& m_mqueue;
 public:
 	FileSaveThread(
 		wxTarOutputStream& store,
-		wxMessageQueue<std::pair<wxImage, uint32_t>>& mqueue);
+		wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue);
 protected:
 	void* Entry() override;
 };
@@ -27,8 +27,10 @@ public:
 	virtual size_t GetSize() const override;
 	virtual IImageStore* BuildStore() override;
 private:
+	uint32_t m_imageHeight;
+	uint32_t m_imageWidth;
 	std::vector<uint32_t> m_durations;
-	wxMessageQueue<std::pair<wxImage, uint32_t>> m_mqueue;
+	wxMessageQueue<std::pair<wxImage*, uint32_t>> m_mqueue;
 	FileSaveThread m_backgroundThread;
 	wxString m_fileName;
 	wxFileOutputStream m_fileOStream;
@@ -40,8 +42,13 @@ private:
 	std::vector<std::pair<wxTarEntry*, uint32_t>> m_store;
 	wxTarInputStream m_tarInputStream;
 	wxFileInputStream m_fileIStream;
+	uint32_t m_imageHeight;
+	uint32_t m_imageWidth;
 public:
-	FileImageStore(wxString fileName, std::vector<uint32_t> && durations);
+	FileImageStore(wxString fileName,
+		decltype(m_imageHeight) height,
+		decltype(m_imageWidth) width, 
+		std::vector<uint32_t> && durations);
 
 	virtual ~FileImageStore()
 	{

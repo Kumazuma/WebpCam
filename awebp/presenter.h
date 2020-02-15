@@ -9,9 +9,9 @@ class AppPresenter : public wxEvtHandler
 private:
 	Model m_model;
 	wxEvtHandler* m_view;
-	wxTimer* m_timer;
 	ICapturer* m_capturer;
 	IImageStoreBuilder* m_imageStoreBuilder;
+	wxThreadHelper* m_captureThreadHelper;
 public:
 	AppPresenter() {}
 	AppPresenter(wxEvtHandler* view);

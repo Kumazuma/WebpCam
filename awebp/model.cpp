@@ -12,6 +12,7 @@ Model::Model()
 
 Model::~Model()
 {
+	m_representers.clear();
 }
 void Model::LinkPresenter(wxEvtHandler* handler)
 {

@@ -1,7 +1,11 @@
 #include "wx/wxprec.h"
 #include "temporalfileimagestore.h"
-
-FileImageStore::FileImageStore(wxString fileName, std::vector<uint32_t>&& durations):
+#include <wx/mstream.h>
+FileImageStore::FileImageStore(wxString fileName,
+	decltype(m_imageHeight) height,
+	decltype(m_imageWidth) width, std::vector<uint32_t>&& durations) :
+	m_imageHeight(height),
+	m_imageWidth(width),
 	m_fileIStream(fileName),
 	m_tarInputStream(m_fileIStream)
 {
@@ -14,13 +18,22 @@ FileImageStore::FileImageStore(wxString fileName, std::vector<uint32_t>&& durati
 	}
 }
 
+
 std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 {
 	auto entry = m_store[index].first;
 	m_tarInputStream.OpenEntry(*entry);
-	auto image = wxImage(m_tarInputStream, wxBITMAP_TYPE_PNG);
+	uint8_t* buffer = (uint8_t*)malloc(entry->GetSize());
+	wxMemoryOutputStream memStream(buffer, entry->GetSize());
+	m_tarInputStream.Read(memStream);
+	memStream.Close();
 	m_tarInputStream.CloseEntry();
-	return std::pair<wxImage, uint32_t>(image, m_store[index].second);
+
+	auto image = wxImage(m_imageWidth, m_imageHeight);
+	image.SetData(buffer);
+
+	
+	return std::pair<wxImage, uint32_t>(std::move(image), m_store[index].second);
 }
 
 void FileImageStore::Clear()
@@ -34,7 +47,7 @@ void FileImageStore::Clear()
 
 FileSaveThread::FileSaveThread(
 	wxTarOutputStream& store,
-	wxMessageQueue<std::pair<wxImage, uint32_t>>& mqueue):
+	wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue):
 	m_store(store),
 	m_mqueue(mqueue)
 {
@@ -46,9 +59,9 @@ void* FileSaveThread::Entry()
 	int i = 0;
 	while (true)
 	{
-		std::pair<wxImage, uint32_t> data;
+		std::pair<wxImage*, uint32_t> data;
 		m_mqueue.Receive(data);
-		if (!data.first.IsOk())
+		if (!data.first)
 		{
 			break;
 		}
@@ -56,8 +69,12 @@ void* FileSaveThread::Entry()
 		wxString tempName = wxString::Format(wxT("%d.tmp"), i);
 		//wxTarEntry* entry = new wxTarEntry(tempName);
 		m_store.PutNextEntry(tempName);
-		data.first.SaveFile(m_store, wxBITMAP_TYPE_PNG);
+		auto s = data.first->GetSize();
+		//data.first.SaveFile(m_store, wxBITMAP_TYPE_PNG);
+		auto bits = data.first->GetData();
+		m_store.WriteAll(bits, s.x * s.y * 3);
 		m_store.CloseEntry();
+		delete data.first;
 	}
 	return nullptr;
 }
@@ -79,14 +96,16 @@ FileImageStoreBuilder::~FileImageStoreBuilder()
 	if (thread != nullptr)
 	{
 		m_mqueue.Clear();
-		m_mqueue.Post(std::pair<wxImage, uint32_t>(wxImage(), 0));
+		m_mqueue.Post(std::pair<wxImage*, uint32_t>(nullptr, 0));
 	}
 }
 
 void FileImageStoreBuilder::PushBack(const wxImage& image, uint32_t duration)
 {
+	m_imageHeight = image.GetHeight();
+	m_imageWidth = image.GetWidth();
 	m_durations.push_back(duration);
-	m_mqueue.Post(std::pair<wxImage, uint32_t>(image, duration));
+	m_mqueue.Post(std::pair<wxImage*, uint32_t>(new wxImage(image), duration));
 }
 
 size_t FileImageStoreBuilder::GetSize() const
@@ -99,11 +118,11 @@ IImageStore* FileImageStoreBuilder::BuildStore()
 	auto thread = m_backgroundThread.GetThread();
 	if (thread != nullptr)
 	{
-		m_mqueue.Post(std::pair<wxImage, uint32_t>(wxImage(), 0));
+		m_mqueue.Post(std::pair<wxImage*, uint32_t>(nullptr, 0));
 		thread->Wait();
 	}
 	m_taroutputStream.Close();
 	m_fileOStream.Close();
 	
-	return new FileImageStore(m_fileName,std::move(m_durations));
+	return new FileImageStore(m_fileName,m_imageHeight,m_imageWidth, std::move(m_durations));
 }

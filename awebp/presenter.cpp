@@ -9,7 +9,7 @@ wxDEFINE_EVENT(EVT_RefreshView, wxCommandEvent);
 wxIMPLEMENT_DYNAMIC_CLASS(AppPresenter, wxEvtHandler);
 
 bool isStop = false;
-class CaptureThread : public wxThread
+class CaptureThread : public wxThreadHelper
 {
 public:
 	ICapturer* m_capturer = nullptr;
@@ -35,13 +35,12 @@ protected:
 			}
 		} while (isStop == false);
 		
-		delete m_capturer;
+		
 		return nullptr;
 	}
 };
 AppPresenter::AppPresenter(wxEvtHandler * view):
 	wxEvtHandler(),
-	m_timer(new wxTimer(this)),
 	m_capturer(nullptr),
 	m_imageStoreBuilder(nullptr),
 	m_view(view)
@@ -56,11 +55,6 @@ AppPresenter::AppPresenter(wxEvtHandler * view):
 AppPresenter::~AppPresenter()
 {
 	m_model.UnlinkPresenter(this);
-	if (m_timer != nullptr)
-	{
-		m_timer->Stop();
-		delete m_timer;
-	}
 	if (m_capturer != nullptr)
 	{
 		delete m_capturer;
@@ -99,14 +93,22 @@ void AppPresenter::StartRecording()
 	thread->m_capturer = m_capturer;
 	thread->m_fps = m_model.GetFPS();
 	thread->m_imageStoreBuilder = m_imageStoreBuilder;
-	thread->Run();
+	m_captureThreadHelper = thread;
+	thread->CreateThread();
+	thread->GetThread()->Run();
 }	
 
 void AppPresenter::StopRecording()
 {
 	isStop = true;
-	m_capturer->EndCapture();
+	if (m_captureThreadHelper->GetThread() != nullptr)
+	{
+		m_captureThreadHelper->GetThread()->Wait();
+	}
+	
 	m_model.SetRecording(false);
+	m_capturer->EndCapture();
+	delete m_capturer;
 	m_capturer = nullptr;
 }
 
