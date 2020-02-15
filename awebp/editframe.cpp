@@ -1,14 +1,16 @@
 #include <wx/wxprec.h>
 #include "editframe.h"
 #include "encoderview.h"
-wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)	
-	EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE,EditFrame::OnRbarBtnSaveFileClick)
-wxEND_EVENT_TABLE()
+wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
+EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFileClick)
+wxEND_EVENT_TABLE();
 EditFrame::EditFrame(IImageStore* imageStore):
 	UIEditFrame(nullptr, wxID_ANY, wxT("ÆíÁýÃ¢")),
 	m_imageStore(imageStore)
 {
-
+	ui_editForm = new EditForm(this);
+	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
+	this->Layout();
 }
 
 EditFrame::~EditFrame()
@@ -28,3 +30,8 @@ void EditFrame::OnRbarBtnSaveFileClick(wxRibbonButtonBarEvent& event)
 	this->Close();
 }
 
+EditForm::EditForm(wxWindow* parent):
+	UIEditForm(parent)
+{
+
+}
