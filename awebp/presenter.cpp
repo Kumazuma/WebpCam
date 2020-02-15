@@ -7,18 +7,49 @@
 #include "memoryimagestore.h"
 wxDEFINE_EVENT(EVT_RefreshView, wxCommandEvent);
 wxIMPLEMENT_DYNAMIC_CLASS(AppPresenter, wxEvtHandler);
+
+bool isStop = false;
+class CaptureThread : public wxThread
+{
+public:
+	ICapturer* m_capturer = nullptr;
+	IImageStoreBuilder* m_imageStoreBuilder = nullptr;
+	FPS m_fps;
+protected:
+	void* Entry() override
+	{
+		isStop = false;
+		auto pre = wxGetLocalTimeMillis();
+		do
+		{
+			auto now = wxGetLocalTimeMillis();
+			auto delta = (now - pre).GetValue();
+			if (delta >= (int)m_fps)
+			{
+				if (isStop == false)
+				{
+					auto frame = m_capturer->CaptureFrame();
+					m_imageStoreBuilder->PushBack(frame, delta);
+					pre = now;
+				}
+			}
+		} while (isStop == false);
+		
+		delete m_capturer;
+		return nullptr;
+	}
+};
 AppPresenter::AppPresenter(wxEvtHandler * view):
 	wxEvtHandler(),
 	m_timer(new wxTimer(this)),
 	m_capturer(nullptr),
-	m_imageStore(nullptr),
+	m_imageStoreBuilder(nullptr),
 	m_view(view)
 {
 	m_model.LinkPresenter(this);
 	this->Bind(EVT_PropertyChanged, &AppPresenter::OnModelPropertyChanged, this,ModelPropertyId::IsRecording);
 	this->Bind(EVT_PropertyChanged, &AppPresenter::OnModelPropertyChanged, this, ModelPropertyId::RecordedRect);
 	this->Bind(wxEVT_TIMER, &AppPresenter::OnTimer, this);
-	this->Bind(EVT_CompleteRecord, &AppPresenter::OnCompleteRecord, this);
 	//m_timer->Bind(wxEVT_TIMER, &AppPresenter::OnTimer, this);
 }
 
@@ -35,10 +66,10 @@ AppPresenter::~AppPresenter()
 		delete m_capturer;
 		m_capturer = nullptr;
 	}
-	if (m_imageStore != nullptr)
+	if (m_imageStoreBuilder != nullptr)
 	{
-		delete m_imageStore;
-		m_imageStore = nullptr;
+		delete m_imageStoreBuilder;
+		m_imageStoreBuilder = nullptr;
 	}
 	
 }
@@ -54,25 +85,36 @@ void AppPresenter::StartRecording()
 	auto size = recordedRect.GetSize();
 	m_capturer = new GDICapturer();
 	if (m_model.IsUsingTemporalFile())
-		m_imageStore = new FileImageStore();
+	{
+		m_imageStoreBuilder = new FileImageStoreBuilder();
+	}	
 	else
-		m_imageStore = new MemoryImageStore();
+	{
+		//TODO: Not yet implement;
+		//m_imageStore = new MemoryImageStore();
+	}
 	m_capturer->BeginCapture(this, recordedRect, (int)m_model.GetFPS());
-	m_timer->Start((int)m_model.GetFPS()); 
+	//m_timer->Start((int)m_model.GetFPS()); 
+	auto* thread = new CaptureThread();
+	thread->m_capturer = m_capturer;
+	thread->m_fps = m_model.GetFPS();
+	thread->m_imageStoreBuilder = m_imageStoreBuilder;
+	thread->Run();
 }	
 
 void AppPresenter::StopRecording()
 {
-	m_timer->Stop();
+	isStop = true;
 	m_capturer->EndCapture();
 	m_model.SetRecording(false);
-	delete m_capturer;
 	m_capturer = nullptr;
 }
 
-const IImageStore& AppPresenter::GetImageStore() const
+IImageStore* AppPresenter::BuildImageStore()
 {
-	return *m_imageStore;
+	auto store = m_imageStoreBuilder->BuildStore();
+	delete m_imageStoreBuilder;
+	return store;
 }
 
 void AppPresenter::StartEncodeAndSave()
@@ -87,8 +129,7 @@ void AppPresenter::OnModelPropertyChanged(wxCommandEvent& event)
 
 void AppPresenter::OnTimer(wxTimerEvent& event)
 {
-	auto frame = m_capturer->CaptureFrame();
-	m_imageStore->Add(frame.first, frame.second);
+	
 }
 
 void AppPresenter::OnCompleteRecord(wxCommandEvent& event)

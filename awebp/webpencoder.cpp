@@ -8,7 +8,7 @@
 #pragma comment(lib,"libwebpdemux.lib")
 #pragma comment(lib,"libwebpmux.lib")
 
-void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, const IImageStore& imageStore)
+void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore)
 {
 	WebPConfigInit(&m_config);
 	WebPAnimEncoderOptionsInit(&m_encoderOption);
@@ -73,7 +73,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, const I
 wxString WebpEncoder::GetFileFilter()
 {
 	//TODO:
-	return wxString();
+	return wxT("webp 이미지 파일 (*.webp)|*.webp");
 }
 
 wxString WebpEncoder::GetFileExtension()

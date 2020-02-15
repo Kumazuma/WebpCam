@@ -11,7 +11,7 @@ private:
 	wxEvtHandler* m_view;
 	wxTimer* m_timer;
 	ICapturer* m_capturer;
-	IImageStore* m_imageStore;
+	IImageStoreBuilder* m_imageStoreBuilder;
 public:
 	AppPresenter() {}
 	AppPresenter(wxEvtHandler* view);
@@ -25,7 +25,8 @@ public:
 	void EnableTemporalFile() { m_model.SetUsingTemporalFile(true); }
 	void DisableTemporalFile() { m_model.SetUsingTemporalFile(false); }
 	bool IsUsingTemporalFile() { return m_model.IsUsingTemporalFile(); }
-	const IImageStore& GetImageStore() const;
+
+	IImageStore* BuildImageStore();
 	FPS  GetFPS() { return m_model.GetFPS(); }
 	void SetFPS(FPS fps) { m_model.SetFPS(fps); }
 	void StartEncodeAndSave();

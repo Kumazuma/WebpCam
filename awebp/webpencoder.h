@@ -6,7 +6,7 @@
 class WebpEncoder : public IEncoder
 {
 public:
-	void Encode(wxEvtHandler* handler, const wxString filePath, const IImageStore& imageStore) override;
+	void Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore) override;
 	wxString GetFileFilter() override;
 	wxString GetFileExtension() override;
 private:

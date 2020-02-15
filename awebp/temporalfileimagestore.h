@@ -5,41 +5,52 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include <wx/wfstream.h>
+#include <wx/tarstrm.h>
+#include <wx/msgqueue.h>
+class FileSaveThread : public wxThreadHelper
+{
+	wxTarOutputStream& m_store;
+	wxMessageQueue<std::pair<wxImage, uint32_t>>& m_mqueue;
+public:
+	FileSaveThread(
+		wxTarOutputStream& store,
+		wxMessageQueue<std::pair<wxImage, uint32_t>>& mqueue);
+protected:
+	void* Entry() override;
+};
+class FileImageStoreBuilder : public IImageStoreBuilder
+{
+public:
+	FileImageStoreBuilder();
+	~FileImageStoreBuilder();
+	virtual void PushBack(const wxImage& image, uint32_t duration) override;
+	virtual size_t GetSize() const override;
+	virtual IImageStore* BuildStore() override;
+private:
+	std::vector<uint32_t> m_durations;
+	wxMessageQueue<std::pair<wxImage, uint32_t>> m_mqueue;
+	FileSaveThread m_backgroundThread;
+	wxString m_fileName;
+	wxFileOutputStream m_fileOStream;
+	wxTarOutputStream m_taroutputStream;
+};
 class FileImageStore : public IImageStore
 {
 private:
-	std::vector<std::pair<wxString, uint32_t>> m_store;
+	std::vector<std::pair<wxTarEntry*, uint32_t>> m_store;
+	wxTarInputStream m_tarInputStream;
+	wxFileInputStream m_fileIStream;
 public:
+	FileImageStore(wxString fileName, std::vector<uint32_t> && durations);
+
 	virtual ~FileImageStore()
 	{
 		Clear();
 	}
-	virtual size_t Add(const wxImage& image, uint32_t duration) override
-	{
-		auto it = m_store.size();
-		auto file = new wxFile();
-		auto path = wxFileName::CreateTempFileName(wxT("awebmaker"), file);
-		wxFileOutputStream stream{*file };
-		image.SaveFile(stream, wxBITMAP_TYPE_PNG);
-		stream.Close();
-		m_store.push_back(std::pair<wxString, uint32_t>(path, duration));
-		return it;
-	}
-	virtual const std::pair<wxImage, uint32_t> Get(size_t index) const  override
-	{
-		auto path = m_store[index].first;
-		
-		wxFileInputStream stream(path);
-		auto image = wxImage(stream, wxBITMAP_TYPE_PNG);
-		
-		return std::pair<wxImage, uint32_t>(image, m_store[index].second);
-	}
+	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
 	virtual size_t GetSize() const override
 	{
 		return m_store.size();
 	}
-	virtual void Clear() override
-	{
-		m_store.clear();
-	}
+	virtual void Clear() override;
 }; 

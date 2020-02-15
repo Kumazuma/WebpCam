@@ -1,7 +1,7 @@
 #include "wx/wxprec.h"
 #include "frame.h"
 #include "app.h"
-
+#include "encoderview.h"
 const auto CAPTURE_REGION_FRAME_STYPE =
 wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP |
 wxFRAME_SHAPED | wxFRAME_TOOL_WINDOW;
@@ -18,6 +18,7 @@ int BORDER_THICKNESS = 0;
 CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter* presenter, const wxString& title):
 	wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, CAPTURE_REGION_FRAME_STYPE)
 {
+	m_presenter = presenter;
 	CenterOnScreen();
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 	wxRect windowRect = GetSize();
@@ -41,7 +42,7 @@ CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter* presenter
 	rect.y += TOP_HEIGHT + BOTTOM_HEIGHT;
 	rect.height -= BOTTOM_HEIGHT * 2 + TOP_HEIGHT;
 	
-	m_presenter = presenter;
+	
 	m_presenter->SetRecordedRect(rect);
 	this->SetShape(region);
 }
@@ -83,7 +84,7 @@ void CaptureRegionFrame::OnSized(wxSizeEvent& event)
 CommandFrame::CommandFrame(const wxString& title):
 	UIRecordFrame(nullptr, wxID_ANY, title)
 {
-	m_presenter = new AppPresenter();
+	m_presenter = new AppPresenter(this);
 	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("Ä¸Ã³¿µ¿ª"));
 	ui_regionFrame->Show();
 	ui_btnStart->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStart, this);
@@ -120,14 +121,7 @@ void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	sizer = new wxBoxSizer(wxVERTICAL);
-	auto& t = m_presenter->GetImageStore();
-	for (int i = 0; i < t.GetSize(); i++)
-	{
-		auto bit = t[i];
-		wxStaticBitmap* bitmap = new wxStaticBitmap(panel, wxID_ANY, wxBitmap(bit.first));
-		bitmap->SetSize(bit.first.GetSize());
-		sizer->Add(bitmap, 1, wxEXPAND);
-	}
+
 	panel->SetSizer(sizer);
 	panel->Layout();
 	sizer->Fit(panel);
@@ -176,7 +170,9 @@ void CommandFrame::OnChangeChkUsingTemoFile(wxCommandEvent& event)
 
 void CommandFrame::OnClickSave(wxCommandEvent& event)
 {
-
+	EncoderFrame* frame = new EncoderFrame(m_presenter->BuildImageStore());
+	frame->Show();
+	Close();
 }
 void CommandFrame::OnRefleshView(wxCommandEvent& event)
 {

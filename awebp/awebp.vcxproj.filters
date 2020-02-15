@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="app.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -46,6 +43,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="frame.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EncorderPresenter.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="encoderview.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="temporalfileimagestore.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,5 +89,11 @@
     <ClInclude Include="EncorderPresenter.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="encoderview.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

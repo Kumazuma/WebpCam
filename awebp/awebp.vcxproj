@@ -140,20 +140,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="encoderview.cpp" />
+    <ClCompile Include="EncorderPresenter.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="GDICapturer.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="presenter.cpp" />
     <ClCompile Include="interface.cpp" />
+    <ClCompile Include="temporalfileimagestore.cpp" />
     <ClCompile Include="UIDesign.cpp" />
     <ClCompile Include="webpencoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
+    <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="GDICapturer.h" />
@@ -164,6 +165,9 @@
     <ClInclude Include="temporalfileimagestore.h" />
     <ClInclude Include="UIDesign.h" />
     <ClInclude Include="webpencoder.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

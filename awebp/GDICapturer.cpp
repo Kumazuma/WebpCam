@@ -6,20 +6,18 @@ void GDICapturer::BeginCapture(wxEvtHandler* handler, const wxRect& rect , uint3
 	m_rect = rect;
 	m_duration = duration;
 	m_handler = handler;
+	m_bitmap.Create(rect.GetSize());
+	m_memDC = new wxMemoryDC(m_bitmap);
 }
 
-std::pair<wxImage, uint32_t> GDICapturer::CaptureFrame()
+wxImage GDICapturer::CaptureFrame()
 {
-	
 	wxScreenDC dc;
-	wxBitmap bitmap(m_rect.GetSize());
-	auto* memDC = new wxMemoryDC(bitmap);
-	memDC->Blit(wxPoint(0, 0), m_rect.GetSize(), &dc, m_rect.GetPosition());
-	delete memDC;
-	return std::pair<wxImage, uint32_t>(bitmap.ConvertToImage(), m_duration);
+	m_memDC->Blit(wxPoint(0, 0), m_rect.GetSize(), &dc, m_rect.GetPosition());
+	return m_bitmap.ConvertToImage();
 }
 
 void GDICapturer::EndCapture()
 {
-
+	delete m_memDC;
 }

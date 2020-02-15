@@ -5,6 +5,9 @@ wxIMPLEMENT_APP(AWebpApp);
 
 bool AWebpApp::OnInit()
 {
+#ifdef __WXMSW__
+	SetProcessDPIAware();
+#endif
 	wxInitAllImageHandlers();
 	ui_mainFrame = new CommandFrame(wxT("TEST2"));
 	ui_mainFrame->Show();
