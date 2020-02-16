@@ -1,4 +1,4 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "presenter.h"
 #include <wx/dc.h>
 #include "webpencoder.h"
@@ -126,10 +126,7 @@ void AppPresenter::StopRecording()
 
 IImageStore* AppPresenter::BuildImageStore()
 {
-	auto store = m_imageStoreBuilder->BuildStore();
-	delete m_imageStoreBuilder;
-	m_imageStoreBuilder = nullptr;
-	return store;
+	return IImageStoreBuilder::BuildStore(m_imageStoreBuilder);
 }
 
 void AppPresenter::StartEncodeAndSave()

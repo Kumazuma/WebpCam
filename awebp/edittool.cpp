@@ -18,11 +18,8 @@ void EditDeleteFrame::Execute(IImageStore*& OUT imageStore, size_t start, size_t
 	}
 	delete imageStore;
 	
-	historyItem = new HistoryItemDeleteFrame(tempSaveBuilder->BuildStore(), start, end);
-	imageStore = builder->BuildStore();
-
-	delete tempSaveBuilder;
-	delete builder;
+	historyItem = new HistoryItemDeleteFrame(IImageStoreBuilder::BuildStore(tempSaveBuilder), start, end);
+	imageStore = IImageStoreBuilder::BuildStore(builder);
 }
 
 HistoryItemDeleteFrame::HistoryItemDeleteFrame(IImageStore* imageStore, size_t start, size_t end):
@@ -54,8 +51,7 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 		builder->PushBack(item.first, item.second);
 	}
 	delete imageStore;
-	imageStore = builder->BuildStore();
-	delete builder;
+	imageStore =IImageStoreBuilder::BuildStore(builder);
 }
 
 void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
@@ -70,7 +66,5 @@ void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 		}
 	}
 	delete imageStore;
-	imageStore = builder->BuildStore();
-
-	delete builder;
+	imageStore =IImageStoreBuilder::BuildStore(builder);
 }

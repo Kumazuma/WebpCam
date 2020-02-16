@@ -25,7 +25,18 @@ struct IImageStoreBuilder
 	virtual ~IImageStoreBuilder() {};
 	virtual void PushBack(const wxImage& image, uint32_t duration) = 0;
 	virtual size_t GetSize() const = 0;
+	//IImageStore를 반환하고 Builder를 해제한다.
+	static IImageStore* BuildStore(IImageStoreBuilder*& builder)
+	{
+		auto* temp = builder;
+		builder = nullptr;
+		auto store = temp->BuildStore();
+		delete temp;
+		return store;
+	}
+protected:
 	virtual IImageStore* BuildStore() = 0;
+	
 };
 //이미지를 애니메이션 이미지로 만드는 인터페이스
 wxDECLARE_EVENT(EVT_FINISH_ENCODE, wxCommandEvent);//인코딩을 완료했을 때

@@ -25,6 +25,7 @@ public:
 	~FileImageStoreBuilder();
 	virtual void PushBack(const wxImage& image, uint32_t duration) override;
 	virtual size_t GetSize() const override;
+protected:
 	virtual IImageStore* BuildStore() override;
 	
 private:

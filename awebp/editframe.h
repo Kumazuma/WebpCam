@@ -10,7 +10,6 @@ class EditFrame : public UIEditFrame
 private:
 	IImageStore* m_imageStore;
 	EditForm* ui_editForm;
-	FrameListWidgets* ui_frameList;
 public:
 	EditFrame(IImageStore* imageStore);
 	virtual ~EditFrame();
