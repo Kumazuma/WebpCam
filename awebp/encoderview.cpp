@@ -1,8 +1,9 @@
 #include "wx/wxprec.h"
 #include "encoderview.h"
 #include<wx/filedlg.h>
+
 EncoderFrame::EncoderFrame(IImageStore* store):
-	wxFrame(nullptr, wxID_ANY, wxT("인코딩")),
+	wxFrame(nullptr, wxID_ANY, wxT("encode form")),
 	m_presenter(new EncoderPresenter( this, store))
 {
 	Center();

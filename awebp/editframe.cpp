@@ -5,13 +5,14 @@ wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFileClick)
 wxEND_EVENT_TABLE();
 EditFrame::EditFrame(IImageStore* imageStore):
-	UIEditFrame(nullptr, wxID_ANY, wxT("편집창")),
+	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
 	m_imageStore(imageStore)
 {
 	ui_editForm = new EditForm(this);
 	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
 	this->Layout();
 }
+
 
 EditFrame::~EditFrame()
 {

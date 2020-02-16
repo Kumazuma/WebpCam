@@ -1,4 +1,4 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "webpencoder.h"
 #include "webp/encode.h"
 #include <wx/wfstream.h>
@@ -86,3 +86,4 @@ wxString WebpEncoder::GetFileExtension()
 {
 	return wxT("webp");
 }
+

@@ -1,4 +1,4 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "frame.h"
 #include "app.h"
 #include "encoderview.h"
@@ -179,3 +179,4 @@ void CommandFrame::OnRefleshView(wxCommandEvent& event)
 	ui_spinHeight->SetValue(m_presenter->GetRecordedRect().GetHeight());
 	ui_spinWidth->SetValue(m_presenter->GetRecordedRect().GetWidth());
 }
+

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "interface.h"
 #include <vector>
 #include <wx/file.h>
@@ -26,6 +26,7 @@ public:
 	virtual void PushBack(const wxImage& image, uint32_t duration) override;
 	virtual size_t GetSize() const override;
 	virtual IImageStore* BuildStore() override;
+	
 private:
 	uint32_t m_imageHeight;
 	uint32_t m_imageWidth;
@@ -49,8 +50,9 @@ public:
 		decltype(m_imageHeight) height,
 		decltype(m_imageWidth) width, 
 		const std::vector<uint32_t> & durations);
-
 	virtual ~FileImageStore();
+	
+	virtual IImageStoreBuilder* CreateBuilder();
 	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
 	virtual size_t GetSize() const override
 	{

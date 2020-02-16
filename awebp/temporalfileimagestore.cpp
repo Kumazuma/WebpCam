@@ -1,4 +1,4 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "temporalfileimagestore.h"
 #include <wx/mstream.h>
 FileImageStore::FileImageStore(wxString fileName,
@@ -23,6 +23,11 @@ FileImageStore::~FileImageStore()
 {
 	Clear();
 	
+}
+
+IImageStoreBuilder* FileImageStore::CreateBuilder()
+{
+	return new FileImageStoreBuilder();
 }
 
 std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)

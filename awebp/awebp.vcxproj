@@ -49,9 +49,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="editframe.cpp" />
+    <ClCompile Include="edittool.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
     <ClCompile Include="frame.cpp" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="app.h" />
     <ClInclude Include="editframe.h" />
+    <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
     <ClInclude Include="frame.h" />
@@ -173,6 +175,7 @@
     <ClInclude Include="webpencoder.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
