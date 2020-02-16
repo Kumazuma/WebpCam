@@ -25,7 +25,7 @@
 #include <wx/ribbon/bar.h>
 #include <wx/sizer.h>
 #include <wx/frame.h>
-#include <wx/listbox.h>
+#include "editframelistwidget.h"
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/slider.h>
@@ -73,7 +73,7 @@ class UIEditForm : public wxPanel
 	private:
 
 	protected:
-		wxListBox* m_listBox1;
+		FrameListWidgets* ui_frameList;
 		wxPanel* m_panel1;
 		wxPanel* m_panel2;
 		wxButton* m_button3;

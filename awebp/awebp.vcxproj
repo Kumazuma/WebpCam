@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="editframe.cpp" />
+    <ClCompile Include="editframelistwidget.cpp" />
     <ClCompile Include="edittool.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
@@ -161,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="app.h" />
     <ClInclude Include="editframe.h" />
+    <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />

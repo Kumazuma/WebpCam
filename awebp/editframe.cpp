@@ -1,4 +1,4 @@
-#include <wx/wxprec.h>
+﻿#include <wx/wxprec.h>
 #include "editframe.h"
 #include "encoderview.h"
 wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
@@ -8,8 +8,10 @@ EditFrame::EditFrame(IImageStore* imageStore):
 	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
 	m_imageStore(imageStore)
 {
-	ui_editForm = new EditForm(this);
+	ui_editForm = new EditForm(this, *m_imageStore);
 	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
+	
+
 	this->Layout();
 }
 
@@ -31,8 +33,14 @@ void EditFrame::OnRbarBtnSaveFileClick(wxRibbonButtonBarEvent& event)
 	this->Close();
 }
 
-EditForm::EditForm(wxWindow* parent):
-	UIEditForm(parent)
+EditForm::EditForm(wxWindow* parent, IImageStore& imageStore):
+	UIEditForm(parent),
+	m_imageStore(imageStore)
 {
-
+	for (int i = 0; i < imageStore.GetSize(); i++)
+	{
+		auto it = imageStore.Get(i);
+		auto* temp = new FrameListItemWidgets(ui_frameList, wxID_ANY, it.first, it.second);
+		ui_frameList->AddFrameImage(temp);
+	}
 }
