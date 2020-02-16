@@ -116,6 +116,9 @@
     <ClInclude Include="editframelistwidget.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
+    <ClInclude Include="editframemodel.h">
+      <Filter>헤더 파일\edit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

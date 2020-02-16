@@ -163,6 +163,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="editframe.h" />
     <ClInclude Include="editframelistwidget.h" />
+    <ClInclude Include="editframemodel.h" />
     <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
