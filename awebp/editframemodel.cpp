@@ -6,3 +6,11 @@ EditFrameModel::EditFrameModel(IImageStore* imageStore):
 {
 
 }
+
+EditFrameModel::~EditFrameModel()
+{
+	if (m_imageStore != nullptr)
+	{
+		delete m_imageStore;
+	}
+}

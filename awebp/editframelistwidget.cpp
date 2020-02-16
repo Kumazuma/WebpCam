@@ -1,48 +1,115 @@
 ﻿#include "wx/wxprec.h"
 #include "editframelistwidget.h"
 #include <optional>
-void FrameListItemWidgets::SetImage(const wxImage& image)
-{
-	m_image = image;
-	Init();
-}
-
-void FrameListItemWidgets::SetDuration(size_t duration)
-{
-	m_duration = duration;
-	Init();
-}
+#include <wx/dcbuffer.h>
 
 inline void FrameListItemWidgets::ItemSelect()
 { 
 	m_isSelected = true; 
 
 	
-	this->Refresh();
+	this->Refresh(false);
 }
 
 inline void FrameListItemWidgets::ItemUnselect() 
 { 
 	m_isSelected = false; 
 
-	this->Refresh();
+	this->Refresh(false);
 }
 
 FrameListItemWidgets::FrameListItemWidgets(
 	wxWindow* parent, wxWindowID winid,
-	const wxImage& frame,size_t duration, const wxPoint& pos,
+	EditFramePresenter* presenter, size_t index, const wxPoint& pos,
 	const wxSize& size, long style,
 	const wxValidator& val, const wxString& name):
 	wxControl(parent,winid, pos, size, style, val, name ),
-	m_image(frame), m_duration(duration), m_isSelected(false)
+	m_presenter(presenter), m_index(index), m_isSelected(false)
 {
 	Init();
+}
+
+void FrameListItemWidgets::LoadData()
+{
+	if (m_presenter == nullptr)
+	{
+		return;
+	}
+	if (m_bitmap.IsOk())
+	{
+		return;
+	}
+	auto& presenter = *m_presenter;
+	wxImage image;
+	uint32_t duration;
+	if (presenter.GetImage(m_index, image, duration))
+	{
+		auto size = image.GetSize();
+		int* max = nullptr;
+		int* min = nullptr;
+
+		if (size.x >= size.y)
+		{
+			max = &size.x;
+			min = &size.y;
+		}
+		else
+		{
+			max = &size.y;
+			min = &size.x;
+		}
+		float radio = 256.f / *max;
+		*max = 256;
+		*min = *min * radio;
+		image.Rescale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
+		m_bitmap = image;
+		Refresh(false);
+	}
+}
+
+void FrameListItemWidgets::UnloadData()
+{
+	if (m_bitmap.IsOk())
+	{
+		m_bitmap.UnRef();
+	}
+}
+
+inline void FrameListItemWidgets::Init() {
+
+	// init widget's internals...
+	/*
+	if (m_image.IsOk())
+	m_bitmap.Create(wxSize(256, 256));
+	{
+		auto size = m_image.GetSize();
+		int* max = nullptr;
+		int* min = nullptr;
+
+		if (size.x >= size.y)
+		{
+			max = &size.x;
+			min = &size.y;
+		}
+		else
+		{
+			max = &size.y;
+			min = &size.x;
+		}
+		float radio = 256.f / *max;
+		*max = 256;
+		*min = *min * radio;
+		auto image = m_image.Scale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
+		m_bitmap = image;
+		m_image.Clear();
+	}*/
 
 }
 
 void FrameListItemWidgets::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC dc(this);
+	
+	wxBufferedPaintDC dc(this);
 	wxColour bgColor = wxColour(255, 255, 255);
 	if (m_isSelected)
 	{
@@ -91,6 +158,15 @@ int FrameListWidgets::AddFrameImage(FrameListItemWidgets* item)
 	return index;
 }
 
+void FrameListWidgets::Init() {
+	long style = this->GetWindowStyle();
+	SetMinSize(wxSize(266, 266));
+	SetSize(wxSize(266, 266));
+	this->SetWindowStyle(style | wxVSCROLL);
+	this->EnableScrolling(false, true);
+	SetScrollRate(0, 266);
+}
+
 wxSize FrameListWidgets::DoGetBestSize() const {
 	// we need to calculate and return the best size of the widget...
 	auto vscrollWidth = wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
@@ -107,21 +183,45 @@ void FrameListWidgets::AlignItems()
 	size_t height = 0;
 	for (auto it : m_items)
 	{
-		
+		auto size = it->GetBestSize();
 		it->SetPosition(wxPoint(0, height));
-		it->SetSize(it->GetBestSize());
-		height += it->GetBestSize().GetHeight();
+		it->SetSize(size);
+		height += size.GetHeight();
 	}
-	auto size = DoGetBestSize();
-	SetVirtualSize(size);
+	SetVirtualSize(DoGetBestSize());
+	UpdateItemsImageLoad();
 }
-void FrameListWidgets::OnScrolledEvent(wxScrollEvent& event)
+void FrameListWidgets::OnScrolledEvent(wxScrollWinEvent& event)
 {
+	event.Skip();
+	CallAfter([this]()
+		{
+			UpdateItemsImageLoad();
+		});
 }
 
 void FrameListWidgets::OnSized(wxSizeEvent& event)
 {
-	SetScrollbar(wxVERTICAL, 0, GetBestSize().GetHeight() / 266, m_items.size());
+	event.Skip();
+	UpdateItemsImageLoad();
+}
+void FrameListWidgets::UpdateItemsImageLoad()
+{
+	auto viewViewStart = GetViewStart();
+	int viewStartY = viewViewStart.y;
+	
+	int viewEndY = viewStartY + GetSize().GetHeight() / 266;
+	for (int i = 0 ; i <m_items.size() ;i++)
+	{
+		if (viewStartY <= i && i <= viewEndY)
+		{
+			m_items[i]->LoadData();
+		}
+		else
+		{
+			m_items[i]->UnloadData();
+		}
+	}
 }
 void FrameListWidgets::OnMouseLeftDown(wxMouseEvent& event)
 {
@@ -213,6 +313,8 @@ void FrameListWidgets::OnMouseEnter(wxMouseEvent& event)
 wxBEGIN_EVENT_TABLE(FrameListWidgets, wxScrolledCanvas)
 EVT_LEFT_DOWN(FrameListWidgets::OnMouseLeftDown)
 EVT_LEFT_UP(FrameListWidgets::OnMouseLeftUp)
+EVT_SCROLLWIN(FrameListWidgets::OnScrolledEvent)
+EVT_SIZE(FrameListWidgets::OnSized)
 wxEND_EVENT_TABLE()
 
 wxBEGIN_EVENT_TABLE(FrameListItemWidgets, wxControl)

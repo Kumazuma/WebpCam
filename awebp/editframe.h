@@ -8,7 +8,7 @@ class EditFrame : public UIEditFrame
 {
 	wxDECLARE_EVENT_TABLE();
 private:
-	IImageStore* m_imageStore;
+	EditFramePresenter m_presenter;
 	EditForm* ui_editForm;
 public:
 	EditFrame(IImageStore* imageStore);
@@ -19,8 +19,8 @@ protected:
 class EditForm : public UIEditForm
 {
 private:
-	IImageStore& m_imageStore;
+	EditFramePresenter& m_presenter;
 public:
-	EditForm(wxWindow* parent, IImageStore& imageStore);
+	EditForm(wxWindow* parent, EditFramePresenter& imageStore);
 
 };

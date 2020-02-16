@@ -5,6 +5,8 @@ class EditFrameModel
 {
 public:
 	EditFrameModel(IImageStore* imageStore);
+	~EditFrameModel();
+	IImageStore*& GetImageStore() { return m_imageStore; }
 private:
 	IImageStore* m_imageStore;
 };
