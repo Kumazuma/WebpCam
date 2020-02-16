@@ -2,20 +2,20 @@
 #include "editframelistwidget.h"
 #include <optional>
 #include <wx/dcbuffer.h>
-
+const int IMAGE_RESIZE_SiZE = 128;
+const int WIDGET_BORDER = 5;
 inline void FrameListItemWidgets::ItemSelect()
 { 
 	m_isSelected = true; 
-
-	
-	this->Refresh(false);
+	wxClientDC dc(this);
+	DoPaint(dc);
 }
 
 inline void FrameListItemWidgets::ItemUnselect() 
 { 
 	m_isSelected = false; 
-
-	this->Refresh(false);
+	wxClientDC dc(this);
+	DoPaint(dc);
 }
 
 FrameListItemWidgets::FrameListItemWidgets(
@@ -58,12 +58,14 @@ void FrameListItemWidgets::LoadData()
 			max = &size.y;
 			min = &size.x;
 		}
-		float radio = 256.f / *max;
-		*max = 256;
+		float radio = float(IMAGE_RESIZE_SiZE) / *max;
+		*max = IMAGE_RESIZE_SiZE;
 		*min = *min * radio;
 		image.Rescale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
 		m_bitmap = image;
-		Refresh(false);
+		
+		wxClientDC dc(this);
+		DoPaint(dc);
 	}
 }
 
@@ -75,41 +77,24 @@ void FrameListItemWidgets::UnloadData()
 	}
 }
 
-inline void FrameListItemWidgets::Init() {
+inline void FrameListItemWidgets::Init()
+{
+}
 
-	// init widget's internals...
-	/*
-	if (m_image.IsOk())
-	m_bitmap.Create(wxSize(256, 256));
-	{
-		auto size = m_image.GetSize();
-		int* max = nullptr;
-		int* min = nullptr;
-
-		if (size.x >= size.y)
-		{
-			max = &size.x;
-			min = &size.y;
-		}
-		else
-		{
-			max = &size.y;
-			min = &size.x;
-		}
-		float radio = 256.f / *max;
-		*max = 256;
-		*min = *min * radio;
-		auto image = m_image.Scale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
-		m_bitmap = image;
-		m_image.Clear();
-	}*/
-
+inline wxSize FrameListItemWidgets::DoGetBestSize() const {
+	// we need to calculate and return the best size of the widget...
+	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 }
 
 void FrameListItemWidgets::OnPaint(wxPaintEvent& event)
 {
 	
 	wxBufferedPaintDC dc(this);
+	DoPaint(dc);
+}
+
+void FrameListItemWidgets::DoPaint(wxDC& dc)
+{
 	wxColour bgColor = wxColour(255, 255, 255);
 	if (m_isSelected)
 	{
@@ -120,8 +105,8 @@ void FrameListItemWidgets::OnPaint(wxPaintEvent& event)
 	//dc.DrawRectangle(5, 5, 256, 256);
 	if (m_bitmap.IsOk())
 	{
-		int x =(256 - m_bitmap.GetWidth()) / 2;
-		int y =(256 - m_bitmap.GetHeight()) / 2;
+		int x = (IMAGE_RESIZE_SiZE - m_bitmap.GetWidth()) / 2;
+		int y = (IMAGE_RESIZE_SiZE - m_bitmap.GetHeight()) / 2;
 		dc.DrawBitmap(m_bitmap, wxPoint(5 + x, 5 + y));
 	}
 }
@@ -160,11 +145,11 @@ int FrameListWidgets::AddFrameImage(FrameListItemWidgets* item)
 
 void FrameListWidgets::Init() {
 	long style = this->GetWindowStyle();
-	SetMinSize(wxSize(266, 266));
-	SetSize(wxSize(266, 266));
+	SetMinSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
+	SetSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
 	this->SetWindowStyle(style | wxVSCROLL);
 	this->EnableScrolling(false, true);
-	SetScrollRate(0, 266);
+	SetScrollRate(0, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 }
 
 wxSize FrameListWidgets::DoGetBestSize() const {
@@ -175,7 +160,7 @@ wxSize FrameListWidgets::DoGetBestSize() const {
 	{
 		height += it->GetBestSize().GetHeight();
 	}
-	return wxSize(266 + vscrollWidth, height);
+	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2 + vscrollWidth, height);
 }
 
 void FrameListWidgets::AlignItems()
@@ -194,7 +179,37 @@ void FrameListWidgets::AlignItems()
 void FrameListWidgets::OnScrolledEvent(wxScrollWinEvent& event)
 {
 	event.Skip();
-	CallAfter([this]()
+	int etypes[] = {
+		wxEVT_SCROLLWIN_BOTTOM,
+		wxEVT_SCROLLWIN_LINEDOWN,
+		wxEVT_SCROLLWIN_LINEUP,
+		wxEVT_SCROLLWIN_PAGEDOWN,
+		wxEVT_SCROLLWIN_PAGEUP,
+		wxEVT_SCROLLWIN_THUMBRELEASE,
+		wxEVT_SCROLLWIN_THUMBTRACK,
+		wxEVT_SCROLLWIN_TOP
+	};
+	wxString typestr[] = {
+		"wxEVT_SCROLLWIN_BOTTOM",
+		"wxEVT_SCROLLWIN_LINEDOWN",
+		"wxEVT_SCROLLWIN_LINEUP",
+		"wxEVT_SCROLLWIN_PAGEDOWN",
+		"wxEVT_SCROLLWIN_PAGEUP",
+		"wxEVT_SCROLLWIN_THUMBRELEASE",
+		"wxEVT_SCROLLWIN_THUMBTRACK",
+		"wxEVT_SCROLLWIN_TOP"
+	};
+	/*auto t = event.GetEventType();
+	for (int i = 0; i < sizeof(etypes) / sizeof(etypes[0]); i++)
+	{
+		if (t == etypes[i])
+		{
+			wxLogGeneric(wxLogLevelValues::wxLOG_Message, typestr[i]);
+			break;
+		}
+	}*/
+
+		 this->CallAfter([this]()
 		{
 			UpdateItemsImageLoad();
 		});
@@ -210,7 +225,7 @@ void FrameListWidgets::UpdateItemsImageLoad()
 	auto viewViewStart = GetViewStart();
 	int viewStartY = viewViewStart.y;
 	
-	int viewEndY = viewStartY + GetSize().GetHeight() / 266;
+	int viewEndY = viewStartY + GetSize().GetHeight() / IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2;
 	for (int i = 0 ; i <m_items.size() ;i++)
 	{
 		if (viewStartY <= i && i <= viewEndY)

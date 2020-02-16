@@ -49,8 +49,6 @@ private:
     size_t m_index;
 public:
     FrameListItemWidgets() { Init(); }
-    void SetImage(const wxImage& image);
-    void SetDuration(size_t duration);
     bool IsSelected() { return m_isSelected; }
     void ItemSelect();
     void ItemUnselect();
@@ -67,12 +65,9 @@ public:
 protected:
     const size_t HEIGHT_PER_DPI = 256 / 96;
     void Init();
-    virtual wxSize DoGetBestSize() const {
-        // we need to calculate and return the best size of the widget...
-        return wxSize(266, 266);
-    }
+    virtual wxSize DoGetBestSize() const;
     void OnPaint(wxPaintEvent& event);
-    
+    void DoPaint(wxDC& dc);
 private:
     wxDECLARE_DYNAMIC_CLASS(FrameListItemWidgets);
     wxDECLARE_EVENT_TABLE();
