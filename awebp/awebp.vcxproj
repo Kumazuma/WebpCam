@@ -103,6 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +136,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,6 +149,8 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="editframe.cpp" />
     <ClCompile Include="editframelistwidget.cpp" />
+    <ClCompile Include="editframemodel.cpp" />
+    <ClCompile Include="editpresenter.cpp" />
     <ClCompile Include="edittool.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
@@ -164,6 +168,7 @@
     <ClInclude Include="editframe.h" />
     <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="editframemodel.h" />
+    <ClInclude Include="editpresenter.h" />
     <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />

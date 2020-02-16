@@ -1,14 +1,18 @@
 ﻿#pragma once
 #include<wx/wx.h>
 #include<wx/vector.h>
+#include<optional>
 #include"interface.h"
 class FrameListItemWidgets;
 class FrameListWidgets : public wxScrolledCanvas
 {
 private:
     wxVector<FrameListItemWidgets*> m_items;
+    //마우스 처리를 위한 변수들...
+    std::optional<wxPoint> m_dragStartPosition;
+    
 public:
-    FrameListWidgets() { Init(); }
+    FrameListWidgets();
     FrameListWidgets(wxWindow* parent,
         wxWindowID winid,
         const wxPoint& pos = wxDefaultPosition,
@@ -27,6 +31,14 @@ protected:
     void AlignItems();
     void OnScrolledEvent(wxScrollEvent& event);
     void OnSized(wxSizeEvent& event);
+    /*
+    아래부터는 클릭 및 선택에 대한 이벤트 핸들러들.
+    */
+    void OnMouseLeftDown(wxMouseEvent& event);
+    void OnMouseLeftUp(wxMouseEvent& event);
+    void OnMouseLeave(wxMouseEvent& event);
+    void OnMouseEnter(wxMouseEvent& event);
+    void OnMouseMotion(wxMouseEvent& event);
 private:
     wxDECLARE_DYNAMIC_CLASS(FrameListWidgets);
     wxDECLARE_EVENT_TABLE();
@@ -37,10 +49,15 @@ private:
     wxBitmap m_bitmap;
     wxImage m_image;
     size_t m_duration;
+    bool m_isSelected;
+    
 public:
     FrameListItemWidgets() { Init(); }
     void SetImage(const wxImage& image);
     void SetDuration(size_t duration);
+    bool IsSelected() { return m_isSelected; }
+    void ItemSelect();
+    void ItemUnselect();
     FrameListItemWidgets(wxWindow* parent,
         wxWindowID winid,
         const wxImage& frame,
@@ -85,7 +102,7 @@ protected:
         return wxSize(266, 266);
     }
     void OnPaint(wxPaintEvent& event);
-
+    
 private:
     wxDECLARE_DYNAMIC_CLASS(FrameListItemWidgets);
     wxDECLARE_EVENT_TABLE();

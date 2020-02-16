@@ -4,7 +4,7 @@
 class EditFrameModel
 {
 public:
-
+	EditFrameModel(IImageStore* imageStore);
 private:
 	IImageStore* m_imageStore;
 };

@@ -69,6 +69,12 @@
     <ClCompile Include="editframelistwidget.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
+    <ClCompile Include="editpresenter.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="editframemodel.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h">
@@ -117,6 +123,9 @@
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
     <ClInclude Include="editframemodel.h">
+      <Filter>헤더 파일\edit</Filter>
+    </ClInclude>
+    <ClInclude Include="editpresenter.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
   </ItemGroup>
