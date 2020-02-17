@@ -5,6 +5,9 @@ class EditFramePresenter: public wxEvtHandler
 {
 	
 	wxDECLARE_DYNAMIC_CLASS(EditFramePresenter);
+private:
+	EditFrameModel m_model;
+
 public:
 	EditFramePresenter():m_model(nullptr) {}
 	EditFramePresenter(wxWindow* parent, IImageStore* imageStore);
@@ -15,6 +18,5 @@ public:
 	void Undo();
 	void Redo();
 	const wxVector<const IHistoryItem*>& GetHistory() const;
-private:
-	EditFrameModel m_model;
+
 };

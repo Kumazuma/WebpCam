@@ -38,7 +38,7 @@ void EditFrame::DoPaint(wxDC& dc)
 
 void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 {
-	wxDialog* frame = new EncodingPregressDialog(this, m_presenter.GetImageStore());
+	wxDialog* frame = new EncodingProgressDialog(this, m_presenter.GetImageStore());
 	frame->ShowModal();
 }
 

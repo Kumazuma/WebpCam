@@ -77,6 +77,14 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	WebPPictureAlloc(&m_frame);
 	for(int i = 0 ; i < imageStore.GetSize(); i++)
 	{
+		if (m_requestedStop)
+		{
+			WebPAnimEncoderDelete(m_encoder);
+			WebPPictureFree(&m_frame);
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		auto data = imageStore[i];
 		auto rgbData = data.first.GetData();
 		WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
@@ -124,6 +132,11 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	
 	auto* event = new wxCommandEvent(EVT_FINISH_ENCODE);
 	handler->QueueEvent(event);
+}
+
+void WebpEncoder::StopEncode()
+{
+	m_requestedStop = true;
 }
 
 wxString WebpEncoder::GetFileFilter()

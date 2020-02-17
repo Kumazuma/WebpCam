@@ -4,7 +4,7 @@
 #include "event.h"
 wxIMPLEMENT_DYNAMIC_CLASS(EncoderPresenter, wxEvtHandler);
 EncoderPresenter::EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore):
-	wxEvtHandler(), m_view(view), m_imageStore(imageStore), m_encoder(new WebpEncoder())
+	wxEvtHandler(), m_view(view), m_imageStore(imageStore), m_encoder(new WebpEncoder()), m_threadHelper(nullptr)
 {
 	this->SetNextHandler(view);
 	this->Bind(EVT_ADDED_A_FRAME, &EncoderPresenter::OnAddedAFrame, this);
@@ -13,10 +13,16 @@ EncoderPresenter::EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore):
 
 EncoderPresenter::~EncoderPresenter()
 {
-
 	if (m_encoder != nullptr)
 	{
 		delete m_encoder;
+	}
+	if (m_threadHelper != nullptr)
+	{
+		auto thread = m_threadHelper->GetThread();
+		thread->Wait();
+		delete m_threadHelper;
+		m_threadHelper = nullptr;
 	}
 }
 
@@ -30,7 +36,7 @@ wxString EncoderPresenter::GetFileFilter()
 	return m_encoder->GetFileFilter();
 }
 
-class EncodeThread :public wxThread
+class EncodeThread :public wxThreadHelper
 {
 public:
 	EncodeThread(wxEvtHandler* handler,const wxString& filePath, IEncoder* encoder, IImageStore* store):
@@ -52,8 +58,27 @@ private:
 
 void EncoderPresenter::SaveAnimImage(const wxString& filePath)
 {
-	auto thread = new EncodeThread(this, filePath, m_encoder, &m_imageStore);
-	thread->Run();
+	m_threadHelper = new EncodeThread(this, filePath, m_encoder, &m_imageStore);
+	m_threadHelper->CreateThread();
+	m_threadHelper->GetThread()->Run();
+}
+
+void EncoderPresenter::StopEncode()
+{
+	if (m_encoder != nullptr)
+	{
+		m_encoder->StopEncode();
+		delete m_encoder;
+		m_encoder = nullptr;
+	}
+	if (m_threadHelper != nullptr)
+	{
+		auto thread = m_threadHelper->GetThread();
+		thread->Wait();
+		delete m_threadHelper;
+		m_threadHelper = nullptr;
+	}
+	
 }
 
 void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)

@@ -45,6 +45,7 @@ struct IEncoder
 	virtual void Encode(wxEvtHandler * handler, const wxString filePath, IImageStore& imageStore) = 0;
 	virtual wxString GetFileFilter() =0;
 	virtual wxString GetFileExtension() = 0;
+	virtual void StopEncode() = 0;
 	virtual ~IEncoder() {}
 };
 //화면을 캡쳐하는 인터페이스

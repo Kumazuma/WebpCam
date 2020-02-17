@@ -12,6 +12,7 @@ private:
 	wxEvtHandler* m_view = nullptr;
 	IImageStore& m_imageStore;
 	IEncoder* m_encoder = nullptr;
+	wxThreadHelper* m_threadHelper = nullptr;
 public:
 	EncoderPresenter():m_imageStore(*(IImageStore*)nullptr){}
 	EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore);
@@ -22,6 +23,7 @@ public:
 	void SetFileFormat(EncodeType type);
 	wxString GetFileFilter();
 	void SaveAnimImage(const wxString& filePath);
+	void StopEncode();
 protected:
 	void OnAddedAFrame(wxCommandEvent& event);
 	void OnFinishEncode(wxCommandEvent& event);
