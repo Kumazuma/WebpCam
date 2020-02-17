@@ -82,7 +82,7 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel1->Layout();
 	bSizer2->Fit( m_panel1 );
 	m_listBox1 = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0, wxDefaultValidator, wxT("ui_historyBox") );
-	m_mgr.AddPane( m_listBox1, wxAuiPaneInfo() .Right() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
+	m_mgr.AddPane( m_listBox1, wxAuiPaneInfo() .Right() .CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxSize( 163,107 ) ) );
 
 
 	m_mgr.Update();

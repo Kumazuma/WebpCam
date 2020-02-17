@@ -85,6 +85,7 @@ void FrameListItemWidget::UnloadData()
 
 inline void FrameListItemWidget::Init()
 {
+
 }
 
 inline wxSize FrameListItemWidget::GetBestSize() const {

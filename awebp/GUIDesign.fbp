@@ -459,7 +459,7 @@
                 <property name="caption"></property>
                 <property name="caption_visible">0</property>
                 <property name="center_pane">0</property>
-                <property name="class">FrameListWidgets</property>
+                <property name="class">FrameListWidget</property>
                 <property name="close_button">0</property>
                 <property name="construction"></property>
                 <property name="context_help"></property>
@@ -780,7 +780,7 @@
                 <property name="caption_visible">1</property>
                 <property name="center_pane">0</property>
                 <property name="choices"></property>
-                <property name="close_button">1</property>
+                <property name="close_button">0</property>
                 <property name="context_help"></property>
                 <property name="context_menu">1</property>
                 <property name="default_pane">0</property>
@@ -803,8 +803,8 @@
                 <property name="moveable">1</property>
                 <property name="name">m_listBox1</property>
                 <property name="pane_border">1</property>
-                <property name="pane_position"></property>
-                <property name="pane_size"></property>
+                <property name="pane_position">174,96</property>
+                <property name="pane_size">163,107</property>
                 <property name="permission">protected</property>
                 <property name="pin_button">1</property>
                 <property name="pos"></property>

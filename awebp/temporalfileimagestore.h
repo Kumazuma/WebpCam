@@ -46,6 +46,7 @@ private:
 	wxFileInputStream m_fileIStream;
 	uint32_t m_imageHeight;
 	uint32_t m_imageWidth;
+	wxString m_fileName;
 public:
 	FileImageStore(wxString fileName,
 		decltype(m_imageHeight) height,

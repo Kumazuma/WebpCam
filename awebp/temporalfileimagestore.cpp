@@ -6,6 +6,7 @@ FileImageStore::FileImageStore(wxString fileName,
 	decltype(m_imageWidth) width, const std::vector<uint32_t> & durations) :
 	m_imageHeight(height),
 	m_imageWidth(width),
+	m_fileName(fileName),
 	m_fileIStream(fileName),
 	m_tarInputStream(m_fileIStream)
 {
@@ -52,6 +53,12 @@ void FileImageStore::Clear()
 		delete it.first;
 	}
 	m_store.clear();
+
+	m_tarInputStream.UnRef();
+	m_fileIStream.GetFile()->Detach();
+	m_fileIStream.UnRef();
+	wxFile file(m_fileName, wxFile::write);
+	file.Flush();
 }
 
 FileSaveThread::FileSaveThread(
@@ -132,6 +139,7 @@ IImageStore* FileImageStoreBuilder::BuildStore()
 	}
 	m_taroutputStream.Close();
 	m_fileOStream.Close();
-	
+	m_taroutputStream.UnRef();
+	m_fileOStream.UnRef();
 	return new FileImageStore(m_fileName,m_imageHeight,m_imageWidth, m_durations);
 }
