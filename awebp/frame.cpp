@@ -3,6 +3,8 @@
 #include "app.h"
 #include "encoderview.h"
 #include "editframe.h"
+#include "event.h"
+#include "resource.h"
 const auto CAPTURE_REGION_FRAME_STYPE =
 wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP |
 wxFRAME_SHAPED | wxFRAME_TOOL_WINDOW;
@@ -19,6 +21,7 @@ int BORDER_THICKNESS = 0;
 CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter* presenter, const wxString& title):
 	wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, CAPTURE_REGION_FRAME_STYPE)
 {
+
 	m_presenter = presenter;
 	CenterOnScreen();
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
@@ -85,6 +88,7 @@ void CaptureRegionFrame::OnSized(wxSizeEvent& event)
 CommandFrame::CommandFrame(const wxString& title):
 	UIRecordFrame(nullptr, wxID_ANY, title)
 {
+	SetIcon(wxIcon(wxT("std.ico")));
 	m_presenter = new AppPresenter(this);
 	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("캡처영역"));
 	ui_regionFrame->Show();

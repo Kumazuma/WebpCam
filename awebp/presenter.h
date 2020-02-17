@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include<wx/wx.h>
 #include"model.h"
 #include "interface.h"
-wxDECLARE_EVENT(EVT_RefreshView, wxCommandEvent);
+
 class AppPresenter : public wxEvtHandler
 {
 	wxDECLARE_DYNAMIC_CLASS(AppPresenter);

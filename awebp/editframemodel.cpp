@@ -2,7 +2,8 @@
 #include "editframemodel.h"
 
 EditFrameModel::EditFrameModel(IImageStore* imageStore):
-	m_imageStore(imageStore)
+	m_imageStore(imageStore),
+	m_editHistoryCursor(-1)
 {
 
 }
@@ -13,4 +14,9 @@ EditFrameModel::~EditFrameModel()
 	{
 		delete m_imageStore;
 	}
+	for (auto item : m_editHistory)
+	{
+		delete item;
+	}
+	m_editHistory.clear();
 }

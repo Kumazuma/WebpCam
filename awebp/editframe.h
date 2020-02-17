@@ -10,11 +10,19 @@ class EditFrame : public UIEditFrame
 private:
 	EditFramePresenter m_presenter;
 	EditForm* ui_editForm;
+	std::optional<size_t> m_lastSelectedIndex;
 public:
 	EditFrame(IImageStore* imageStore);
 	virtual ~EditFrame();
 protected:
-	void OnRbarBtnSaveFileClick(wxRibbonButtonBarEvent& event);
+	void DoPaint(wxDC& dc);
+	void OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event);
+	void OnRefreshView(wxCommandEvent& event);
+	void OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event);
+	void OnSelectFramePaint(wxPaintEvent& event);
+	void OnListItemSelected(wxCommandEvent& event);
+	void OnRbarBtnUndo(wxRibbonButtonBarEvent& event);
+	void OnRbarBtnRedo(wxRibbonButtonBarEvent& event);
 };
 class EditForm : public UIEditForm
 {
@@ -22,5 +30,4 @@ private:
 	EditFramePresenter& m_presenter;
 public:
 	EditForm(wxWindow* parent, EditFramePresenter& imageStore);
-
 };

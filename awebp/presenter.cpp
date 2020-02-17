@@ -5,7 +5,7 @@
 #include "GDICapturer.h"
 #include "temporalfileimagestore.h"
 #include "memoryimagestore.h"
-wxDEFINE_EVENT(EVT_RefreshView, wxCommandEvent);
+#include "event.h"
 wxIMPLEMENT_DYNAMIC_CLASS(AppPresenter, wxEvtHandler);
 
 bool isStop = false;
@@ -32,6 +32,14 @@ protected:
 					m_imageStoreBuilder->PushBack(frame, delta);
 					pre = now;
 				}
+				else
+				{
+					break;
+				}
+			}
+			else if(((int64_t)m_fps - delta) >= 10)
+			{
+				wxThread::Sleep(10);
 			}
 		} while (isStop == false);
 		

@@ -19,8 +19,12 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0L,
+        const wxValidator& val = wxDefaultValidator,
         const wxString& name = "FrameListWidgets");
     int AddFrameImage(FrameListItemWidgets* item);
+    std::vector<size_t> GetSelections();
+    std::optional<size_t> GetSelection();
+    void ClearChildren();
 protected:
     void Init();
     virtual wxSize DoGetBestSize() const;

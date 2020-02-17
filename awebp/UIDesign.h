@@ -19,6 +19,7 @@
 #include <wx/settings.h>
 #include <wx/ribbon/buttonbar.h>
 #include <wx/ribbon/panel.h>
+#include <wx/ribbon/toolbar.h>
 #include <wx/ribbon/page.h>
 #include <wx/ribbon/control.h>
 #include <wx/ribbon/art.h>
@@ -29,12 +30,15 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/slider.h>
+#include <wx/listbox.h>
 #include <wx/aui/aui.h>
 #include <wx/stattext.h>
 #include <wx/spinctrl.h>
 #include <wx/choice.h>
 #include <wx/checkbox.h>
 #include <wx/scrolwin.h>
+#include <wx/treectrl.h>
+#include <wx/treelist.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +59,8 @@ class UIEditFrame : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBar1;
 		wxRibbonPanel* m_ribbonPanel2;
 		wxRibbonButtonBar* m_ribbonButtonBar2;
+		wxRibbonPanel* m_ribbonPanel3;
+		wxRibbonToolBar* m_ribbonToolBar1;
 		wxRibbonPage* m_ribbonPage3;
 
 	public:
@@ -78,6 +84,7 @@ class UIEditForm : public wxPanel
 		wxPanel* m_panel2;
 		wxButton* m_button3;
 		wxSlider* m_slider1;
+		wxListBox* m_listBox1;
 
 	public:
 
@@ -132,6 +139,8 @@ class MyFrame3 : public wxFrame
 		wxPanel* m_panel43;
 		wxPanel* m_panel42;
 		wxPanel* m_panel41;
+		wxTreeCtrl* m_treeCtrl1;
+		wxTreeListCtrl* m_treeListCtrl1;
 
 	public:
 

@@ -151,9 +151,11 @@
     <ClCompile Include="editframelistwidget.cpp" />
     <ClCompile Include="editframemodel.cpp" />
     <ClCompile Include="editpresenter.cpp" />
+    <ClCompile Include="editrenderwidget.cpp" />
     <ClCompile Include="edittool.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
+    <ClCompile Include="event.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="GDICapturer.cpp" />
     <ClCompile Include="model.cpp" />
@@ -169,15 +171,18 @@
     <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="editframemodel.h" />
     <ClInclude Include="editpresenter.h" />
+    <ClInclude Include="editrenderwidget.h" />
     <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
+    <ClInclude Include="event.h" />
     <ClInclude Include="frame.h" />
     <ClInclude Include="GDICapturer.h" />
     <ClInclude Include="memoryimagestore.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="presenter.h" />
     <ClInclude Include="interface.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="temporalfileimagestore.h" />
     <ClInclude Include="UIDesign.h" />
     <ClInclude Include="webpencoder.h" />
@@ -185,6 +190,13 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\wxWidgets-3.1.3\samples\sample.rc" />
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\wxWidgets-3.1.3\include\wx\msw\std.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

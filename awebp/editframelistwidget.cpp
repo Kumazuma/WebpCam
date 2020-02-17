@@ -120,7 +120,7 @@ FrameListWidgets::FrameListWidgets():
 FrameListWidgets::FrameListWidgets(
 	wxWindow* parent, wxWindowID winid,
 	const wxPoint& pos, const wxSize& size,
-	long style, const wxString& name):
+	long style, const wxValidator& val, const wxString& name):
 	wxScrolledCanvas(parent,winid,pos,size,style | wxVSCROLL, name),
 	m_dragStartPosition()
 {
@@ -142,6 +142,38 @@ int FrameListWidgets::AddFrameImage(FrameListItemWidgets* item)
 	item->Bind(wxEVT_MOTION, &FrameListWidgets::OnMouseEnter, this);
 	return index;
 }
+
+std::vector<size_t> FrameListWidgets::GetSelections()
+{
+	std::vector<size_t> res;
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		if (m_items[i]->IsSelected())
+		{
+			res.push_back(i);
+		}
+	}
+	return res;
+}
+
+std::optional<size_t> FrameListWidgets::GetSelection()
+{
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		if (m_items[i]->IsSelected())
+		{
+			return i;
+		}
+	}
+	return std::optional<size_t>();
+}
+
+void FrameListWidgets::ClearChildren()
+{
+	this->DestroyChildren();
+	m_items.clear();
+}
+
 
 void FrameListWidgets::Init() {
 	long style = this->GetWindowStyle();
@@ -265,8 +297,13 @@ void FrameListWidgets::OnMouseLeftUp(wxMouseEvent& event)
 		if (item != nullptr)
 		{
 			item->ItemSelect();
+			wxCommandEvent* event = new wxCommandEvent(wxEVT_LISTBOX);
+			auto r = this->GetSelections();
+			event->SetInt(r.front());
+			this->QueueEvent(event);
 		}
 		//TODO: 아이템 선택
+		
 	}
 	m_dragStartPosition.reset();
 }
