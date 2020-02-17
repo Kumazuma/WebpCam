@@ -69,11 +69,17 @@
     <ClCompile Include="editframelistwidget.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
+    <ClCompile Include="editframemodel.cpp">
+      <Filter>소스 파일\edit</Filter>
+    </ClCompile>
     <ClCompile Include="editpresenter.cpp">
+      <Filter>소스 파일\edit</Filter>
+    </ClCompile>
+    <ClCompile Include="event.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="editframemodel.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="editrenderwidget.cpp">
+      <Filter>소스 파일\edit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,9 +134,31 @@
     <ClInclude Include="editpresenter.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
+    <ClInclude Include="event.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="editrenderwidget.h">
+      <Filter>헤더 파일\edit</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="C:\wxWidgets-3.1.3\samples\sample.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\wxWidgets-3.1.3\include\wx\msw\std.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

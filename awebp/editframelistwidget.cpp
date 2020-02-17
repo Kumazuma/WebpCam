@@ -1,97 +1,204 @@
 ﻿#include "wx/wxprec.h"
 #include "editframelistwidget.h"
 #include <optional>
-void FrameListItemWidgets::SetImage(const wxImage& image)
+#include <wx/dcbuffer.h>
+const int IMAGE_RESIZE_SiZE = 128;
+const int WIDGET_BORDER = 5;
+wxBitmap& FrameListItemWidget::GetBitmap()
 {
-	m_image = image;
-	Init();
+	// TODO: 여기에 return 문을 삽입합니다.
+	return m_virtualScreen;
 }
-
-void FrameListItemWidgets::SetDuration(size_t duration)
-{
-	m_duration = duration;
-	Init();
-}
-
-inline void FrameListItemWidgets::ItemSelect()
+inline void FrameListItemWidget::ItemSelect()
 { 
 	m_isSelected = true; 
-
-	
-	this->Refresh();
 }
 
-inline void FrameListItemWidgets::ItemUnselect() 
+inline void FrameListItemWidget::ItemUnselect() 
 { 
 	m_isSelected = false; 
-
-	this->Refresh();
 }
 
-FrameListItemWidgets::FrameListItemWidgets(
-	wxWindow* parent, wxWindowID winid,
-	const wxImage& frame,size_t duration, const wxPoint& pos,
-	const wxSize& size, long style,
-	const wxValidator& val, const wxString& name):
-	wxControl(parent,winid, pos, size, style, val, name ),
-	m_image(frame), m_duration(duration), m_isSelected(false)
+FrameListItemWidget::FrameListItemWidget(wxWindow* parent,
+	EditFramePresenter* presenter, size_t index):
+	m_parent(parent),
+	m_presenter(presenter), m_index(index), m_isSelected(false)
 {
 	Init();
-
 }
 
-void FrameListItemWidgets::OnPaint(wxPaintEvent& event)
+FrameListItemWidget::~FrameListItemWidget()
 {
-	wxPaintDC dc(this);
+}
+
+void FrameListItemWidget::LoadData()
+{
+	if (m_presenter == nullptr)
+	{
+		return;
+	}
+	if (m_bitmap.IsOk())
+	{
+		return;
+	}
+	auto& presenter = *m_presenter;
+	wxImage image;
+	uint32_t duration;
+	if (presenter.GetImage(m_index, image, duration))
+	{
+		auto size = image.GetSize();
+		int* max = nullptr;
+		int* min = nullptr;
+
+		if (size.x >= size.y)
+		{
+			max = &size.x;
+			min = &size.y;
+		}
+		else
+		{
+			max = &size.y;
+			min = &size.x;
+		}
+		float radio = float(IMAGE_RESIZE_SiZE) / *max;
+		*max = IMAGE_RESIZE_SiZE;
+		*min = *min * radio;
+		image.Rescale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
+		m_bitmap = image;
+		m_virtualScreen.Create(m_size);
+		DoPaint();
+	}
+}
+
+void FrameListItemWidget::UnloadData()
+{
+	if (m_bitmap.IsOk())
+	{
+		m_bitmap.UnRef();
+	}
+	if (m_virtualScreen.IsOk())
+	{
+		m_virtualScreen.UnRef();
+	}
+}
+
+void FrameListItemWidget::OnPaint(const wxPoint& viewport, wxDC& dc)
+{
+	if (m_virtualScreen.IsOk())
+	{
+		dc.DrawBitmap(m_virtualScreen, m_position - viewport);
+	}
+}
+
+inline void FrameListItemWidget::Init()
+{
+}
+
+inline wxSize FrameListItemWidget::GetBestSize() const {
+	// we need to calculate and return the best size of the widget...
+	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
+}
+
+
+void FrameListItemWidget::DoPaint()
+{
+	wxMemoryDC dc(m_virtualScreen);
 	wxColour bgColor = wxColour(255, 255, 255);
 	if (m_isSelected)
 	{
 		bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
 	}
 	dc.SetBrush(wxBrush(bgColor));
-	dc.DrawRectangle(wxRect(GetSize()));
+	dc.DrawRectangle(m_size);
 	//dc.DrawRectangle(5, 5, 256, 256);
 	if (m_bitmap.IsOk())
 	{
-		int x =(256 - m_bitmap.GetWidth()) / 2;
-		int y =(256 - m_bitmap.GetHeight()) / 2;
+		int x = (IMAGE_RESIZE_SiZE - m_bitmap.GetWidth()) / 2;
+		int y = (IMAGE_RESIZE_SiZE - m_bitmap.GetHeight()) / 2;
 		dc.DrawBitmap(m_bitmap, wxPoint(5 + x, 5 + y));
 	}
 }
 
-FrameListWidgets::FrameListWidgets():
+FrameListWidget::FrameListWidget():
 	m_dragStartPosition()
 { 
 	Init();
 }
 
-FrameListWidgets::FrameListWidgets(
+FrameListWidget::FrameListWidget(
 	wxWindow* parent, wxWindowID winid,
 	const wxPoint& pos, const wxSize& size,
-	long style, const wxString& name):
+	long style, const wxValidator& val, const wxString& name):
 	wxScrolledCanvas(parent,winid,pos,size,style | wxVSCROLL, name),
 	m_dragStartPosition()
 {
 	Init();
 }
 
-int FrameListWidgets::AddFrameImage(FrameListItemWidgets* item)
+FrameListWidget::~FrameListWidget()
+{
+	ClearChildren();
+}
+
+int FrameListWidget::AddFrameImage(FrameListItemWidget* item)
 {
 	
 	int index = m_items.size();
+	item->ItemUnselect();
 	m_items.push_back(item);
 	this->AlignItems();
-	item->Show();
-	this->Layout();
-	item->Bind(wxEVT_LEFT_DOWN, &FrameListWidgets::OnMouseLeftDown, this);
-	item->Bind(wxEVT_LEFT_UP, &FrameListWidgets::OnMouseLeftUp, this);
-	item->Bind(wxEVT_LEAVE_WINDOW, &FrameListWidgets::OnMouseLeave, this);
-	item->Bind(wxEVT_ENTER_WINDOW, &FrameListWidgets::OnMouseEnter, this);
-	item->Bind(wxEVT_MOTION, &FrameListWidgets::OnMouseEnter, this);
 	return index;
 }
 
-wxSize FrameListWidgets::DoGetBestSize() const {
+std::vector<size_t> FrameListWidget::GetSelections()
+{
+	std::vector<size_t> res;
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		if (m_items[i]->IsSelected())
+		{
+			res.push_back(i);
+		}
+	}
+	return res;
+}
+
+std::optional<size_t> FrameListWidget::GetSelection()
+{
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		if (m_items[i]->IsSelected())
+		{
+			return i;
+		}
+	}
+	return std::optional<size_t>();
+}
+
+void FrameListWidget::ClearChildren()
+{
+	//this->DestroyChildren();
+	for (auto it : m_items)
+	{
+		delete it;
+	}
+	m_items.clear();
+	this->Refresh(false);
+}
+
+
+
+
+void FrameListWidget::Init() {
+	long style = this->GetWindowStyle();
+	SetMinSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
+	SetSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
+	this->SetWindowStyle(style | wxVSCROLL);
+	this->EnableScrolling(false, true);
+	SetScrollRate(0, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
+}
+
+wxSize FrameListWidget::DoGetBestSize() const {
 	// we need to calculate and return the best size of the widget...
 	auto vscrollWidth = wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
 	size_t height = 0;
@@ -99,70 +206,182 @@ wxSize FrameListWidgets::DoGetBestSize() const {
 	{
 		height += it->GetBestSize().GetHeight();
 	}
-	return wxSize(266 + vscrollWidth, height);
+	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2 + vscrollWidth, height);
 }
 
-void FrameListWidgets::AlignItems()
+void FrameListWidget::AlignItems()
 {
 	size_t height = 0;
 	for (auto it : m_items)
 	{
-		
+		auto size = it->GetBestSize();
 		it->SetPosition(wxPoint(0, height));
-		it->SetSize(it->GetBestSize());
-		height += it->GetBestSize().GetHeight();
+		it->SetSize(size);
+		
+		height += size.GetHeight();
 	}
-	auto size = DoGetBestSize();
-	SetVirtualSize(size);
+	SetVirtualSize(DoGetBestSize());
+	UpdateItemsImageLoad();
+	this->PostSizeEventToParent();
 }
-void FrameListWidgets::OnScrolledEvent(wxScrollEvent& event)
+void FrameListWidget::OnScrolledEvent(wxScrollWinEvent& event)
 {
+	event.Skip();
+	int etypes[] = {
+		wxEVT_SCROLLWIN_BOTTOM,
+		wxEVT_SCROLLWIN_LINEDOWN,
+		wxEVT_SCROLLWIN_LINEUP,
+		wxEVT_SCROLLWIN_PAGEDOWN,
+		wxEVT_SCROLLWIN_PAGEUP,
+		wxEVT_SCROLLWIN_THUMBRELEASE,
+		wxEVT_SCROLLWIN_THUMBTRACK,
+		wxEVT_SCROLLWIN_TOP
+	};
+	wxString typestr[] = {
+		"wxEVT_SCROLLWIN_BOTTOM",
+		"wxEVT_SCROLLWIN_LINEDOWN",
+		"wxEVT_SCROLLWIN_LINEUP",
+		"wxEVT_SCROLLWIN_PAGEDOWN",
+		"wxEVT_SCROLLWIN_PAGEUP",
+		"wxEVT_SCROLLWIN_THUMBRELEASE",
+		"wxEVT_SCROLLWIN_THUMBTRACK",
+		"wxEVT_SCROLLWIN_TOP"
+	};
+	/*auto t = event.GetEventType();
+	for (int i = 0; i < sizeof(etypes) / sizeof(etypes[0]); i++)
+	{
+		if (t == etypes[i])
+		{
+			wxLogGeneric(wxLogLevelValues::wxLOG_Message, typestr[i]);
+			break;
+		}
+	}*/
+
+		 this->CallAfter([this]()
+		{
+			UpdateItemsImageLoad();
+		});
 }
 
-void FrameListWidgets::OnSized(wxSizeEvent& event)
+void FrameListWidget::OnSized(wxSizeEvent& event)
 {
-	SetScrollbar(wxVERTICAL, 0, GetBestSize().GetHeight() / 266, m_items.size());
+	event.Skip();
+	UpdateItemsImageLoad();
 }
-void FrameListWidgets::OnMouseLeftDown(wxMouseEvent& event)
+void FrameListWidget::DoPaint(wxDC& dc)
+{
+	auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
+	auto viewRect = wxRect(viewStart, GetSize());
+	for (auto it : m_items)
+	{
+		//실제로 화면에 보일 때만 갱신한다.
+		if (viewRect.Contains(it->GetPosition()))
+		{
+			it->OnPaint(viewStart, dc);
+		}
+	}
+}
+void FrameListWidget::OnPaint(wxPaintEvent& event)
+{
+	wxPaintDC dc(this);
+	DoPaint(dc);
+}
+void FrameListWidget::UpdateItemsImageLoad()
+{
+	auto viewViewStart = GetViewStart();
+	int viewStartY = viewViewStart.y;
+	
+	int viewEndY = viewStartY + GetSize().GetHeight() / IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2;
+	for (int i = 0 ; i <m_items.size() ;i++)
+	{
+		if (viewStartY <= i && i <= viewEndY)
+		{
+			m_items[i]->LoadData();
+		}
+		else
+		{
+			m_items[i]->UnloadData();
+		}
+		m_items[i]->DoPaint();
+	}
+	DoPaint();
+}
+void FrameListWidget::OnMouseLeftDown(wxMouseEvent& event)
 {
 	auto pos = event.GetPosition();
 	auto obj = wxDynamicCast(event.GetEventObject(), wxWindow);
+	auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 	pos = obj->ClientToScreen(pos);
 	pos = this->ScreenToClient(pos);
+	//가상 영역 포지션으로 바꾼다.
+	pos = wxPoint(pos.x + viewStart.x, pos.y + viewStart.y);
 	m_dragStartPosition = pos;
-	auto ctrl = wxDynamicCast(event.GetEventObject(), FrameListItemWidgets);
 	
 	for (auto item : m_items)
 	{
-		
-		item->ItemUnselect();
-	}
-	if (ctrl != nullptr)
-	{
-		ctrl->ItemSelect();
-	}
-}
-void FrameListWidgets::OnMouseLeftUp(wxMouseEvent& event) 
-{
-	if (m_dragStartPosition.has_value())
-	{
-		auto item = wxDynamicCast(event.GetEventObject(), FrameListItemWidgets);
-		if (item != nullptr)
+		wxRect rc(item->GetPosition(), item->GetSize());
+		if (rc.Contains(pos))
 		{
 			item->ItemSelect();
 		}
-		//TODO: 아이템 선택
+		else
+		{
+			item->ItemUnselect();
+		}
+		item->DoPaint();
 	}
-	m_dragStartPosition.reset();
+	DoPaint();
 }
-void FrameListWidgets::OnMouseLeave(wxMouseEvent& event) 
+void FrameListWidget::OnMouseLeftUp(wxMouseEvent& event) 
 {
 	if (m_dragStartPosition.has_value())
 	{
-		auto ctrl = wxDynamicCast(event.GetEventObject(), FrameListItemWidgets);
+		auto ctrl = wxDynamicCast(event.GetEventObject(), wxWindow);
 		auto pos = event.GetPosition();
 		pos = ctrl->ClientToScreen(pos);
 		pos = this->ScreenToClient(pos);
+		auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
+		pos = wxPoint(pos.x + viewStart.x, pos.y + viewStart.y);
+
+		const wxRect rc(*m_dragStartPosition, pos);
+		for (auto item : m_items)
+		{
+
+			auto itemRect = item->GetRect();
+			auto res = rc.Intersect(itemRect);
+			//겹치는 부분이 없다면
+			if (res.width * res.height == 0)
+			{
+				//아이템은 선택 해제한다.
+				item->ItemUnselect();
+			}
+			else
+			{
+				item->ItemSelect();
+			}
+			item->DoPaint();
+		}
+		if (auto selection =this->GetSelection())
+		{
+			wxCommandEvent* event = new wxCommandEvent(wxEVT_LISTBOX);
+			event->SetInt(*selection);
+			this->QueueEvent(event);
+		}
+		DoPaint();
+	}
+	m_dragStartPosition.reset();
+}
+void FrameListWidget::OnMouseMotion(wxMouseEvent& event) 
+{
+	if (m_dragStartPosition.has_value())
+	{
+		auto ctrl = wxDynamicCast(event.GetEventObject(), wxWindow);
+		auto pos = event.GetPosition();
+		pos = ctrl->ClientToScreen(pos);
+		pos = this->ScreenToClient(pos);
+		auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
+		pos = wxPoint(pos.x + viewStart.x, pos.y + viewStart.y);
+
 		const wxRect rc(*m_dragStartPosition, pos);
 		for (auto item : m_items)
 		{
@@ -179,46 +398,20 @@ void FrameListWidgets::OnMouseLeave(wxMouseEvent& event)
 			{
 				item->ItemSelect();
 			}
+			item->DoPaint();
 		}
-	}
-}
-void FrameListWidgets::OnMouseEnter(wxMouseEvent& event) 
-{
-	if (m_dragStartPosition.has_value())
-	{
-		auto ctrl = wxDynamicCast(event.GetEventObject(), FrameListItemWidgets);
-		auto pos = event.GetPosition();
-		pos = ctrl->ClientToScreen(pos);
-		pos = this->ScreenToClient(pos);
-		const wxRect rc(*m_dragStartPosition, pos);
-		for (auto item : m_items)
-		{
-			auto itemRect = item->GetRect();
-			auto res = rc.Intersect(itemRect);
-			//겹치는 부분이 없다면
-			if (res.width * res.height == 0)
-			{
-				//아이템은 선택 해제한다.
-				item->ItemUnselect();
-			}
-			else
-			{
-				item->ItemSelect();
-			}
-		}
+		DoPaint();
 	}
 }
 
 
-wxBEGIN_EVENT_TABLE(FrameListWidgets, wxScrolledCanvas)
-EVT_LEFT_DOWN(FrameListWidgets::OnMouseLeftDown)
-EVT_LEFT_UP(FrameListWidgets::OnMouseLeftUp)
+wxBEGIN_EVENT_TABLE(FrameListWidget, wxScrolledCanvas)
+EVT_LEFT_DOWN(FrameListWidget::OnMouseLeftDown)
+EVT_LEFT_UP(FrameListWidget::OnMouseLeftUp)
+EVT_MOTION(FrameListWidget::OnMouseMotion)
+EVT_SCROLLWIN(FrameListWidget::OnScrolledEvent)
+EVT_SIZE(FrameListWidget::OnSized)
+EVT_PAINT(FrameListWidget::OnPaint)
 wxEND_EVENT_TABLE()
 
-wxBEGIN_EVENT_TABLE(FrameListItemWidgets, wxControl)
-EVT_PAINT(FrameListItemWidgets::OnPaint)
-wxEND_EVENT_TABLE()
-
-wxIMPLEMENT_DYNAMIC_CLASS(FrameListWidgets, wxScrolledCanvas)
-wxIMPLEMENT_DYNAMIC_CLASS(FrameListItemWidgets, wxControl)
-
+wxIMPLEMENT_DYNAMIC_CLASS(FrameListWidget, wxScrolledCanvas)

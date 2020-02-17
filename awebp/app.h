@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<wx/wx.h>
 #include"wx/wxprec.h"
 #include"presenter.h"

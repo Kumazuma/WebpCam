@@ -66,6 +66,7 @@ struct IHistoryItem
 	virtual ~IHistoryItem() {}
 	virtual void Undo(IImageStore*& imageStore) = 0;
 	virtual void Redo(IImageStore*& imageStore) = 0;
+	virtual wxString GetDescription() const  = 0;
 };
 //편집 기능 인터페이스
 struct IEditTool

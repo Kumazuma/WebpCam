@@ -5,8 +5,9 @@ class HistoryItemDeleteFrame : public IHistoryItem
 public:
 	HistoryItemDeleteFrame(IImageStore* imageStore, size_t start, size_t end);
 	~HistoryItemDeleteFrame();
-	virtual void Undo(IImageStore*& imageStore);
-	virtual void Redo(IImageStore*& imageStore);
+	virtual void Undo(IImageStore*& imageStore) override;
+	virtual void Redo(IImageStore*& imageStore) override;
+	virtual wxString GetDescription() const override;
 private:
 	IImageStore* m_imageStore;
 	size_t m_start;

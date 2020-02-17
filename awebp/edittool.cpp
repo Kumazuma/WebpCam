@@ -43,11 +43,11 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 		{
 			for (int j = 0; j < m_imageStore->GetSize(); j++)
 			{
-				auto item = m_imageStore->Get(i);
+				auto item = m_imageStore->Get(j);
 				builder->PushBack(item.first, item.second);
 			}
 		}
-		auto item = m_imageStore->Get(i);
+		auto item = imageStore->Get(i);
 		builder->PushBack(item.first, item.second);
 	}
 	delete imageStore;
@@ -67,4 +67,11 @@ void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 	}
 	delete imageStore;
 	imageStore =IImageStoreBuilder::BuildStore(builder);
+}
+
+wxString HistoryItemDeleteFrame::GetDescription() const
+{
+	wxString description;
+	description << wxT("프레임 삭제(갯수:") << m_imageStore->GetSize() << wxT(")");
+	return description;
 }
