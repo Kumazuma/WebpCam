@@ -82,13 +82,6 @@ void FrameListItemWidget::UnloadData()
 	}
 }
 
-void FrameListItemWidget::OnPaint(const wxPoint& viewport, wxDC& dc)
-{
-	if (m_virtualScreen.IsOk())
-	{
-		dc.DrawBitmap(m_virtualScreen, m_position - viewport);
-	}
-}
 
 inline void FrameListItemWidget::Init()
 {
@@ -99,7 +92,13 @@ inline wxSize FrameListItemWidget::GetBestSize() const {
 	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 }
 
-
+void FrameListItemWidget::OnPaint(const wxPoint& viewport, wxDC& dc)
+{
+	if (m_virtualScreen.IsOk())
+	{
+		dc.DrawBitmap(m_virtualScreen, m_position - viewport);
+	}
+}
 void FrameListItemWidget::DoPaint()
 {
 	wxMemoryDC dc(m_virtualScreen);
@@ -404,6 +403,11 @@ void FrameListWidget::OnMouseMotion(wxMouseEvent& event)
 	}
 }
 
+void FrameListWidget::OnKeyDown(wxKeyEvent& event)
+{
+//TODO:
+}
+
 
 wxBEGIN_EVENT_TABLE(FrameListWidget, wxScrolledCanvas)
 EVT_LEFT_DOWN(FrameListWidget::OnMouseLeftDown)
@@ -412,6 +416,7 @@ EVT_MOTION(FrameListWidget::OnMouseMotion)
 EVT_SCROLLWIN(FrameListWidget::OnScrolledEvent)
 EVT_SIZE(FrameListWidget::OnSized)
 EVT_PAINT(FrameListWidget::OnPaint)
+EVT_KEY_DOWN(FrameListWidget::OnKeyDown)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_DYNAMIC_CLASS(FrameListWidget, wxScrolledCanvas)

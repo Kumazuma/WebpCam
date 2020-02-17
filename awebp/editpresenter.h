@@ -9,7 +9,7 @@ public:
 	EditFramePresenter():m_model(nullptr) {}
 	EditFramePresenter(wxWindow* parent, IImageStore* imageStore);
 	bool GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration);
-	IImageStore* MoveImageStore();
+	IImageStore& GetImageStore();
 	size_t GetImagesCount();
 	bool DeleteFrams(size_t start, size_t end);
 	void Undo();

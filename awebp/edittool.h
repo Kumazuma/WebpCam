@@ -13,12 +13,32 @@ private:
 	size_t m_start;
 	size_t m_end;
 };
-class EditDeleteFrame : public IEditTool
+class EditDeleteFrameTool : public IEditTool
 {
 public:
 	void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
 };
 
+class EditResizeTool : public IEditTool
+{
+public:
+	EditResizeTool(const wxSize& to);
+	void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
+private:
+	wxSize m_sizeResizeTo;
+};
+class HistoryItemResize : public IHistoryItem
+{
+private:
+	IImageStore* m_imageStore;
+	wxSize m_sizeResizeTo;
+public:
+	HistoryItemResize(IImageStore* imageStore, const wxSize& resizeTo);
+	~HistoryItemResize();
+	virtual void Undo(IImageStore*& imageStore) override;
+	virtual void Redo(IImageStore*& imageStore) override;
+	virtual wxString GetDescription() const override;
+};
 class EditSetDurationFrame : public IEditTool
 {
 public:

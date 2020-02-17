@@ -1,12 +1,15 @@
-#pragma once
+﻿#pragma once
 #include <wx/wx.h>
 #include "EncorderPresenter.h"
 #include "interface.h"
-class EncoderFrame : public wxFrame
+class EncodingPregressDialog : public wxDialog
 {
-public:
-	EncoderFrame(IImageStore * store);
-	~EncoderFrame();
 private:
-	EncoderPresenter* m_presenter;
+	EncoderPresenter m_presenter;
+	wxGauge* ui_gauge;
+public:
+	EncodingPregressDialog(wxWindow* parent, IImageStore& store);
+	~EncodingPregressDialog();
+protected:
+	void OnRefreshView(wxCommandEvent& event);
 };

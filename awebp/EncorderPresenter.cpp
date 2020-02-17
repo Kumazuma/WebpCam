@@ -1,19 +1,19 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "EncorderPresenter.h"
 #include "webpencoder.h"
+#include "event.h"
 wxIMPLEMENT_DYNAMIC_CLASS(EncoderPresenter, wxEvtHandler);
-EncoderPresenter::EncoderPresenter(wxEvtHandler* view, IImageStore * imageStore):
+EncoderPresenter::EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore):
 	wxEvtHandler(), m_view(view), m_imageStore(imageStore), m_encoder(new WebpEncoder())
 {
-
+	this->SetNextHandler(view);
+	this->Bind(EVT_ADDED_A_FRAME, &EncoderPresenter::OnAddedAFrame, this);
+	this->Bind(EVT_FINISH_ENCODE, &EncoderPresenter::OnFinishEncode, this);
 }
 
 EncoderPresenter::~EncoderPresenter()
 {
-	if (m_imageStore != nullptr)
-	{
-		delete m_imageStore;
-	}
+
 	if (m_encoder != nullptr)
 	{
 		delete m_encoder;
@@ -52,8 +52,22 @@ private:
 
 void EncoderPresenter::SaveAnimImage(const wxString& filePath)
 {
-	auto thread = new EncodeThread(this, filePath, m_encoder, m_imageStore);
+	auto thread = new EncodeThread(this, filePath, m_encoder, &m_imageStore);
 	thread->Run();
+}
+
+void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
+{
+	m_progress = event.GetInt();
+	wxEvent* e =new wxCommandEvent(EVT_RefreshView);
+	this->QueueEvent(e);
+}
+
+void EncoderPresenter::OnFinishEncode(wxCommandEvent& event)
+{
+	m_progress = m_imageStore.GetSize();
+	wxCommandEvent* e = new wxCommandEvent(EVT_RefreshView);
+	this->QueueEvent(e);
 }
 
 void* EncodeThread::Entry()

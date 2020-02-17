@@ -29,16 +29,17 @@ void EditFrame::DoPaint(wxDC& dc)
 		wxImage image;
 		uint32_t duration;
 		m_presenter.GetImage(*m_lastSelectedIndex, image, duration);
-		
-		dc.DrawBitmap(image, 0, 0);
+		if (image.IsOk())
+		{
+			dc.DrawBitmap(image, 0, 0);
+		}
 	}
 }
 
 void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 {
-	wxFrame* frame = new EncoderFrame(m_presenter.MoveImageStore());
-	frame->Show();
-	this->Close();
+	wxDialog* frame = new EncodingPregressDialog(this, m_presenter.GetImageStore());
+	frame->ShowModal();
 }
 
 void EditFrame::OnRefreshView(wxCommandEvent& event)

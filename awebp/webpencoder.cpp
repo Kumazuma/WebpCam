@@ -3,10 +3,46 @@
 #include "webp/encode.h"
 #include <wx/wfstream.h>
 #include <wx/time.h>
+#include "event.h"
 
-#pragma comment(lib,"libwebp.lib")
-#pragma comment(lib,"libwebpdemux.lib")
-#pragma comment(lib,"libwebpmux.lib")
+#ifdef _DEBUG
+	#pragma comment(lib,"./debug/webp.lib")
+	#pragma comment(lib,"./debug/webpdemux.lib")
+	#pragma comment(lib,"./debug/webpmux.lib")
+#else
+	#pragma comment(lib,"./release/webp.lib")
+	#pragma comment(lib,"./release/webpdemux.lib")
+	#pragma comment(lib,"./release/webpmux.lib")
+#endif
+
+const int etypes[] = {
+	VP8_ENC_OK,
+	VP8_ENC_ERROR_OUT_OF_MEMORY,            // memory error allocating objects
+	VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY,  // memory error while flushing bits
+	VP8_ENC_ERROR_NULL_PARAMETER,           // a pointer parameter is NULL
+	VP8_ENC_ERROR_INVALID_CONFIGURATION,    // configuration is invalid
+	VP8_ENC_ERROR_BAD_DIMENSION,            // picture has invalid width/height
+	VP8_ENC_ERROR_PARTITION0_OVERFLOW,      // partition is bigger than 512k
+	VP8_ENC_ERROR_PARTITION_OVERFLOW,       // partition is bigger than 16M
+	VP8_ENC_ERROR_BAD_WRITE,                // error while flushing bytes
+	VP8_ENC_ERROR_FILE_TOO_BIG,             // file is bigger than 4G
+	VP8_ENC_ERROR_USER_ABORT,               // abort request by user
+	VP8_ENC_ERROR_LAST
+};
+const char* const  typestr[] = {
+	"VP8_ENC_OK",
+	"VP8_ENC_ERROR_OUT_OF_MEMORY",            // memory error allocating objects
+	"VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY",  // memory error while flushing bits
+	"VP8_ENC_ERROR_NULL_PARAMETER",           // a pointer parameter is NULL
+	"VP8_ENC_ERROR_INVALID_CONFIGURATION",    // configuration is invalid
+	"VP8_ENC_ERROR_BAD_DIMENSION",            // picture has invalid width/height
+	"VP8_ENC_ERROR_PARTITION0_OVERFLOW",      // partition is bigger than 512k
+	"VP8_ENC_ERROR_PARTITION_OVERFLOW",       // partition is bigger than 16M
+	"VP8_ENC_ERROR_BAD_WRITE",                // error while flushing bytes
+	"VP8_ENC_ERROR_FILE_TOO_BIG",             // file is bigger than 4G
+	"VP8_ENC_ERROR_USER_ABORT",               // abort request by user
+	"VP8_ENC_ERROR_LAST"
+};
 
 WebpEncoder::~WebpEncoder()
 {
@@ -44,7 +80,21 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 		auto data = imageStore[i];
 		auto rgbData = data.first.GetData();
 		WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
-		WebPAnimEncoderAdd(m_encoder, &m_frame, timestamp, &m_config);
+		if(!WebPAnimEncoderAdd(m_encoder, &m_frame, timestamp, &m_config))
+		{
+			for (int j = 0; j < sizeof(etypes) / sizeof(etypes[0]); j++)
+			{
+				if (m_frame.error_code == etypes[j])
+				{
+
+					wxLogGeneric(wxLogLevelValues::wxLOG_Message, typestr[j]);
+					break;
+				}
+			}
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		timestamp += data.second;
 
 		auto* event = new wxCommandEvent(EVT_ADDED_A_FRAME);

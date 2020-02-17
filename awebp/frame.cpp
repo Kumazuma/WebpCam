@@ -18,11 +18,11 @@ int TOP_HEIGHT = 0;
 int BOTTOM_HEIGHT = 0;
 int BORDER_THICKNESS = 0;
 
-CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter* presenter, const wxString& title):
-	wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, CAPTURE_REGION_FRAME_STYPE)
+CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter& presenter, const wxString& title):
+	wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, CAPTURE_REGION_FRAME_STYPE),
+	m_presenter(presenter)
 {
 
-	m_presenter = presenter;
 	CenterOnScreen();
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 	wxRect windowRect = GetSize();
@@ -47,7 +47,7 @@ CaptureRegionFrame::CaptureRegionFrame(wxWindow* parent, AppPresenter* presenter
 	rect.height -= BOTTOM_HEIGHT * 2 + TOP_HEIGHT;
 	
 	
-	m_presenter->SetRecordedRect(rect);
+	m_presenter.SetRecordedRect(rect);
 	this->SetShape(region);
 }
 
@@ -63,7 +63,7 @@ void CaptureRegionFrame::OnMoved(wxMoveEvent& event)
 	rect.width -= BORDER_THICKNESS * 2;
 	rect.y += TOP_HEIGHT + BOTTOM_HEIGHT;
 	rect.height -= BOTTOM_HEIGHT * 2 + TOP_HEIGHT;
-	m_presenter->SetRecordedRect(rect);
+	m_presenter.SetRecordedRect(rect);
 }
 
 void CaptureRegionFrame::OnSized(wxSizeEvent& event)
@@ -82,14 +82,14 @@ void CaptureRegionFrame::OnSized(wxSizeEvent& event)
 	rect.width -= BORDER_THICKNESS * 2;
 	rect.y += TOP_HEIGHT + BOTTOM_HEIGHT;
 	rect.height -= BOTTOM_HEIGHT * 2 + TOP_HEIGHT;
-	m_presenter->SetRecordedRect(rect);
+	m_presenter.SetRecordedRect(rect);
 }
 
 CommandFrame::CommandFrame(const wxString& title):
-	UIRecordFrame(nullptr, wxID_ANY, title)
+	UIRecordFrame(nullptr, wxID_ANY, title),
+	m_presenter(this)
 {
 	SetIcon(wxIcon(wxT("std.ico")));
-	m_presenter = new AppPresenter(this);
 	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("캡처영역"));
 	ui_regionFrame->Show();
 	ui_btnStart->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStart, this);
@@ -108,18 +108,17 @@ CommandFrame::CommandFrame(const wxString& title):
 CommandFrame::~CommandFrame()
 {
 	ui_regionFrame->Close(true);
-	delete m_presenter;
 }
 
 void CommandFrame::OnClickBtnStart(wxCommandEvent& event)
 {
-	m_presenter->StartRecording();
+	m_presenter.StartRecording();
 }
 
 void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 {
-	m_presenter->StopRecording();
-	EditFrame* frame = new EditFrame(m_presenter->BuildImageStore());
+	m_presenter.StopRecording();
+	EditFrame* frame = new EditFrame(m_presenter.BuildImageStore());
 	frame->Show();
 	Close();
 }
@@ -146,7 +145,7 @@ void CommandFrame::OnChoiceFPS(wxCommandEvent& event)
 	if (data != 0)
 	{
 		FPS fps = (FPS)data;
-		m_presenter->SetFPS(fps);
+		m_presenter.SetFPS(fps);
 	}
 }
 
@@ -154,11 +153,11 @@ void CommandFrame::OnChangeChkUsingTemoFile(wxCommandEvent& event)
 {
 	if (ui_chkUsingTempFile->GetValue())
 	{
-		m_presenter->EnableTemporalFile();
+		m_presenter.EnableTemporalFile();
 	}
 	else
 	{
-		m_presenter->DisableTemporalFile();
+		m_presenter.DisableTemporalFile();
 	}
 }
 
@@ -168,7 +167,7 @@ void CommandFrame::OnClickSave(wxCommandEvent& event)
 }
 void CommandFrame::OnRefleshView(wxCommandEvent& event)
 {
-	if (m_presenter->IsRecording())
+	if (m_presenter.IsRecording())
 	{
 		ui_btnStart->Disable();
 		ui_btnStop->Enable();
@@ -180,7 +179,7 @@ void CommandFrame::OnRefleshView(wxCommandEvent& event)
 		ui_btnStop->Disable();
 		ui_regionFrame->Enable();
 	}
-	ui_spinHeight->SetValue(m_presenter->GetRecordedRect().GetHeight());
-	ui_spinWidth->SetValue(m_presenter->GetRecordedRect().GetWidth());
+	ui_spinHeight->SetValue(m_presenter.GetRecordedRect().GetHeight());
+	ui_spinWidth->SetValue(m_presenter.GetRecordedRect().GetWidth());
 }
 

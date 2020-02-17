@@ -41,6 +41,7 @@ protected:
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
     void OnMouseMotion(wxMouseEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
 private:
     wxDECLARE_DYNAMIC_CLASS(FrameListWidget);
     wxDECLARE_EVENT_TABLE();

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <wx/wx.h>
 #include "UIDesign.h"
 #include "presenter.h"
@@ -10,13 +10,13 @@ class CaptureRegionFrame : public wxFrame
 {
 	wxDECLARE_EVENT_TABLE();
 public:
-	CaptureRegionFrame(wxWindow* parent,AppPresenter* presenter,  const wxString& title);
+	CaptureRegionFrame(wxWindow* parent,AppPresenter& presenter,  const wxString& title);
 	virtual ~CaptureRegionFrame();
 protected:
 	void OnMoved(wxMoveEvent& event);
 	void OnSized(wxSizeEvent& event);
 private:
-	AppPresenter* m_presenter;
+	AppPresenter& m_presenter;
 };
 class CommandFrame : public UIRecordFrame
 {
@@ -35,5 +35,5 @@ protected:
 	void OnRefleshView(wxCommandEvent& event);
 	
 private:
-	AppPresenter* m_presenter;
+	AppPresenter m_presenter;
 };

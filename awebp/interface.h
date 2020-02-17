@@ -39,9 +39,6 @@ protected:
 	
 };
 //이미지를 애니메이션 이미지로 만드는 인터페이스
-wxDECLARE_EVENT(EVT_FINISH_ENCODE, wxCommandEvent);//인코딩을 완료했을 때
-wxDECLARE_EVENT(EVT_FAILED_ENCODE, wxCommandEvent);//인코딩을 실패했을 때
-wxDECLARE_EVENT(EVT_ADDED_A_FRAME, wxCommandEvent);//프레임 하나를 처리 완료 했을 때
 //TODO: webp 이외의 이미지 포맷을 지원해보자.
 struct IEncoder
 {

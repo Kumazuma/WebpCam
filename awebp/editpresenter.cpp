@@ -21,12 +21,9 @@ bool EditFramePresenter::GetImage(size_t index, wxImage& OUT image, uint32_t& OU
 	return false;
 }
 
-IImageStore* EditFramePresenter::MoveImageStore()
+IImageStore& EditFramePresenter::GetImageStore()
 {
-	auto& imageStore = m_model.GetImageStore();
-	auto* temp = imageStore;
-	imageStore = nullptr;
-	return temp;
+	return *m_model.GetImageStore();
 }
 
 size_t EditFramePresenter::GetImagesCount()
@@ -37,7 +34,7 @@ size_t EditFramePresenter::GetImagesCount()
 
 bool EditFramePresenter::DeleteFrams(size_t start, size_t end)
 {
-	EditDeleteFrame deleteTool;
+	EditDeleteFrameTool deleteTool;
 	IHistoryItem* historyItem = nullptr;
 	deleteTool.Execute(m_model.GetImageStore(), start, end, historyItem);
 	bool res = historyItem != nullptr;
