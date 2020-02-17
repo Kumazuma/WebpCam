@@ -43,11 +43,11 @@ void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 
 void EditFrame::OnRefreshView(wxCommandEvent& event)
 {
-	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidgets) ;
+	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget) ;
 	widgets->ClearChildren();
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
-		auto* temp = new FrameListItemWidgets(widgets, wxID_ANY, &m_presenter, i);
+		auto* temp = new FrameListItemWidget(widgets, &m_presenter, i);
 		widgets->AddFrameImage(temp);
 	}
 	auto lbHistory = wxDynamicCast(this->FindWindow(wxT("ui_historyBox")), wxListBox);
@@ -64,10 +64,11 @@ void EditFrame::OnRefreshView(wxCommandEvent& event)
 
 void EditFrame::OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event)
 {
-	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidgets);
+	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget);
 	if (widgets != nullptr)
 	{
 		auto selectedItemIndexes = widgets->GetSelections();
+		if (selectedItemIndexes.size() == 0)return;
 		size_t start = selectedItemIndexes.front();
 		size_t end = *selectedItemIndexes.rbegin();
 		m_presenter.DeleteFrams(start, end + 1);
@@ -76,7 +77,7 @@ void EditFrame::OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event)
 
 void EditFrame::OnSelectFramePaint(wxPaintEvent& event)
 {
-	auto widget = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidgets);
+	auto widget = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget);
 	wxBufferedPaintDC dc(wxDynamicCast(event.GetEventObject(), wxWindow));
 	DoPaint(dc);
 }
@@ -106,7 +107,7 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 {
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
-		auto* temp = new FrameListItemWidgets(ui_frameList,  wxID_ANY, &m_presenter, i);
+		auto* temp = new FrameListItemWidget(ui_frameList, &m_presenter, i);
 		ui_frameList->AddFrameImage(temp);
 	}
 }

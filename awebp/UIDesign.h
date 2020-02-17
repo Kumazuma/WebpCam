@@ -79,7 +79,7 @@ class UIEditForm : public wxPanel
 	private:
 
 	protected:
-		FrameListWidgets* ui_frameList;
+		FrameListWidget* ui_frameList;
 		wxPanel* m_panel1;
 		wxPanel* m_panel2;
 		wxButton* m_button3;
