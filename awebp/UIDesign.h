@@ -162,8 +162,7 @@ class UIResizeDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticText6;
 		wxSpinCtrl* m_spinCtrl3;
-		wxStaticText* m_staticText7;
-		wxSpinCtrl* m_spinCtrl4;
+		wxStaticText* m_staticText9;
 		wxStdDialogButtonSizer* m_sdbSizer1;
 		wxButton* m_sdbSizer1OK;
 		wxButton* m_sdbSizer1Cancel;

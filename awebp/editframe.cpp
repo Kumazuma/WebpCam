@@ -81,22 +81,20 @@ void EditFrame::OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event)
 void EditFrame::OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event)
 {
 	UIResizeDialog* dialog = new UIResizeDialog(this);
-	auto ui_width = wxDynamicCast(dialog->FindWindowByName(wxT("ui_width")), wxSpinCtrl);
-	auto ui_height = wxDynamicCast(dialog->FindWindowByName(wxT("ui_height")), wxSpinCtrl);
+	auto ui_scale = wxDynamicCast(dialog->FindWindowByName(wxT("ui_scale")), wxSpinCtrl);
 	auto imageSize = m_presenter.GetImageSize();
-	ui_width->SetValue(imageSize.GetWidth());
-	ui_height->SetValue(imageSize.GetHeight());
 	if (dialog->ShowModal() == wxID_OK)
 	{
-		wxSize resize(
-			ui_width->GetValue(),
-			ui_height->GetValue()
-		);
-		//같으면 리사이즈 할 필요가 없다.
-		if (resize == imageSize)
+		auto scale = ui_scale->GetValue();
+		if (scale == 100)
 		{
 			return;
 		}
+		wxSize resize(
+			imageSize.GetWidth() * float(scale),
+			imageSize.GetHeight() * float(scale));
+		//같으면 리사이즈 할 필요가 없다.
+		
 		m_presenter.ResizeImage(resize);
 	}
 	delete dialog;

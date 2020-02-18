@@ -5,15 +5,15 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include <wx/wfstream.h>
-#include <wx/tarstrm.h>
+#include <wx/zipstrm.h>
 #include <wx/msgqueue.h>
 class FileSaveThread : public wxThreadHelper
 {
-	wxTarOutputStream& m_store;
+	wxZipOutputStream& m_store;
 	wxMessageQueue<std::pair<wxImage*, uint32_t>>& m_mqueue;
 public:
 	FileSaveThread(
-		wxTarOutputStream& store,
+		wxZipOutputStream& store,
 		wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue);
 protected:
 	void* Entry() override;
@@ -35,13 +35,13 @@ private:
 	FileSaveThread m_backgroundThread;
 	wxString m_fileName;
 	wxFileOutputStream m_fileOStream;
-	wxTarOutputStream m_taroutputStream;
+	wxZipOutputStream m_zipOutputStream;
 };
 class FileImageStore : public IImageStore
 {
 private:
-	std::vector<std::pair<wxTarEntry*, uint32_t>> m_store;
-	wxTarInputStream m_tarInputStream;
+	std::vector<std::pair<wxZipEntry*, uint32_t>> m_store;
+	wxZipInputStream m_zipInputStream;
 	wxFileInputStream m_fileIStream;
 	uint32_t m_imageHeight;
 	uint32_t m_imageWidth;

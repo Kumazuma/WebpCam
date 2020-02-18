@@ -254,28 +254,22 @@ UIResizeDialog::UIResizeDialog( wxWindow* parent, wxWindowID id, const wxString&
 	wxBoxSizer* bSizer10;
 	bSizer10 = new wxBoxSizer( wxVERTICAL );
 
-	wxFlexGridSizer* fgSizer2;
-	fgSizer2 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer2->AddGrowableCol( 1 );
-	fgSizer2->SetFlexibleDirection( wxBOTH );
-	fgSizer2->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
+	wxBoxSizer* bSizer11;
+	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("width"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("Scale to"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
-	fgSizer2->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	bSizer11->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 
-	m_spinCtrl3 = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999, 0, wxT("ui_width") );
-	fgSizer2->Add( m_spinCtrl3, 0, wxALL|wxEXPAND, 5 );
+	m_spinCtrl3 = new wxSpinCtrl( this, wxID_ANY, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 50, 200, 0, wxT("ui_scale") );
+	bSizer11->Add( m_spinCtrl3, 1, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
 
-	m_staticText7 = new wxStaticText( this, wxID_ANY, wxT("height"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText7->Wrap( -1 );
-	fgSizer2->Add( m_staticText7, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
-
-	m_spinCtrl4 = new wxSpinCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999, 0, wxT("ui_height") );
-	fgSizer2->Add( m_spinCtrl4, 0, wxALL|wxEXPAND, 5 );
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("%"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	bSizer11->Add( m_staticText9, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 
-	bSizer10->Add( fgSizer2, 1, wxEXPAND, 5 );
+	bSizer10->Add( bSizer11, 1, wxEXPAND, 5 );
 
 	m_sdbSizer1 = new wxStdDialogButtonSizer();
 	m_sdbSizer1OK = new wxButton( this, wxID_OK );

@@ -187,6 +187,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="temporalfileimagestore.h" />
     <ClInclude Include="UIDesign.h" />
+    <ClInclude Include="webmencoder.h" />
     <ClInclude Include="webpencoder.h" />
   </ItemGroup>
   <ItemGroup>

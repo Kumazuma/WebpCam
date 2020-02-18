@@ -155,6 +155,9 @@
     <ClInclude Include="encoderview.h">
       <Filter>헤더 파일\encode</Filter>
     </ClInclude>
+    <ClInclude Include="webmencoder.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
