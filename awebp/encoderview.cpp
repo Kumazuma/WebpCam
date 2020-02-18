@@ -8,15 +8,15 @@ EncodingProgressDialog::EncodingProgressDialog(wxWindow* parent, IImageStore& st
 {
 	Center();
 	auto sizer = new wxBoxSizer(wxVERTICAL);
-	ui_staticText = new wxStaticText(this, wxID_ANY, wxT(""));
+	ui_staticText = new wxStaticText(this, wxID_ANY, wxT("0/0(0%)"));
 	ui_gauge = new wxGauge(this, wxID_ANY, m_presenter.GetImagesCount());
 	
 	sizer->Add(ui_staticText, 0, wxALL | wxEXPAND);
 	sizer->Add(ui_gauge, 0, wxALL|wxEXPAND);
-
 	SetSizer(sizer);
 	Layout();
-
+	FitInside();
+	SetSize(GetBestSize());
 	m_presenter.Bind(EVT_RefreshView, & EncodingProgressDialog::OnRefreshView, this);
 	wxFileDialog saveFileDialog(this, wxT("Save Anim File"), "", "",
 		m_presenter.GetFileFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

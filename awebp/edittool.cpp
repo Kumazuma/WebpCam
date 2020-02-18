@@ -3,9 +3,9 @@
 #include "webp/decode.h"
 void EditDeleteFrameTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
-	auto builder = imageStore->CreateBuilder();
-	auto tempSaveBuilder = imageStore->CreateBuilder();
-	for (int i = 0;i < imageStore->GetSize(); i++)
+	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
+	auto tempSaveBuilder = imageStore->CreateBuilder(imageStore->GetImageSize());
+	for (int i = 0;i < imageStore->GetCount(); i++)
 	{
 		auto item = imageStore->Get(i);
 		auto store = tempSaveBuilder;
@@ -36,12 +36,12 @@ HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
 
 void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 {
-	auto builder = imageStore->CreateBuilder();
-	for (int i = 0; i < imageStore->GetSize(); i++)
+	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
+	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
 		if (i == m_start)
 		{
-			for (int j = 0; j < m_imageStore->GetSize(); j++)
+			for (int j = 0; j < m_imageStore->GetCount(); j++)
 			{
 				auto item = m_imageStore->Get(j);
 				builder->PushBack(item.first, item.second);
@@ -56,8 +56,8 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 
 void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 {
-	auto builder = imageStore->CreateBuilder();
-	for (int i = 0; i < imageStore->GetSize(); i++)
+	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
+	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
 		auto item = imageStore->Get(i);
 		if (i < m_start || m_end <= i)
@@ -72,7 +72,7 @@ void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 wxString HistoryItemDeleteFrame::GetDescription() const
 {
 	wxString description;
-	description << wxT("프레임 삭제(갯수:") << m_imageStore->GetSize() << wxT(")");
+	description << wxT("프레임 삭제(갯수:") << m_imageStore->GetCount() << wxT(")");
 	return description;
 }
 
@@ -83,23 +83,22 @@ EditResizeTool::EditResizeTool(const wxSize& to):
 }
 void EditResizeTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
-	auto builder = imageStore->CreateBuilder();
-	//auto tempSaveBuilder = imageStore->CreateBuilder();
-	for (int i = 0; i < imageStore->GetSize(); i++)
+	auto builder = imageStore->CreateBuilder(m_sizeResizeTo);
+	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
 		
 		auto item = imageStore->Get(i);
 		item.first.Rescale(m_sizeResizeTo.GetWidth(), m_sizeResizeTo.GetHeight());
 		builder->PushBack(item.first, item.second);
 	}
-
-	historyItem = new HistoryItemDeleteFrame(imageStore, start, end);
+	historyItem = new HistoryItemResize(imageStore, m_sizeResizeTo);
 	imageStore = IImageStoreBuilder::BuildStore(builder);
 }
 
 HistoryItemResize::HistoryItemResize(IImageStore* imageStore, const wxSize& resizeTo):
 	m_imageStore(imageStore), m_sizeResizeTo(resizeTo)
 {
+
 }
 
 HistoryItemResize::~HistoryItemResize()

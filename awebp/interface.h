@@ -1,23 +1,17 @@
 ﻿#pragma once
 #include<wx/wx.h>
 struct IImageStoreBuilder;
-//캡처 이미지 데이터를 임시로 보관하는 --인터페이스-- 추상클래스
+//캡처 이미지 데이터를 임시로 보관하는 인터페이스
 struct IImageStore
 {
 	virtual ~IImageStore() {}
 	virtual  std::pair<wxImage, uint32_t> Get(size_t index)  = 0;
-	virtual size_t GetSize() const = 0;
+	virtual size_t GetCount() const = 0;
+	virtual wxSize GetImageSize() const = 0;
 	virtual void Clear() = 0;
 //해당 이미지 저장소와 동일한 빌더를 생성한다.
-	virtual IImageStoreBuilder* CreateBuilder() = 0;
-	size_t size()
-	{
-		return GetSize();
-	}
-	const std::pair<wxImage, uint32_t> operator[] (size_t index) 
-	{
-		return Get(index);
-	}
+	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) = 0;
+
 };
 //
 struct IImageStoreBuilder

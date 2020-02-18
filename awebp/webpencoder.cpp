@@ -53,7 +53,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 {
 	WebPConfigInit(&m_config);
 	WebPAnimEncoderOptionsInit(&m_encoderOption);
-	auto image = imageStore[0].first;
+	auto image = imageStore.Get(0).first;
 	uint32_t width = image.GetWidth();
 	uint32_t height = image.GetHeight();
 	uint32_t timestamp = 0;
@@ -75,7 +75,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_frame.height = height;
 	m_frame.use_argb = 1;
 	WebPPictureAlloc(&m_frame);
-	for(int i = 0 ; i < imageStore.GetSize(); i++)
+	for(int i = 0 ; i < imageStore.GetCount(); i++)
 	{
 		if (m_requestedStop)
 		{
@@ -85,7 +85,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			handler->QueueEvent(event);
 			return;
 		}
-		auto data = imageStore[i];
+		auto data = imageStore.Get(i);
 		auto rgbData = data.first.GetData();
 		WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
 		if(!WebPAnimEncoderAdd(m_encoder, &m_frame, timestamp, &m_config))

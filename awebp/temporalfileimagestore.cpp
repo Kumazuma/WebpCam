@@ -2,8 +2,8 @@
 #include "temporalfileimagestore.h"
 #include <wx/mstream.h>
 FileImageStore::FileImageStore(wxString fileName,
-	decltype(m_imageHeight) height,
-	decltype(m_imageWidth) width, const std::vector<uint32_t> & durations) :
+	decltype(m_imageWidth) width,
+	decltype(m_imageHeight) height, const std::vector<uint32_t> & durations) :
 	m_imageHeight(height),
 	m_imageWidth(width),
 	m_fileName(fileName),
@@ -26,9 +26,9 @@ FileImageStore::~FileImageStore()
 	
 }
 
-IImageStoreBuilder* FileImageStore::CreateBuilder()
+IImageStoreBuilder* FileImageStore::CreateBuilder(const wxSize& imageSize)
 {
-	return new FileImageStoreBuilder();
+	return new FileImageStoreBuilder(imageSize);
 }
 
 std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
@@ -44,6 +44,11 @@ std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 	auto image = wxImage(m_imageWidth, m_imageHeight);
 	image.SetData(buffer);
 	return std::pair<wxImage, uint32_t>(std::move(image), m_store[index].second);
+}
+
+wxSize FileImageStore::GetImageSize() const
+{
+	return wxSize(m_imageWidth, m_imageHeight);
 }
 
 void FileImageStore::Clear()
@@ -95,8 +100,9 @@ void* FileSaveThread::Entry()
 	return nullptr;
 }
 
-FileImageStoreBuilder::FileImageStoreBuilder():
+FileImageStoreBuilder::FileImageStoreBuilder(const wxSize& imageSize):
 	m_fileName(wxFileName::CreateTempFileName(wxT("awebpcap"))),
+	m_imageSize(imageSize),
 	m_fileOStream(m_fileName),
 	m_taroutputStream(m_fileOStream),
 	m_mqueue(),
@@ -118,8 +124,6 @@ FileImageStoreBuilder::~FileImageStoreBuilder()
 
 void FileImageStoreBuilder::PushBack(const wxImage& image, uint32_t duration)
 {
-	m_imageHeight = image.GetHeight();
-	m_imageWidth = image.GetWidth();
 	m_durations.push_back(duration);
 	m_mqueue.Post(std::pair<wxImage*, uint32_t>(new wxImage(image), duration));
 }
@@ -141,5 +145,5 @@ IImageStore* FileImageStoreBuilder::BuildStore()
 	m_fileOStream.Close();
 	m_taroutputStream.UnRef();
 	m_fileOStream.UnRef();
-	return new FileImageStore(m_fileName,m_imageHeight,m_imageWidth, m_durations);
+	return new FileImageStore(m_fileName,m_imageSize.GetWidth(),m_imageSize.GetHeight(), m_durations);
 }

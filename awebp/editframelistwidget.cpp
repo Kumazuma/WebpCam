@@ -85,7 +85,6 @@ void FrameListItemWidget::UnloadData()
 
 inline void FrameListItemWidget::Init()
 {
-
 }
 
 inline wxSize FrameListItemWidget::GetBestSize() const {
@@ -183,7 +182,7 @@ void FrameListWidget::ClearChildren()
 		delete it;
 	}
 	m_items.clear();
-	this->Refresh(false);
+	this->Refresh(true);
 }
 
 
@@ -221,8 +220,8 @@ void FrameListWidget::AlignItems()
 		height += size.GetHeight();
 	}
 	SetVirtualSize(DoGetBestSize());
-	UpdateItemsImageLoad();
-	this->PostSizeEventToParent();
+	//UpdateItemsImageLoad();
+	//this->PostSizeEventToParent();
 }
 void FrameListWidget::OnScrolledEvent(wxScrollWinEvent& event)
 {

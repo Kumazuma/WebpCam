@@ -2,7 +2,8 @@
 #include "editpresenter.h"
 #include "edittool.h"
 #include "event.h"
-EditFramePresenter::EditFramePresenter(wxWindow* parent, IImageStore* imageStore):
+
+EditFramePresenter::EditFramePresenter(wxWindow* parent, IImageStore* imageStore, const wxSize& imageSize):
 	m_model(imageStore)
 {
 	this->SetNextHandler(parent);
@@ -11,7 +12,7 @@ EditFramePresenter::EditFramePresenter(wxWindow* parent, IImageStore* imageStore
 bool EditFramePresenter::GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration)
 {
 	auto imageStore = m_model.GetImageStore();
-	if (index < imageStore->GetSize())
+	if (index < imageStore->GetCount())
 	{
 		auto item = imageStore->Get(index);
 		image = item.first;
@@ -29,10 +30,27 @@ IImageStore& EditFramePresenter::GetImageStore()
 size_t EditFramePresenter::GetImagesCount()
 {
 	auto& imageStore = m_model.GetImageStore();
-	return imageStore->GetSize();
+	return imageStore->GetCount();
 }
-
-bool EditFramePresenter::DeleteFrams(size_t start, size_t end)
+void EditFramePresenter::AddHistoryItem(IHistoryItem* historyItem)
+{
+	//커서가 현재 히스토리의 전체 사이즈보다 작다면, 현재 커서 이후의 로그는 전부 날려야 한다.
+	int cursor = m_model.GetEditHistoryCursor() + 1;
+	size_t count = m_model.GetEditHistory().size();
+	auto& history = m_model.GetEditHistory();
+	if (cursor < count)
+	{
+		auto start = history.begin() + cursor;
+		for (auto it = start; it != history.end(); it++)
+		{
+			delete* it;
+		}
+		history.erase(start, history.end());
+	}
+	m_model.SetEditHistoryCursor(cursor);
+	history.push_back(historyItem);
+}
+bool EditFramePresenter::DeleteFrame(size_t start, size_t end)
 {
 	EditDeleteFrameTool deleteTool;
 	IHistoryItem* historyItem = nullptr;
@@ -40,21 +58,22 @@ bool EditFramePresenter::DeleteFrams(size_t start, size_t end)
 	bool res = historyItem != nullptr;
 	if (res)
 	{
-		//커서가 현재 히스토리의 전체 사이즈보다 작다면, 현재 커서 이후의 로그는 전부 날려야 한다.
-		int cursor = m_model.GetEditHistoryCursor() + 1;
-		size_t count = m_model.GetEditHistory().size();
-		auto& history = m_model.GetEditHistory();
-		if (cursor < count)
-		{
-			auto start = history.begin() + cursor ;
-			for (auto it = start; it != history.end(); it++)
-			{
-				delete* it;
-			}
-			history.erase(start, history.end());
-		}
-		m_model.SetEditHistoryCursor(cursor);
-		history.push_back(historyItem);
+		AddHistoryItem(historyItem);
+	}
+
+	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	return res;
+}
+
+bool EditFramePresenter::ResizeImage(const wxSize& reImageSize)
+{
+	EditResizeTool resizeTool(reImageSize);
+	IHistoryItem* historyItem = nullptr;
+	resizeTool.Execute(m_model.GetImageStore(), 0, 0, historyItem);
+	bool res = historyItem != nullptr;
+	if (res)
+	{
+		AddHistoryItem(historyItem);
 	}
 
 	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));

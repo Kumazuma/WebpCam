@@ -12,13 +12,14 @@ private:
 	EditForm* ui_editForm;
 	std::optional<size_t> m_lastSelectedIndex;
 public:
-	EditFrame(IImageStore* imageStore);
+	EditFrame(IImageStore* imageStore,const wxSize& imageSize);
 	virtual ~EditFrame();
 protected:
 	void DoPaint(wxDC& dc);
 	void OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event);
 	void OnRefreshView(wxCommandEvent& event);
 	void OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event);
+	void OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event);
 	void OnSelectFramePaint(wxPaintEvent& event);
 	void OnListItemSelected(wxCommandEvent& event);
 	void OnRbarBtnUndo(wxRibbonButtonBarEvent& event);

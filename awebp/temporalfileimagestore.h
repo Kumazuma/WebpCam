@@ -21,7 +21,7 @@ protected:
 class FileImageStoreBuilder : public IImageStoreBuilder
 {
 public:
-	FileImageStoreBuilder();
+	FileImageStoreBuilder(const wxSize& imageSize);
 	~FileImageStoreBuilder();
 	virtual void PushBack(const wxImage& image, uint32_t duration) override;
 	virtual size_t GetSize() const override;
@@ -29,8 +29,7 @@ protected:
 	virtual IImageStore* BuildStore() override;
 	
 private:
-	uint32_t m_imageHeight;
-	uint32_t m_imageWidth;
+	wxSize m_imageSize;
 	std::vector<uint32_t> m_durations;
 	wxMessageQueue<std::pair<wxImage*, uint32_t>> m_mqueue;
 	FileSaveThread m_backgroundThread;
@@ -49,16 +48,17 @@ private:
 	wxString m_fileName;
 public:
 	FileImageStore(wxString fileName,
+		decltype(m_imageWidth)width ,
 		decltype(m_imageHeight) height,
-		decltype(m_imageWidth) width, 
 		const std::vector<uint32_t> & durations);
 	virtual ~FileImageStore();
 	
-	virtual IImageStoreBuilder* CreateBuilder();
+	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
-	virtual size_t GetSize() const override
+	virtual size_t GetCount() const override
 	{
 		return m_store.size();
 	}
+	virtual wxSize GetImageSize() const override;
 	virtual void Clear() override;
 }; 

@@ -25,6 +25,12 @@
     <Filter Include="헤더 파일\edit">
       <UniqueIdentifier>{6a73c487-806f-4a9f-a5f9-3dae28cb1d7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\encode">
+      <UniqueIdentifier>{96b3343a-b47c-4379-bdba-990df1dc2d5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\encode">
+      <UniqueIdentifier>{857bd71c-1624-4715-a7ba-20bf5b8faa4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp">
@@ -49,12 +55,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="frame.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="EncorderPresenter.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="encoderview.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="temporalfileimagestore.cpp">
@@ -83,6 +83,12 @@
     </ClCompile>
     <ClCompile Include="cachedimagestore.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="encoderview.cpp">
+      <Filter>소스 파일\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="EncorderPresenter.cpp">
+      <Filter>소스 파일\encode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,12 +122,6 @@
     <ClInclude Include="UIDesign.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="EncorderPresenter.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="encoderview.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="editframe.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
@@ -148,6 +148,12 @@
     </ClInclude>
     <ClInclude Include="cachedimagestore.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EncorderPresenter.h">
+      <Filter>헤더 파일\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="encoderview.h">
+      <Filter>헤더 파일\encode</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,10 @@
 #include "interface.h"
 class EditFrameModel
 {
+private:
+	IImageStore* m_imageStore;
+	wxVector<IHistoryItem*> m_editHistory;
+	int m_editHistoryCursor;
 public:
 	EditFrameModel(IImageStore* imageStore);
 	~EditFrameModel();
@@ -16,8 +20,5 @@ public:
 	int GetEditHistoryCursor() { return m_editHistoryCursor; }
 	void SetEditHistoryCursor(int val) { m_editHistoryCursor = val; }
 
-private:
-	IImageStore* m_imageStore;
-	wxVector<IHistoryItem*> m_editHistory;
-	int m_editHistoryCursor;
+
 };
