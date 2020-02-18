@@ -8,8 +8,10 @@ struct IImageStore
 	virtual  std::pair<wxImage, uint32_t> Get(size_t index)  = 0;
 	virtual size_t GetCount() const = 0;
 	virtual wxSize GetImageSize() const = 0;
-	
 	virtual void Clear() = 0;
+//부가적인 기능
+	virtual bool IsSupportedRemoveImages() { return false; }
+	virtual IImageStore* RemoveImages(size_t from, size_t to) { return nullptr; }
 
 //해당 이미지 저장소와 동일한 빌더를 생성한다.
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) = 0;

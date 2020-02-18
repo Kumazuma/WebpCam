@@ -3,6 +3,12 @@
 #include "webp/decode.h"
 void EditDeleteFrameTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
+	if (imageStore->IsSupportedRemoveImages())
+	{
+		auto newStore = imageStore->RemoveImages(start, end);
+		historyItem = new HistoryItemDeleteFrame(newStore, start, end);
+		return;
+	}
 	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
 	auto tempSaveBuilder = imageStore->CreateBuilder(imageStore->GetImageSize());
 	for (int i = 0;i < imageStore->GetCount(); i++)

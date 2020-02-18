@@ -17,7 +17,6 @@ EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	this->Layout();
 }
 
-
 EditFrame::~EditFrame()
 {
 }
