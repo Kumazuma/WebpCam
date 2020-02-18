@@ -95,15 +95,14 @@ void AppPresenter::StartRecording()
 	auto size = recordedRect.GetSize();
 	m_capturer = new GDICapturer();
 
-	m_imageStoreBuilder = new FileImageStoreBuilder(size);
+	
 	if (m_model.IsUsingTemporalFile())
 	{
-		
+		m_imageStoreBuilder = new FileImageStoreBuilder(size);
 	}	
 	else
 	{
-		//TODO: Not yet implement;
-		//m_imageStore = new MemoryImageStore();
+		m_imageStoreBuilder = new FileImageStoreBuilder(size);
 	}
 	m_capturer->BeginCapture(this, recordedRect, (int)m_model.GetFPS());
 	//m_timer->Start((int)m_model.GetFPS()); 
