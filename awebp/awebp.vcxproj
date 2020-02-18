@@ -160,6 +160,7 @@
     <ClCompile Include="event.cpp" />
     <ClCompile Include="frame.cpp" />
     <ClCompile Include="GDICapturer.cpp" />
+    <ClCompile Include="memoryimagestore.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="presenter.cpp" />
     <ClCompile Include="interface.cpp" />

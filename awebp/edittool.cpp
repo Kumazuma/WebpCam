@@ -37,11 +37,20 @@ HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
 void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 {
 	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
+	int j = 0;
+	if (imageStore->GetCount() == 0)
+	{
+		for (j = 0; j < m_imageStore->GetCount(); j++)
+		{
+			auto item = m_imageStore->Get(j);
+			builder->PushBack(item.first, item.second);
+		}
+	}
 	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
 		if (i == m_start)
 		{
-			for (int j = 0; j < m_imageStore->GetCount(); j++)
+			for (j = 0; j < m_imageStore->GetCount(); j++)
 			{
 				auto item = m_imageStore->Get(j);
 				builder->PushBack(item.first, item.second);
@@ -50,6 +59,7 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 		auto item = imageStore->Get(i);
 		builder->PushBack(item.first, item.second);
 	}
+	
 	delete imageStore;
 	imageStore =IImageStoreBuilder::BuildStore(builder);
 }
@@ -110,12 +120,14 @@ void HistoryItemResize::Undo(IImageStore*& imageStore)
 {
 	auto temp = imageStore;
 	imageStore = m_imageStore;
+	m_imageStore = temp;
 }
 
 void HistoryItemResize::Redo(IImageStore*& imageStore)
 {
 	auto temp = imageStore;
 	imageStore = m_imageStore;
+	m_imageStore = temp;
 }
 
 wxString HistoryItemResize::GetDescription() const

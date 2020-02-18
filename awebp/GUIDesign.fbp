@@ -2335,7 +2335,7 @@
             <property name="window_style"></property>
             <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
-                <property name="name">bSizer10</property>
+                <property name="name">bSizer12</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
                 <object class="sizeritem" expanded="1">
@@ -2344,12 +2344,12 @@
                     <property name="proportion">1</property>
                     <object class="wxBoxSizer" expanded="1">
                         <property name="minimum_size"></property>
-                        <property name="name">bSizer11</property>
+                        <property name="name">bSizer13</property>
                         <property name="orient">wxHORIZONTAL</property>
                         <property name="permission">none</property>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT</property>
+                            <property name="flag">wxALL|wxALIGN_CENTER_VERTICAL</property>
                             <property name="proportion">0</property>
                             <object class="wxStaticText" expanded="1">
                                 <property name="BottomDockable">1</property>
@@ -2379,7 +2379,7 @@
                                 <property name="gripper">0</property>
                                 <property name="hidden">0</property>
                                 <property name="id">wxID_ANY</property>
-                                <property name="label">Scale to</property>
+                                <property name="label">Scale To</property>
                                 <property name="markup">0</property>
                                 <property name="max_size"></property>
                                 <property name="maximize_button">0</property>
@@ -2388,7 +2388,7 @@
                                 <property name="minimize_button">0</property>
                                 <property name="minimum_size"></property>
                                 <property name="moveable">1</property>
-                                <property name="name">m_staticText6</property>
+                                <property name="name">m_staticText9</property>
                                 <property name="pane_border">1</property>
                                 <property name="pane_position"></property>
                                 <property name="pane_size"></property>
@@ -2410,8 +2410,8 @@
                         </object>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>
-                            <property name="flag">wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL</property>
-                            <property name="proportion">1</property>
+                            <property name="flag">wxALL</property>
+                            <property name="proportion">0</property>
                             <object class="wxSpinCtrl" expanded="1">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
@@ -2440,8 +2440,8 @@
                                 <property name="gripper">0</property>
                                 <property name="hidden">0</property>
                                 <property name="id">wxID_ANY</property>
-                                <property name="initial">0</property>
-                                <property name="max">200</property>
+                                <property name="initial">100</property>
+                                <property name="max">300</property>
                                 <property name="max_size"></property>
                                 <property name="maximize_button">0</property>
                                 <property name="maximum_size"></property>
@@ -2450,7 +2450,7 @@
                                 <property name="minimize_button">0</property>
                                 <property name="minimum_size"></property>
                                 <property name="moveable">1</property>
-                                <property name="name">m_spinCtrl3</property>
+                                <property name="name">m_spinCtrl4</property>
                                 <property name="pane_border">1</property>
                                 <property name="pane_position"></property>
                                 <property name="pane_size"></property>
@@ -2511,7 +2511,7 @@
                                 <property name="minimize_button">0</property>
                                 <property name="minimum_size"></property>
                                 <property name="moveable">1</property>
-                                <property name="name">m_staticText9</property>
+                                <property name="name">m_staticText10</property>
                                 <property name="pane_border">1</property>
                                 <property name="pane_position"></property>
                                 <property name="pane_size"></property>
@@ -2547,7 +2547,7 @@
                         <property name="Save">0</property>
                         <property name="Yes">0</property>
                         <property name="minimum_size"></property>
-                        <property name="name">m_sdbSizer1</property>
+                        <property name="name">m_sdbSizer2</property>
                         <property name="permission">protected</property>
                     </object>
                 </object>

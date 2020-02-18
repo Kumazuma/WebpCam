@@ -291,6 +291,8 @@ void FrameListWidget::UpdateItemsImageLoad()
 	int viewStartY = viewViewStart.y;
 	
 	int viewEndY = viewStartY + GetSize().GetHeight() / IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2;
+	if (viewEndY <= 0)
+		return;
 	for (int i = 0 ; i <m_items.size() ;i++)
 	{
 		if (viewStartY <= i && i <= viewEndY)

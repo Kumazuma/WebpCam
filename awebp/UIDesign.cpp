@@ -255,39 +255,39 @@ UIResizeDialog::UIResizeDialog( wxWindow* parent, wxWindowID id, const wxString&
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
-	wxBoxSizer* bSizer10;
-	bSizer10 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer12;
+	bSizer12 = new wxBoxSizer( wxVERTICAL );
 
-	wxBoxSizer* bSizer11;
-	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer13;
+	bSizer13 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText6 = new wxStaticText( this, wxID_ANY, wxT("Scale to"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText6->Wrap( -1 );
-	bSizer11->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
-
-	m_spinCtrl3 = new wxSpinCtrl( this, wxID_ANY, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 50, 200, 0, wxT("ui_scale") );
-	bSizer11->Add( m_spinCtrl3, 1, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
-
-	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("%"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9 = new wxStaticText( this, wxID_ANY, wxT("Scale To"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText9->Wrap( -1 );
-	bSizer11->Add( m_staticText9, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizer13->Add( m_staticText9, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_spinCtrl4 = new wxSpinCtrl( this, wxID_ANY, wxT("100"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 50, 300, 100, wxT("ui_scale") );
+	bSizer13->Add( m_spinCtrl4, 0, wxALL, 5 );
+
+	m_staticText10 = new wxStaticText( this, wxID_ANY, wxT("%"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText10->Wrap( -1 );
+	bSizer13->Add( m_staticText10, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
 
-	bSizer10->Add( bSizer11, 1, wxEXPAND, 5 );
+	bSizer12->Add( bSizer13, 1, wxEXPAND, 5 );
 
-	m_sdbSizer1 = new wxStdDialogButtonSizer();
-	m_sdbSizer1OK = new wxButton( this, wxID_OK );
-	m_sdbSizer1->AddButton( m_sdbSizer1OK );
-	m_sdbSizer1Cancel = new wxButton( this, wxID_CANCEL );
-	m_sdbSizer1->AddButton( m_sdbSizer1Cancel );
-	m_sdbSizer1->Realize();
+	m_sdbSizer2 = new wxStdDialogButtonSizer();
+	m_sdbSizer2OK = new wxButton( this, wxID_OK );
+	m_sdbSizer2->AddButton( m_sdbSizer2OK );
+	m_sdbSizer2Cancel = new wxButton( this, wxID_CANCEL );
+	m_sdbSizer2->AddButton( m_sdbSizer2Cancel );
+	m_sdbSizer2->Realize();
 
-	bSizer10->Add( m_sdbSizer1, 1, wxEXPAND, 5 );
+	bSizer12->Add( m_sdbSizer2, 1, wxEXPAND, 5 );
 
 
-	this->SetSizer( bSizer10 );
+	this->SetSizer( bSizer12 );
 	this->Layout();
-	bSizer10->Fit( this );
+	bSizer12->Fit( this );
 
 	this->Centre( wxBOTH );
 }

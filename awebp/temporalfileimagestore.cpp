@@ -91,6 +91,11 @@ FileImageStore::FileImageStore(wxString fileName,
 {
 	auto& tar = m_zipInputStream;
 	auto it = durations.begin();
+	if (tar.Eof() || tar.CanRead() == false || durations.size() ==0)
+	{
+		return;
+	}
+	
 	for (auto entry = tar.GetNextEntry(); entry != nullptr; entry = tar.GetNextEntry())
 	{
 		m_store.push_back(std::pair<wxZipEntry*, uint32_t>(entry, *it));
@@ -112,17 +117,22 @@ IImageStoreBuilder* FileImageStore::CreateBuilder(const wxSize& imageSize)
 
 std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 {
-	auto entry = m_store[index].first;
-	m_zipInputStream.OpenEntry(*entry);
-	uint8_t* buffer = (uint8_t*)malloc(entry->GetSize());
-	wxMemoryOutputStream memStream(buffer, entry->GetSize());
-	m_zipInputStream.Read(memStream);
-	memStream.Close();
-	m_zipInputStream.CloseEntry();
+	if (index < m_store.size())
+	{
+		auto entry = m_store[index].first;
+		m_zipInputStream.OpenEntry(*entry);
+		uint8_t* buffer = (uint8_t*)malloc(entry->GetSize());
+		wxMemoryOutputStream memStream(buffer, entry->GetSize());
+		m_zipInputStream.Read(memStream);
+		memStream.Close();
+		m_zipInputStream.CloseEntry();
 
-	auto image = wxImage(m_imageWidth, m_imageHeight);
-	image.SetData(buffer);
-	return std::pair<wxImage, uint32_t>(std::move(image), m_store[index].second);
+		auto image = wxImage(m_imageWidth, m_imageHeight);
+		image.SetData(buffer);
+
+		return std::pair<wxImage, uint32_t>(std::move(image), m_store[index].second);
+	}
+	return std::pair<wxImage, uint32_t>();
 }
 
 wxSize FileImageStore::GetImageSize() const
@@ -187,7 +197,7 @@ FileImageStoreBuilder::FileImageStoreBuilder(const wxSize& imageSize):
 	m_mqueue(),
 	m_backgroundThread(m_zipOutputStream, m_mqueue)
 {
-	m_zipOutputStream.SetLevel(3);
+	m_zipOutputStream.SetLevel(2);
 	m_backgroundThread.CreateThread();
 	m_backgroundThread.GetThread()->Run();
 }
