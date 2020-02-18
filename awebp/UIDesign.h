@@ -39,6 +39,7 @@
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
 #include <wx/treelist.h>
+#include <wx/gauge.h>
 #include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -143,6 +144,7 @@ class MyFrame3 : public wxFrame
 		wxPanel* m_panel41;
 		wxTreeCtrl* m_treeCtrl1;
 		wxTreeListCtrl* m_treeListCtrl1;
+		wxGauge* m_gauge1;
 
 	public:
 

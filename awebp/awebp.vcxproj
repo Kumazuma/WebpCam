@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="cachedfileimagestore.cpp" />
     <ClCompile Include="cachedimagestore.cpp" />
     <ClCompile Include="editframe.cpp" />
     <ClCompile Include="editframelistwidget.cpp" />
@@ -169,6 +170,7 @@
   <ItemGroup>
     <ClInclude Include="app.h" />
     <ClInclude Include="cachedimagestore.h" />
+    <ClInclude Include="cfimagestore.h" />
     <ClInclude Include="editframe.h" />
     <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="editframemodel.h" />

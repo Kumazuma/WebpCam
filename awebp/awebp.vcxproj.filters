@@ -90,6 +90,9 @@
     <ClCompile Include="EncorderPresenter.cpp">
       <Filter>소스 파일\encode</Filter>
     </ClCompile>
+    <ClCompile Include="cachedfileimagestore.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h">
@@ -156,6 +159,9 @@
       <Filter>헤더 파일\encode</Filter>
     </ClInclude>
     <ClInclude Include="webmencoder.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="cfimagestore.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

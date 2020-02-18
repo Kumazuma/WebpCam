@@ -3,7 +3,7 @@
 #include <wx/dc.h>
 #include "webpencoder.h"
 #include "GDICapturer.h"
-#include "temporalfileimagestore.h"
+#include "cfimagestore.h"
 #include "memoryimagestore.h"
 #include "event.h"
 wxIMPLEMENT_DYNAMIC_CLASS(AppPresenter, wxEvtHandler);
@@ -95,7 +95,7 @@ void AppPresenter::StartRecording()
 	auto size = recordedRect.GetSize();
 	m_capturer = new GDICapturer();
 
-	m_imageStoreBuilder = new FileImageStoreBuilder(size);
+	m_imageStoreBuilder = new CachedImageStorageBuilder(size);
 	if (m_model.IsUsingTemporalFile())
 	{
 		

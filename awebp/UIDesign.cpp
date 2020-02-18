@@ -236,6 +236,10 @@ MyFrame3::MyFrame3( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	bSizer6->Add( m_treeListCtrl1, 1, wxEXPAND | wxALL, 5 );
 
+	m_gauge1 = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
+	m_gauge1->SetValue( 0 );
+	bSizer6->Add( m_gauge1, 0, wxALL, 5 );
+
 
 	this->SetSizer( bSizer6 );
 	this->Layout();
