@@ -3,7 +3,7 @@
 #include "webp/decode.h"
 void EditDeleteFrameTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
-	if (imageStore->IsSupportedRemoveImages())
+	if (imageStore->IsSupportedEdit())
 	{
 		auto newStore = imageStore->RemoveImages(start, end);
 		historyItem = new HistoryItemDeleteFrame(newStore, start, end);
@@ -72,6 +72,12 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 
 void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 {
+	if (imageStore->IsSupportedEdit())
+	{
+		auto newStore = imageStore->RemoveImages(m_start, m_end);
+		m_imageStore = newStore;
+		return;
+	}
 	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
 	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
@@ -97,7 +103,11 @@ EditResizeTool::EditResizeTool(const wxSize& to):
 {
 
 }
-void EditResizeTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
+#include<future>
+void EditResizeTool::Execute(
+	IImageStore*& OUT imageStore, 
+	size_t start, size_t end, 
+	IHistoryItem*& OUT historyItem)
 {
 	auto builder = imageStore->CreateBuilder(m_sizeResizeTo);
 	for (int i = 0; i < imageStore->GetCount(); i++)

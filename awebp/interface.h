@@ -10,8 +10,9 @@ struct IImageStore
 	virtual wxSize GetImageSize() const = 0;
 	virtual void Clear() = 0;
 //부가적인 기능
-	virtual bool IsSupportedRemoveImages() { return false; }
+	virtual bool IsSupportedEdit() { return false; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to) { return nullptr; }
+	virtual bool InsertImages(IImageStore*& store, size_t to) { return false; }
 
 //해당 이미지 저장소와 동일한 빌더를 생성한다.
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) = 0;

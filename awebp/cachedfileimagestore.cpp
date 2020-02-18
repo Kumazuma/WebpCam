@@ -43,7 +43,7 @@ public:
 	virtual size_t GetCount() const;
 	virtual wxSize GetImageSize() const;
 	virtual void Clear() override{  }
-	virtual bool IsSupportedRemoveImages()override { return true; }
+	virtual bool IsSupportedEdit()override { return true; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to);
 };
 CISSaveThread::CISSaveThread(
