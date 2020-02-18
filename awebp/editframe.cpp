@@ -4,9 +4,9 @@
 #include "event.h"
 #include <wx/dcbuffer.h>
 
-EditFrame::EditFrame(IImageStore* imageStore):
+EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
-	m_presenter(this, imageStore)
+	m_presenter(this, imageStore, imageSize)
 {
 	SetIcon(wxICON(AAAAA));
 	m_presenter.Bind(EVT_RefreshView, &EditFrame::OnRefreshView, this);
@@ -46,11 +46,13 @@ void EditFrame::OnRefreshView(wxCommandEvent& event)
 {
 	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget) ;
 	widgets->ClearChildren();
+	widgets->Hide();
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
 		auto* temp = new FrameListItemWidget(widgets, &m_presenter, i);
 		widgets->AddFrameImage(temp);
 	}
+	widgets->Show();
 	auto lbHistory = wxDynamicCast(this->FindWindow(wxT("ui_historyBox")), wxListBox);
 	if (lbHistory != nullptr)
 	{
@@ -72,8 +74,30 @@ void EditFrame::OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event)
 		if (selectedItemIndexes.size() == 0)return;
 		size_t start = selectedItemIndexes.front();
 		size_t end = *selectedItemIndexes.rbegin();
-		m_presenter.DeleteFrams(start, end + 1);
+		m_presenter.DeleteFrame(start, end + 1);
 	}
+}
+
+void EditFrame::OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event)
+{
+	UIResizeDialog* dialog = new UIResizeDialog(this);
+	auto ui_scale = wxDynamicCast(dialog->FindWindowByName(wxT("ui_scale")), wxSpinCtrl);
+	auto imageSize = m_presenter.GetImageSize();
+	if (dialog->ShowModal() == wxID_OK)
+	{
+		auto scale = ui_scale->GetValue();
+		if (scale == 100)
+		{
+			return;
+		}
+		wxSize resize(
+			imageSize.GetWidth() * float(scale),
+			imageSize.GetHeight() * float(scale));
+		//같으면 리사이즈 할 필요가 없다.
+		
+		m_presenter.ResizeImage(resize);
+	}
+	delete dialog;
 }
 
 void EditFrame::OnSelectFramePaint(wxPaintEvent& event)
@@ -106,16 +130,19 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	UIEditForm(parent),
 	m_presenter(presenter)
 {
+	ui_frameList->Hide();
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
 		auto* temp = new FrameListItemWidget(ui_frameList, &m_presenter, i);
 		ui_frameList->AddFrameImage(temp);
 	}
+	ui_frameList->Show();
 }
 
 wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFile)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_UNDO, EditFrame::OnRbarBtnUndo)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_REDO, EditFrame::OnRbarBtnRedo)
+EVT_RIBBONTOOLBAR_CLICKED(ID_RESIZE_FRAME, EditFrame::OnRbarBtnResizeFrames)
 EVT_RIBBONTOOLBAR_CLICKED(wxID_DELETE, EditFrame::OnRbarBtnDeleteFrames)
 wxEND_EVENT_TABLE()

@@ -36,4 +36,5 @@ protected:
 	
 private:
 	AppPresenter m_presenter;
+	wxCaret* m_caret;
 };

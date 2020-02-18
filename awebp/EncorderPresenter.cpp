@@ -68,8 +68,6 @@ void EncoderPresenter::StopEncode()
 	if (m_encoder != nullptr)
 	{
 		m_encoder->StopEncode();
-		delete m_encoder;
-		m_encoder = nullptr;
 	}
 	if (m_threadHelper != nullptr)
 	{
@@ -78,7 +76,8 @@ void EncoderPresenter::StopEncode()
 		delete m_threadHelper;
 		m_threadHelper = nullptr;
 	}
-	
+	delete m_encoder;
+	m_encoder = nullptr;
 }
 
 void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
@@ -90,7 +89,7 @@ void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
 
 void EncoderPresenter::OnFinishEncode(wxCommandEvent& event)
 {
-	m_progress = m_imageStore.GetSize();
+	m_progress = m_imageStore.GetCount();
 	wxCommandEvent* e = new wxCommandEvent(EVT_RefreshView);
 	this->QueueEvent(e);
 }

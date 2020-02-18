@@ -53,6 +53,7 @@ private:
     wxBitmap m_bitmap;
     size_t m_duration;
     bool m_isSelected;
+    bool m_isShown;
     EditFramePresenter* m_presenter;
     wxWindow* m_parent;
     size_t m_index;
@@ -64,9 +65,11 @@ public:
     bool IsSelected() { return m_isSelected; }
     void ItemSelect();
     void ItemUnselect();
+    
     FrameListItemWidget(wxWindow* parent,
         EditFramePresenter* presenter, size_t index);
     ~FrameListItemWidget();
+
     void LoadData();
     void UnloadData();
     wxSize GetBestSize() const;

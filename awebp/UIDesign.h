@@ -39,11 +39,13 @@
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
 #include <wx/treelist.h>
+#include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
 #define ID_NEW_CAPTURE 1000
 #define ID_SAVE_FILE 1001
+#define ID_RESIZE_FRAME 1002
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame
@@ -147,6 +149,28 @@ class MyFrame3 : public wxFrame
 		MyFrame3( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MyFrame3();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class UIResizeDialog
+///////////////////////////////////////////////////////////////////////////////
+class UIResizeDialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText6;
+		wxSpinCtrl* m_spinCtrl3;
+		wxStaticText* m_staticText9;
+		wxStdDialogButtonSizer* m_sdbSizer1;
+		wxButton* m_sdbSizer1OK;
+		wxButton* m_sdbSizer1Cancel;
+
+	public:
+
+		UIResizeDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Image"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
+		~UIResizeDialog();
 
 };
 

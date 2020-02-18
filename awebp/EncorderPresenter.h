@@ -18,10 +18,11 @@ public:
 	EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore);
 	
 	~EncoderPresenter();
-	int GetImagesCount() { return m_imageStore.GetSize(); }
+	int GetImagesCount() { return m_imageStore.GetCount(); }
 	int GetEncodeProgress() { return m_progress; }
 	void SetFileFormat(EncodeType type);
 	wxString GetFileFilter();
+	
 	void SaveAnimImage(const wxString& filePath);
 	void StopEncode();
 protected:

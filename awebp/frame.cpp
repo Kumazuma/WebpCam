@@ -5,6 +5,7 @@
 #include "editframe.h"
 #include "event.h"
 #include "resource.h"
+#include <wx/caret.h>
 const auto CAPTURE_REGION_FRAME_STYPE =
 wxCAPTION | wxRESIZE_BORDER | wxSTAY_ON_TOP |
 wxFRAME_SHAPED | wxFRAME_TOOL_WINDOW;
@@ -104,6 +105,7 @@ CommandFrame::CommandFrame(const wxString& title):
 	ui_chkUsingTempFile->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, &CommandFrame::OnChangeChkUsingTemoFile, this);
 	ui_btnStop->Disable();
 	this->Bind(EVT_RefreshView, &CommandFrame::OnRefleshView, this);
+
 }
 CommandFrame::~CommandFrame()
 {
@@ -118,7 +120,7 @@ void CommandFrame::OnClickBtnStart(wxCommandEvent& event)
 void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 {
 	m_presenter.StopRecording();
-	EditFrame* frame = new EditFrame(m_presenter.BuildImageStore());
+	EditFrame* frame = new EditFrame(m_presenter.BuildImageStore(), m_presenter.GetRecordedRect().GetSize());
 	frame->Show();
 	Close();
 }
