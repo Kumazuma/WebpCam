@@ -9,6 +9,7 @@ struct IImageStore
 	virtual size_t GetCount() const = 0;
 	virtual wxSize GetImageSize() const = 0;
 	virtual void Clear() = 0;
+
 //해당 이미지 저장소와 동일한 빌더를 생성한다.
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) = 0;
 

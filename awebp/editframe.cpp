@@ -53,6 +53,7 @@ void EditFrame::OnRefreshView(wxCommandEvent& event)
 		widgets->AddFrameImage(temp);
 	}
 	widgets->Show();
+	widgets->PostSizeEvent();
 	auto lbHistory = wxDynamicCast(this->FindWindow(wxT("ui_historyBox")), wxListBox);
 	if (lbHistory != nullptr)
 	{
@@ -85,14 +86,14 @@ void EditFrame::OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event)
 	auto imageSize = m_presenter.GetImageSize();
 	if (dialog->ShowModal() == wxID_OK)
 	{
-		auto scale = ui_scale->GetValue();
+		auto scale = ui_scale->GetValue() / 100.f;
 		if (scale == 100)
 		{
 			return;
 		}
 		wxSize resize(
-			imageSize.GetWidth() * float(scale),
-			imageSize.GetHeight() * float(scale));
+			imageSize.GetWidth()  * scale,
+			imageSize.GetHeight() * scale);
 		//같으면 리사이즈 할 필요가 없다.
 		
 		m_presenter.ResizeImage(resize);
