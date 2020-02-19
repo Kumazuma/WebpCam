@@ -22,6 +22,11 @@ bool EditFramePresenter::GetImage(size_t index, wxImage& OUT image, uint32_t& OU
 	return false;
 }
 
+std::optional<uint32_t> EditFramePresenter::GetFrameDuration(size_t index)
+{
+	return m_model.GetImageStore()->GetFrameDuration(index);
+}
+
 IImageStore& EditFramePresenter::GetImageStore()
 {
 	return *m_model.GetImageStore();

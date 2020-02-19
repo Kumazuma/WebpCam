@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include<wx/wx.h>
 #include"editframemodel.h"
+#include <optional>
 class EditFramePresenter: public wxEvtHandler
 {
 	
@@ -13,6 +14,7 @@ public:
 	EditFramePresenter():m_model(nullptr) {}
 	EditFramePresenter(wxWindow* parent, IImageStore* imageStore, const wxSize& imageSize);
 	bool GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration);
+	std::optional<uint32_t> GetFrameDuration(size_t index);
 	IImageStore& GetImageStore();
 	size_t GetImagesCount();
 	bool DeleteFrame(size_t start, size_t end);

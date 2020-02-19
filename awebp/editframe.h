@@ -24,6 +24,9 @@ protected:
 	void OnListItemSelected(wxCommandEvent& event);
 	void OnRbarBtnUndo(wxRibbonButtonBarEvent& event);
 	void OnRbarBtnRedo(wxRibbonButtonBarEvent& event);
+	void OnRBarBtnNewCap(wxRibbonButtonBarEvent& event);
+	void OnBtnClickPlay(wxCommandEvent& event);
+	
 };
 class EditForm : public UIEditForm
 {

@@ -63,14 +63,14 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 
-	m_panel2 = new wxPanel( m_panel1, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, wxT("ui_draw") );
-	bSizer2->Add( m_panel2, 1, wxEXPAND | wxALL, 5 );
+	ui_drawWidget = new EditFrameRenderWidget( m_panel1, ID_DRAW_WIDGET, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, wxT("ui_drawWidget") );
+	bSizer2->Add( ui_drawWidget, 1, wxALL|wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_button3 = new wxButton( m_panel1, wxID_ANY, wxT("재생"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer11->Add( m_button3, 0, wxALL, 5 );
+	ui_btnButton = new wxButton( m_panel1, ID_PLAY_BUTTON, wxT("재생"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer11->Add( ui_btnButton, 0, wxALL, 5 );
 
 	m_slider1 = new wxSlider( m_panel1, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
 	bSizer11->Add( m_slider1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
@@ -235,10 +235,6 @@ MyFrame3::MyFrame3( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	m_treeListCtrl1 = new wxTreeListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTL_DEFAULT_STYLE );
 
 	bSizer6->Add( m_treeListCtrl1, 1, wxEXPAND | wxALL, 5 );
-
-	m_gauge1 = new wxGauge( this, wxID_ANY, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
-	m_gauge1->SetValue( 0 );
-	bSizer6->Add( m_gauge1, 0, wxALL, 5 );
 
 
 	this->SetSizer( bSizer6 );

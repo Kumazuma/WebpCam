@@ -3,7 +3,7 @@
 #include "encoderview.h"
 #include "event.h"
 #include <wx/dcbuffer.h>
-
+#include "frame.h"
 EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
 	m_presenter(this, imageStore, imageSize)
@@ -11,7 +11,7 @@ EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	SetIcon(wxICON(AAAAA));
 	m_presenter.Bind(EVT_RefreshView, &EditFrame::OnRefreshView, this);
 	ui_editForm = new EditForm(this, m_presenter);
-	this->FindWindow(wxT("ui_draw"))->Bind(wxEVT_PAINT, &EditFrame::OnSelectFramePaint, this);
+	
 	this->FindWindow(wxT("ui_frameList"))->Bind(wxEVT_LISTBOX, &EditFrame::OnListItemSelected, this);
 	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
 	this->Layout();
@@ -110,9 +110,7 @@ void EditFrame::OnSelectFramePaint(wxPaintEvent& event)
 void EditFrame::OnListItemSelected(wxCommandEvent& event)
 {
 	m_lastSelectedIndex = event.GetSelection();
-	wxClientDC dc(this->FindWindow(wxT("ui_draw")));
-	wxBufferedDC bufferedDC(&dc);
-	DoPaint(bufferedDC);
+	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), EditFrameRenderWidget)->SetSelectImage(m_lastSelectedIndex);
 	//this->FindWindow(wxT("ui_draw"))->Refresh();
 }
 
@@ -126,6 +124,28 @@ void EditFrame::OnRbarBtnRedo(wxRibbonButtonBarEvent& event)
 	m_presenter.Redo();
 }
 
+void EditFrame::OnRBarBtnNewCap(wxRibbonButtonBarEvent& event)
+{
+	auto frame = new CommandFrame(wxT("설정"));
+	frame->Show();
+	Close();
+}
+
+void EditFrame::OnBtnClickPlay(wxCommandEvent& event)
+{
+	auto widget = wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), EditFrameRenderWidget);
+	if (widget != nullptr)
+	{
+		auto index = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->GetSelection();
+		if (index.has_value())
+		{
+			index == 0;
+		}
+		//widget->SetSelectImage(index);
+		widget->PlayAnimImage();
+	}
+}
+
 EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	UIEditForm(parent),
 	m_presenter(presenter)
@@ -137,12 +157,15 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 		ui_frameList->AddFrameImage(temp);
 	}
 	ui_frameList->Show();
+	ui_drawWidget->SetPresenter(&presenter);
 }
 
 wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
+EVT_BUTTON(ID_PLAY_BUTTON, EditFrame::OnBtnClickPlay)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFile)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_UNDO, EditFrame::OnRbarBtnUndo)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_REDO, EditFrame::OnRbarBtnRedo)
+EVT_RIBBONBUTTONBAR_CLICKED(ID_NEW_CAPTURE, EditFrame::OnRBarBtnNewCap)
 EVT_RIBBONTOOLBAR_CLICKED(ID_RESIZE_FRAME, EditFrame::OnRbarBtnResizeFrames)
 EVT_RIBBONTOOLBAR_CLICKED(wxID_DELETE, EditFrame::OnRbarBtnDeleteFrames)
 wxEND_EVENT_TABLE()

@@ -1,6 +1,7 @@
 ﻿#include "wx/wxprec.h"
 #include "cfimagestore.h"
 #include <wx/log.h>
+#include <optional>
 #ifndef __WXMSW__
 #include <unistd.h>
 #endif
@@ -46,6 +47,7 @@ public:
 	virtual bool IsSupportedEdit()override { return true; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to);
 	virtual bool InsertImages(IImageStore*& image, size_t to) override;
+	virtual std::optional<uint32_t> GetFrameDuration(size_t index) override;
 };
 CISSaveThread::CISSaveThread(
 	wxFileOutputStream& fOStream,
@@ -153,8 +155,8 @@ CachedImageStorage::CachedImageStorage(
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	DWORD high = 0;
 	DWORD low = GetFileSize(m_hFile, &high);
-	//if (high == 0 && low == 0)
-	high = 0x1;
+	if (high == 0 && low == 0)
+		low = 0x20000000;
 	if (m_hFile == INVALID_HANDLE_VALUE)
 	{
 		wchar_t* text = nullptr;
@@ -307,4 +309,11 @@ bool CachedImageStorage::InsertImages(IImageStore*& image, size_t to)
 
 	}
 	return false;
+}
+
+std::optional<uint32_t> CachedImageStorage::GetFrameDuration(size_t index)
+{
+	if(m_durations.size() <= index)
+		return std::optional<uint32_t>();
+	return m_durations[index];
 }

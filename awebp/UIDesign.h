@@ -27,9 +27,10 @@
 #include <wx/sizer.h>
 #include <wx/frame.h>
 #include "editframelistwidget.h"
-#include <wx/panel.h>
+#include "editrenderwidget.h"
 #include <wx/button.h>
 #include <wx/slider.h>
+#include <wx/panel.h>
 #include <wx/listbox.h>
 #include <wx/aui/aui.h>
 #include <wx/stattext.h>
@@ -39,7 +40,6 @@
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
 #include <wx/treelist.h>
-#include <wx/gauge.h>
 #include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,8 @@
 #define ID_NEW_CAPTURE 1000
 #define ID_SAVE_FILE 1001
 #define ID_RESIZE_FRAME 1002
+#define ID_DRAW_WIDGET 1003
+#define ID_PLAY_BUTTON 1004
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame
@@ -84,8 +86,8 @@ class UIEditForm : public wxPanel
 	protected:
 		FrameListWidget* ui_frameList;
 		wxPanel* m_panel1;
-		wxPanel* m_panel2;
-		wxButton* m_button3;
+		EditFrameRenderWidget* ui_drawWidget;
+		wxButton* ui_btnButton;
 		wxSlider* m_slider1;
 		wxListBox* m_listBox1;
 
@@ -144,7 +146,6 @@ class MyFrame3 : public wxFrame
 		wxPanel* m_panel41;
 		wxTreeCtrl* m_treeCtrl1;
 		wxTreeListCtrl* m_treeListCtrl1;
-		wxGauge* m_gauge1;
 
 	public:
 
