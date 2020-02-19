@@ -4,6 +4,7 @@
 #include<optional>
 #include"interface.h"
 #include"editpresenter.h"
+#include <wx/dcbuffer.h>
 class FrameListItemWidget;
 class FrameListWidget : public wxScrolledCanvas
 {
@@ -24,10 +25,11 @@ public:
     int AddFrameImage(FrameListItemWidget* item);
     std::vector<size_t> GetSelections();
     std::optional<size_t> GetSelection();
+    void SetSelection(size_t index);
     void ClearChildren();
 protected:
     void DoPaint(wxDC& dc);
-    void DoPaint() { wxClientDC dc(this); DoPaint(dc); }
+    void DoPaint() { wxClientDC dc(this); wxBufferedDC bufferdDC(&dc, GetSize()); DoPaint(bufferdDC); }
     void Init();
     void UpdateItemsImageLoad();
     virtual wxSize DoGetBestSize() const;

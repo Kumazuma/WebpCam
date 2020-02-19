@@ -174,6 +174,24 @@ std::optional<size_t> FrameListWidget::GetSelection()
 	return std::optional<size_t>();
 }
 
+void FrameListWidget::SetSelection(size_t index)
+{
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		if (index == i)
+		{
+			m_items[i]->ItemSelect();
+			Scroll(m_items[i]->GetPosition()/ m_items[i]->GetSize().y);
+		}
+		else
+		{
+			m_items[i]->ItemUnselect();
+		}
+	}
+	UpdateItemsImageLoad();
+	DoPaint();
+}
+
 void FrameListWidget::ClearChildren()
 {
 	//this->DestroyChildren();
@@ -269,6 +287,7 @@ void FrameListWidget::OnSized(wxSizeEvent& event)
 }
 void FrameListWidget::DoPaint(wxDC& dc)
 {
+	dc.Clear();
 	auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 	auto viewRect = wxRect(viewStart, GetSize());
 	for (auto it : m_items)
@@ -282,7 +301,7 @@ void FrameListWidget::DoPaint(wxDC& dc)
 }
 void FrameListWidget::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC dc(this);
+	wxBufferedPaintDC dc(this);
 	DoPaint(dc);
 }
 void FrameListWidget::UpdateItemsImageLoad()

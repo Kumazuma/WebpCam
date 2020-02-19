@@ -26,7 +26,7 @@ protected:
 	void OnRbarBtnRedo(wxRibbonButtonBarEvent& event);
 	void OnRBarBtnNewCap(wxRibbonButtonBarEvent& event);
 	void OnBtnClickPlay(wxCommandEvent& event);
-	
+	void OnAnimProcessAFrame(wxCommandEvent& event);
 };
 class EditForm : public UIEditForm
 {

@@ -2,6 +2,7 @@
 #include "webpencoder.h"
 #include "webp/encode.h"
 #include <wx/wfstream.h>
+#include <wx/mstream.h>
 #include <wx/time.h>
 #include "event.h"
 
@@ -53,9 +54,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 {
 	WebPConfigInit(&m_config);
 	WebPAnimEncoderOptionsInit(&m_encoderOption);
-	auto image = imageStore.Get(0).first;
-	uint32_t width = image.GetWidth();
-	uint32_t height = image.GetHeight();
+	wxSize imgSize = imageStore.GetImageSize();
 	uint32_t timestamp = 0;
 	//WebP Config세팅
 	m_config.quality = 80.f;
@@ -68,11 +67,11 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_encoderOption.kmin = 1;
 	m_encoderOption.kmax = 40;
 	//인코더를 초기화
-	m_encoder = WebPAnimEncoderNew(width, height,&m_encoderOption);
+	m_encoder = WebPAnimEncoderNew(imgSize.GetWidth(), imgSize.GetHeight(),&m_encoderOption);
 	//프레임을 초기화한다
 	WebPPictureInit(&m_frame);
-	m_frame.width = width;
-	m_frame.height = height;
+	m_frame.width = imgSize.GetWidth();
+	m_frame.height = imgSize.GetHeight();
 	m_frame.use_argb = 1;
 	WebPPictureAlloc(&m_frame);
 	for(int i = 0 ; i < imageStore.GetCount(); i++)
@@ -85,9 +84,15 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			handler->QueueEvent(event);
 			return;
 		}
-		auto data = imageStore.Get(i);
-		auto rgbData = data.first.GetData();
+		auto data = imageStore.GetRawData(i);
+
+		auto rgbData = new uint8_t[imgSize.x * imgSize.y * 3];
+		wxMemoryOutputStream stream(rgbData, imgSize.x * imgSize.y * 3);
+		stream.Write(*data.first);
+		stream.Close();
+		delete data.first;
 		WebPPictureImportRGB(&m_frame, rgbData, 3 * m_frame.width);
+		delete[] rgbData;
 		if(!WebPAnimEncoderAdd(m_encoder, &m_frame, timestamp, &m_config))
 		{
 			for (int j = 0; j < sizeof(etypes) / sizeof(etypes[0]); j++)

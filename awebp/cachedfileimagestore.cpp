@@ -41,6 +41,7 @@ public:
 	~CachedImageStorage();
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual  std::pair<wxImage, uint32_t> Get(size_t index);
+	virtual std::pair<wxInputStream*, uint32_t> GetRawData(size_t index);
 	virtual size_t GetCount() const;
 	virtual wxSize GetImageSize() const;
 	virtual void Clear() override{  }
@@ -236,6 +237,14 @@ std::pair<wxImage, uint32_t> CachedImageStorage::Get(size_t index)
 	wxImage image(m_imageSize, mem);
 
 	return std::pair<wxImage, uint32_t>(image,m_durations[index]);
+}
+
+std::pair<wxInputStream*, uint32_t> CachedImageStorage::GetRawData(size_t index)
+{
+	auto s = m_pages[index];
+	wxMemoryInputStream* memIStream = new wxMemoryInputStream(m_mappedFile + s[0], s[1]);
+	wxZlibInputStream* zIStream = new wxZlibInputStream(memIStream);
+	return std::pair<wxInputStream*, uint32_t>(zIStream, m_durations[index]);
 }
 
 size_t CachedImageStorage::GetCount() const

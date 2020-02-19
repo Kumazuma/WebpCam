@@ -6,7 +6,8 @@ struct IImageStoreBuilder;
 struct IImageStore
 {
 	virtual ~IImageStore() {}
-	virtual  std::pair<wxImage, uint32_t> Get(size_t index)  = 0;
+	virtual std::pair<wxImage, uint32_t> Get(size_t index)  = 0;
+	virtual std::pair<wxInputStream*, uint32_t> GetRawData(size_t index) =0;
 	virtual size_t GetCount() const = 0;
 	virtual wxSize GetImageSize() const = 0;
 	virtual void Clear() = 0;

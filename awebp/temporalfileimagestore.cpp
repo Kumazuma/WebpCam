@@ -136,6 +136,11 @@ std::pair<wxImage, uint32_t> FileImageStore::Get(size_t index)
 	return std::pair<wxImage, uint32_t>();
 }
 
+std::pair<wxInputStream*, uint32_t> FileImageStore::GetRawData(size_t index)
+{
+	return std::pair<wxInputStream*, uint32_t>();
+}
+
 wxSize FileImageStore::GetImageSize() const
 {
 	return wxSize(m_imageWidth, m_imageHeight);

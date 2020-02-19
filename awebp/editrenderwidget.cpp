@@ -1,7 +1,7 @@
 ﻿#include "wx/wxprec.h"
 #include "editrenderwidget.h"
 #include <wx/dcbuffer.h>
-
+#include "event.h"
 EditFrameRenderWidget::EditFrameRenderWidget():
 	m_timer(nullptr)
 {
@@ -106,7 +106,9 @@ void EditFrameRenderWidget::ProcessAnim()
 		uint32_t due;
 		wxImage img;
 		m_presenter->GetImage(*m_index,img, due);
-
+		wxCommandEvent* e = new wxCommandEvent(EVT_ANIM_PROCESS_A_FRAME);
+		e->SetInt(*m_index);
+		this->QueueEvent(e);
 		if (img.IsOk())
 		{
 			m_bitmap = img;

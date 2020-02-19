@@ -13,6 +13,7 @@ EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	ui_editForm = new EditForm(this, m_presenter);
 	
 	this->FindWindow(wxT("ui_frameList"))->Bind(wxEVT_LISTBOX, &EditFrame::OnListItemSelected, this);
+	this->FindWindowById(ID_DRAW_WIDGET)->Bind(EVT_ANIM_PROCESS_A_FRAME, &EditFrame::OnAnimProcessAFrame, this);
 	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
 	this->Layout();
 }
@@ -144,6 +145,11 @@ void EditFrame::OnBtnClickPlay(wxCommandEvent& event)
 		//widget->SetSelectImage(index);
 		widget->PlayAnimImage();
 	}
+}
+
+void EditFrame::OnAnimProcessAFrame(wxCommandEvent& event)
+{
+	wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->SetSelection(event.GetSelection());
 }
 
 EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :

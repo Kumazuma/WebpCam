@@ -1,4 +1,4 @@
-#include "wx/wxprec.h"
+﻿#include "wx/wxprec.h"
 #include "GDICapturer.h"
 
 

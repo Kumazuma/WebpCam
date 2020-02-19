@@ -55,6 +55,7 @@ public:
 	
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
+	virtual std::pair<wxInputStream*, uint32_t> GetRawData(size_t index);
 	virtual size_t GetCount() const override
 	{
 		return m_store.size();
