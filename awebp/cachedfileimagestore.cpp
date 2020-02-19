@@ -111,6 +111,10 @@ CachedImageStorageBuilder::~CachedImageStorageBuilder()
 	m_fileOStream.GetFile()->Detach();
 	m_fileOStream.Close();
 	m_fileOStream.UnRef();
+	if (m_fileName.empty() == false)
+	{
+		wxRemoveFile(m_fileName);
+	}
 }
 
 void CachedImageStorageBuilder::PushBack(const wxImage& image, uint32_t duration)
@@ -135,7 +139,9 @@ IImageStore* CachedImageStorageBuilder::BuildStore()
 	m_fileOStream.GetFile()->Detach();
 	m_fileOStream.Close();
 	m_fileOStream.UnRef();
-	return new CachedImageStorage(m_fileName, m_imageSize, m_bytesCounts, m_durations);
+	wxString temp = m_fileName;
+	m_fileName.Clear();
+	return new CachedImageStorage(temp, m_imageSize, m_bytesCounts, m_durations);
 }
 
 CachedImageStorage::CachedImageStorage(
