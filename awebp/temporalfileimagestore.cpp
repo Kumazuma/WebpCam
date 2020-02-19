@@ -5,6 +5,7 @@
 #include "webp/decode.h"
 #include "webp/mux.h"
 #include "webp/demux.h"
+#include <wx/imaggif.h>
 class LibWebp
 {
 public:

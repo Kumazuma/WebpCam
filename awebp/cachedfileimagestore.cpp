@@ -45,6 +45,7 @@ public:
 	virtual void Clear() override{  }
 	virtual bool IsSupportedEdit()override { return true; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to);
+	virtual bool InsertImages(IImageStore*& image, size_t to) override;
 };
 CISSaveThread::CISSaveThread(
 	wxFileOutputStream& fOStream,
@@ -152,8 +153,8 @@ CachedImageStorage::CachedImageStorage(
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	DWORD high = 0;
 	DWORD low = GetFileSize(m_hFile, &high);
-	if (high == 0 && low == 0)
-		high = 0x1;
+	//if (high == 0 && low == 0)
+	high = 0x1;
 	if (m_hFile == INVALID_HANDLE_VALUE)
 	{
 		wchar_t* text = nullptr;
@@ -254,7 +255,7 @@ IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
 	}
 	size_t source = m_pages[from][0];
 	auto lastPage = *m_pages.rbegin();
-	size_t dec = m_pages[to][0] - m_pages[from][0];
+	size_t dec = m_pages[to -1][0] - m_pages[from][0];
 	
 	for (size_t i = to; i < m_pages.size(); i++)
 	{
@@ -267,4 +268,43 @@ IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
 	m_pages.erase(m_pages.begin() + from , m_pages.begin() + to);
 
 	return storage;
+}
+
+bool CachedImageStorage::InsertImages(IImageStore*& image, size_t to)
+{
+	CachedImageStorage* obj = dynamic_cast<CachedImageStorage*>(image);
+	if (obj != nullptr)
+	{
+		auto lastPage = *obj->m_pages.rbegin();
+		size_t objMemSize = lastPage[0] + lastPage[1];
+		size_t endCount = (m_pages.size() - 1) - to;
+		uint8_t* ptr = nullptr;
+		size_t to_offset = 0;
+		if(m_pages.size() != to)
+			to_offset = m_pages[to][0];
+		else if(m_pages.size() != 0)
+			to_offset = m_pages[to- 1][0] + m_pages[to - 1][1];
+		for (auto it = m_pages.rbegin(); it != m_pages.rend() - to; it++)
+		{
+			auto& page = *it;
+			ptr = m_mappedFile + page[0];
+			memcpy(ptr + objMemSize , ptr, page[1]);
+			page[0] += objMemSize;
+		}
+		for (auto& it : obj->m_pages)
+		{
+			it[0] += to_offset;
+		}
+		memcpy(m_mappedFile + to_offset, obj->m_mappedFile, objMemSize);
+		size_t offset = 0;
+		size_t i = 0;
+		m_pages.insert(m_pages.begin() + to, obj->m_pages.begin(), obj->m_pages.end());
+		m_durations.insert(m_durations.begin() + to, obj->m_durations.begin(), obj->m_durations.end());
+		return true;
+	}
+	else
+	{
+
+	}
+	return false;
 }

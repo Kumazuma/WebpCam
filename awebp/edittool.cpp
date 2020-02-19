@@ -42,6 +42,10 @@ HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
 
 void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 {
+	if (imageStore->InsertImages(m_imageStore, m_start))
+	{
+		return;
+	}
 	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
 	int j = 0;
 	if (imageStore->GetCount() == 0)
