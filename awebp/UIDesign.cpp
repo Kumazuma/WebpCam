@@ -33,6 +33,9 @@ UIEditFrame::UIEditFrame( wxWindow* parent, wxWindowID id, const wxString& title
 	m_ribbonToolBar1 = new wxRibbonToolBar( m_ribbonPanel3, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonToolBar1->AddTool( wxID_DELETE, wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxT("선택된 프레임을 제거합니다"));
 	m_ribbonToolBar1->AddTool( ID_RESIZE_FRAME, wxBitmap( wxT("expand(2).png"), wxBITMAP_TYPE_ANY ), wxT("이미지의 크기를 조절합니다"));
+	m_ribbonPanel7 = new wxRibbonPanel( m_ribbonPage1, wxID_ANY, wxT("기타") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
+	m_ribbonButtonBar4 = new wxRibbonButtonBar( m_ribbonPanel7, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_ribbonButtonBar4->AddButton( ID_STORE_WINDOW, wxT("창복구"), wxBitmap( wxT("restore.png"), wxBITMAP_TYPE_ANY ), wxEmptyString);
 	m_ribbonPage3 = new wxRibbonPage( m_ribbonBar1, wxID_ANY, wxT("테스트") , wxNullBitmap , 0 );
 	m_ribbonBar1->Realize();
 
@@ -52,7 +55,7 @@ UIEditFrame::~UIEditFrame()
 UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	m_mgr.SetManagedWindow(this);
-	m_mgr.SetFlags(wxAUI_MGR_ALLOW_ACTIVE_PANE|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_RECTANGLE_HINT|wxAUI_MGR_TRANSPARENT_HINT);
+	m_mgr.SetFlags(wxAUI_MGR_ALLOW_ACTIVE_PANE|wxAUI_MGR_ALLOW_FLOATING|wxAUI_MGR_LIVE_RESIZE|wxAUI_MGR_RECTANGLE_HINT|wxAUI_MGR_TRANSPARENT_HINT);
 
 	ui_frameList = new FrameListWidget( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, wxT("ui_frameList") );
 	m_mgr.AddPane( ui_frameList, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
@@ -82,8 +85,11 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	m_panel1->SetSizer( bSizer2 );
 	m_panel1->Layout();
 	bSizer2->Fit( m_panel1 );
-	m_listBox1 = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0, wxDefaultValidator, wxT("ui_historyBox") );
-	m_mgr.AddPane( m_listBox1, wxAuiPaneInfo() .Right() .CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxSize( 163,107 ) ) );
+	m_customControl3 = new wxSimpleHtmlListBox(this,ID_HISTORY_LIST);
+	m_mgr.AddPane( m_customControl3, wxAuiPaneInfo() .Right() .Caption( wxT("변경 이력") ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
+
+	ui_propertyGrid = new wxPropertyGrid(this, ID_PROPERTY, wxDefaultPosition, wxDefaultSize, wxPG_DEFAULT_STYLE);
+	m_mgr.AddPane( ui_propertyGrid, wxAuiPaneInfo() .Right() .PinButton( true ).Dock().Resizable().FloatingSize( wxSize( 50,63 ) ).MinSize( wxSize( 200,-1 ) ) );
 
 
 	m_mgr.Update();
@@ -290,4 +296,48 @@ UIResizeDialog::UIResizeDialog( wxWindow* parent, wxWindowID id, const wxString&
 
 UIResizeDialog::~UIResizeDialog()
 {
+}
+
+MyFrame4::MyFrame4( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	m_mgr.SetManagedWindow(this);
+	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
+
+	m_panel10 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_mgr.AddPane( m_panel10, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
+
+	wxBoxSizer* bSizer12;
+	bSizer12 = new wxBoxSizer( wxVERTICAL );
+
+	m_ribbonBar3 = new wxRibbonBar( m_panel10, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRIBBON_BAR_DEFAULT_STYLE );
+	m_ribbonBar3->SetArtProvider(new wxRibbonDefaultArtProvider);
+	m_ribbonPage5 = new wxRibbonPage( m_ribbonBar3, wxID_ANY, wxT("MyRibbonPage") , wxNullBitmap , 0 );
+	m_ribbonPanel5 = new wxRibbonPanel( m_ribbonPage5, wxID_ANY, wxT("MyRibbonPanel") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
+	m_ribbonPanel6 = new wxRibbonPanel( m_ribbonPage5, wxID_ANY, wxT("MyRibbonPanel") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
+	m_ribbonBar3->Realize();
+
+	bSizer12->Add( m_ribbonBar3, 1, wxEXPAND, 5 );
+
+
+	m_panel10->SetSizer( bSizer12 );
+	m_panel10->Layout();
+	bSizer12->Fit( m_panel10 );
+	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_mgr.AddPane( m_panel11, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
+
+	m_genericDirCtrl1 = new wxGenericDirCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER, wxEmptyString, 0 );
+
+	m_genericDirCtrl1->ShowHidden( false );
+	m_mgr.AddPane( m_genericDirCtrl1, wxAuiPaneInfo() .Right() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
+
+
+	m_mgr.Update();
+	this->Centre( wxBOTH );
+}
+
+MyFrame4::~MyFrame4()
+{
+	m_mgr.UnInit();
+
 }

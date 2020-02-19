@@ -14,6 +14,7 @@ EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	
 	this->FindWindow(wxT("ui_frameList"))->Bind(wxEVT_LISTBOX, &EditFrame::OnListItemSelected, this);
 	this->FindWindowById(ID_DRAW_WIDGET)->Bind(EVT_ANIM_PROCESS_A_FRAME, &EditFrame::OnAnimProcessAFrame, this);
+	this->FindWindowById(ID_PROPERTY)->Bind(wxEVT_PG_CHANGED, &EditFrame::OnPropertyValueChanged, this);
 	this->GetSizer()->Add(ui_editForm,1,wxEXPAND);
 	this->Layout();
 }
@@ -54,14 +55,32 @@ void EditFrame::OnRefreshView(wxCommandEvent& event)
 	}
 	widgets->Show();
 	widgets->PostSizeEvent();
-	auto lbHistory = wxDynamicCast(this->FindWindow(wxT("ui_historyBox")), wxListBox);
+	auto lbHistory = wxDynamicCast(this->FindWindowById(ID_HISTORY_LIST), wxSimpleHtmlListBox);
 	if (lbHistory != nullptr)
 	{
 		lbHistory->Clear();
 		auto history = m_presenter.GetHistory();
-		for (auto item : history)
+		auto cursor = m_presenter.GetHistoryCursor();
+		for (auto i = 0; i < history.size(); i++)
 		{
-			lbHistory->Append(item->GetDescription(), (void*)item);
+			auto item = history[i];
+			wxString html;
+			wxString format;
+			if (i < cursor)
+			{
+				//TO DO Nothing;
+				format = wxT("%s");
+			}
+			else if (i == cursor)
+			{
+				format = wxT("<strong>%s</strong>");
+			}
+			else if (i > cursor)
+			{
+				format = wxT("<span style='color:#CCC;'>%s</span>");
+			}
+			html = wxString::Format(format, item->GetDescription());
+			lbHistory->Append(html, (void*)item);
 		}
 	}
 }
@@ -112,6 +131,17 @@ void EditFrame::OnListItemSelected(wxCommandEvent& event)
 {
 	m_lastSelectedIndex = event.GetSelection();
 	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), EditFrameRenderWidget)->SetSelectImage(m_lastSelectedIndex);
+	auto progrid = wxDynamicCast(FindWindowById(ID_PROPERTY), wxPropertyGrid);
+	auto t = wxDynamicCast(event.GetEventObject(), FrameListWidget);
+	auto selections = t->GetSelections();
+	auto item = progrid->GetProperty(wxT("PROPERTY_FRAME_DURATION"));
+	item->ChangeFlag(wxPG_PROP_READONLY, true);
+	if(selections.size() == 1)
+	{
+		item->ChangeFlag(wxPG_PROP_READONLY, false);
+		item->SetValue(wxVariant((long)*m_presenter.GetFrameDuration(selections.front())));
+	}
+	
 	//this->FindWindow(wxT("ui_draw"))->Refresh();
 }
 
@@ -123,6 +153,17 @@ void EditFrame::OnRbarBtnUndo(wxRibbonButtonBarEvent& event)
 void EditFrame::OnRbarBtnRedo(wxRibbonButtonBarEvent& event)
 {
 	m_presenter.Redo();
+}
+
+void EditFrame::OnRbarBtnRestoreWindow(wxRibbonButtonBarEvent& event)
+{
+	auto& mgr = ui_editForm->GetAuiManger();
+	auto win = FindWindowById(ID_HISTORY_LIST);
+	auto pane = mgr.GetPane(win);
+	//pane.Right();
+	pane.Dock().Right();
+	mgr.RestorePane(pane);
+	mgr.Update();
 }
 
 void EditFrame::OnRBarBtnNewCap(wxRibbonButtonBarEvent& event)
@@ -140,7 +181,7 @@ void EditFrame::OnBtnClickPlay(wxCommandEvent& event)
 		auto index = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->GetSelection();
 		if (index.has_value())
 		{
-			index == 0;
+			index = 0;
 		}
 		//widget->SetSelectImage(index);
 		widget->PlayAnimImage();
@@ -150,6 +191,15 @@ void EditFrame::OnBtnClickPlay(wxCommandEvent& event)
 void EditFrame::OnAnimProcessAFrame(wxCommandEvent& event)
 {
 	wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->SetSelection(event.GetSelection());
+}
+
+void EditFrame::OnPropertyValueChanged(wxPropertyGridEvent& event)
+{
+	auto res = wxMessageBox(wxT("해당 프레임의 시간을 바꾸시겠습니까?"), wxT("Question"), wxYES_NO | wxICON_QUESTION, this);
+	if (res == wxYES)
+	{
+		event.GetProperty()->GetValue();
+	}
 }
 
 EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
@@ -162,6 +212,22 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 		auto* temp = new FrameListItemWidget(ui_frameList, &m_presenter, i);
 		ui_frameList->AddFrameImage(temp);
 	}
+	wxPGProperty* PROPERTY_IMAGE_SIZE;
+	
+	ui_propertyGrid->Append(new wxPropertyCategory(wxT("Project Information")));
+	ui_propertyGrid->Append(new wxUIntProperty(wxT("프레임 수"), wxT("PROPERTY_FRAMES_COUNT"), presenter.GetImagesCount()))
+		->ChangeFlag(wxPG_PROP_READONLY, true);
+	auto imageSize = presenter.GetImageSize();
+	auto s = wxString::Format(wxT("(%d, %d)"), imageSize.GetWidth(), imageSize.GetHeight());
+	PROPERTY_IMAGE_SIZE = ui_propertyGrid->Append(new wxStringProperty(wxT("이미지 사이즈"), wxT("PROPERTY_IMAGE_SIZE"), s));
+	PROPERTY_IMAGE_SIZE->ChangeFlag(wxPG_PROP_READONLY, true);
+	ui_propertyGrid->AppendIn(PROPERTY_IMAGE_SIZE, new wxUIntProperty(wxT("폭"),wxT("PROPERTY_IMAGE_SIZE_WIDTH"), imageSize.GetWidth()))
+		->ChangeFlag(wxPG_PROP_READONLY, true);
+	ui_propertyGrid->AppendIn(PROPERTY_IMAGE_SIZE, new wxUIntProperty(wxT("높이"), wxT("PROPERTY_IMAGE_SIZE_HEIGHT"), imageSize.GetHeight()))
+		->ChangeFlag(wxPG_PROP_READONLY, true);
+	ui_propertyGrid->Append(new wxPropertyCategory(wxT("Frame Information")));
+	ui_propertyGrid->Append(new wxUIntProperty(wxT("시간(ms)"), wxT("PROPERTY_FRAME_DURATION")));
+
 	ui_frameList->Show();
 	ui_drawWidget->SetPresenter(&presenter);
 }
@@ -172,6 +238,8 @@ EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFile)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_UNDO, EditFrame::OnRbarBtnUndo)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_REDO, EditFrame::OnRbarBtnRedo)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_NEW_CAPTURE, EditFrame::OnRBarBtnNewCap)
+EVT_RIBBONBUTTONBAR_CLICKED(ID_STORE_WINDOW, EditFrame::OnRbarBtnRestoreWindow)
 EVT_RIBBONTOOLBAR_CLICKED(ID_RESIZE_FRAME, EditFrame::OnRbarBtnResizeFrames)
 EVT_RIBBONTOOLBAR_CLICKED(wxID_DELETE, EditFrame::OnRbarBtnDeleteFrames)
+//EVT_PG_CHANGED(ID_PROPERTY, )
 wxEND_EVENT_TABLE()

@@ -111,6 +111,11 @@ FileImageStore::~FileImageStore()
 	
 }
 
+void FileImageStore::SetFrameDuration(size_t index, uint32_t duration)
+{
+	m_store[index].second = duration;
+}
+
 IImageStoreBuilder* FileImageStore::CreateBuilder(const wxSize& imageSize)
 {
 	return new FileImageStoreBuilder(imageSize);

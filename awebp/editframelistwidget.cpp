@@ -88,7 +88,6 @@ inline void FrameListItemWidget::Init()
 }
 
 inline wxSize FrameListItemWidget::GetBestSize() const {
-	// we need to calculate and return the best size of the widget...
 	return wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
 }
 
@@ -203,9 +202,6 @@ void FrameListWidget::ClearChildren()
 	this->Refresh(true);
 }
 
-
-
-
 void FrameListWidget::Init() {
 	long style = this->GetWindowStyle();
 	SetMinSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
@@ -216,7 +212,6 @@ void FrameListWidget::Init() {
 }
 
 wxSize FrameListWidget::DoGetBestSize() const {
-	// we need to calculate and return the best size of the widget...
 	auto vscrollWidth = wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
 	size_t height = 0;
 	for (auto it : m_items)
@@ -238,42 +233,10 @@ void FrameListWidget::AlignItems()
 		height += size.GetHeight();
 	}
 	SetVirtualSize(DoGetBestSize());
-	//UpdateItemsImageLoad();
-	//this->PostSizeEventToParent();
 }
 void FrameListWidget::OnScrolledEvent(wxScrollWinEvent& event)
 {
 	event.Skip();
-	int etypes[] = {
-		wxEVT_SCROLLWIN_BOTTOM,
-		wxEVT_SCROLLWIN_LINEDOWN,
-		wxEVT_SCROLLWIN_LINEUP,
-		wxEVT_SCROLLWIN_PAGEDOWN,
-		wxEVT_SCROLLWIN_PAGEUP,
-		wxEVT_SCROLLWIN_THUMBRELEASE,
-		wxEVT_SCROLLWIN_THUMBTRACK,
-		wxEVT_SCROLLWIN_TOP
-	};
-	wxString typestr[] = {
-		"wxEVT_SCROLLWIN_BOTTOM",
-		"wxEVT_SCROLLWIN_LINEDOWN",
-		"wxEVT_SCROLLWIN_LINEUP",
-		"wxEVT_SCROLLWIN_PAGEDOWN",
-		"wxEVT_SCROLLWIN_PAGEUP",
-		"wxEVT_SCROLLWIN_THUMBRELEASE",
-		"wxEVT_SCROLLWIN_THUMBTRACK",
-		"wxEVT_SCROLLWIN_TOP"
-	};
-	/*auto t = event.GetEventType();
-	for (int i = 0; i < sizeof(etypes) / sizeof(etypes[0]); i++)
-	{
-		if (t == etypes[i])
-		{
-			wxLogGeneric(wxLogLevelValues::wxLOG_Message, typestr[i]);
-			break;
-		}
-	}*/
-
 		 this->CallAfter([this]()
 		{
 			UpdateItemsImageLoad();
@@ -384,6 +347,7 @@ void FrameListWidget::OnMouseLeftUp(wxMouseEvent& event)
 		if (auto selection =this->GetSelection())
 		{
 			wxCommandEvent* event = new wxCommandEvent(wxEVT_LISTBOX);
+			event->SetEventObject(this);
 			event->SetInt(*selection);
 			this->QueueEvent(event);
 		}

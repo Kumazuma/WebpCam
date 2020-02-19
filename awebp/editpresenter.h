@@ -17,6 +17,7 @@ public:
 	std::optional<uint32_t> GetFrameDuration(size_t index);
 	IImageStore& GetImageStore();
 	size_t GetImagesCount();
+	size_t GetHistoryCursor();
 	bool DeleteFrame(size_t start, size_t end);
 	bool ResizeImage(const wxSize& reImageSize);
 	void Undo();

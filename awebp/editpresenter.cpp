@@ -37,6 +37,10 @@ size_t EditFramePresenter::GetImagesCount()
 	auto& imageStore = m_model.GetImageStore();
 	return imageStore->GetCount();
 }
+size_t EditFramePresenter::GetHistoryCursor()
+{
+	return m_model.GetEditHistoryCursor();
+}
 void EditFramePresenter::AddHistoryItem(IHistoryItem* historyItem)
 {
 	//커서가 현재 히스토리의 전체 사이즈보다 작다면, 현재 커서 이후의 로그는 전부 날려야 한다.

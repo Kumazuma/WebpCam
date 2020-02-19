@@ -31,7 +31,9 @@
 #include <wx/button.h>
 #include <wx/slider.h>
 #include <wx/panel.h>
-#include <wx/listbox.h>
+#include <wx/htmllbox.h>
+#include <wx/propgrid/propgrid.h>
+#include <wx/propgrid/advprops.h>
 #include <wx/aui/aui.h>
 #include <wx/stattext.h>
 #include <wx/spinctrl.h>
@@ -41,14 +43,18 @@
 #include <wx/treectrl.h>
 #include <wx/treelist.h>
 #include <wx/dialog.h>
+#include <wx/dirctrl.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
 #define ID_NEW_CAPTURE 1000
 #define ID_SAVE_FILE 1001
 #define ID_RESIZE_FRAME 1002
-#define ID_DRAW_WIDGET 1003
-#define ID_PLAY_BUTTON 1004
+#define ID_STORE_WINDOW 1003
+#define ID_DRAW_WIDGET 1004
+#define ID_PLAY_BUTTON 1005
+#define ID_HISTORY_LIST 1006
+#define ID_PROPERTY 1007
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame
@@ -66,6 +72,8 @@ class UIEditFrame : public wxFrame
 		wxRibbonButtonBar* m_ribbonButtonBar2;
 		wxRibbonPanel* m_ribbonPanel3;
 		wxRibbonToolBar* m_ribbonToolBar1;
+		wxRibbonPanel* m_ribbonPanel7;
+		wxRibbonButtonBar* m_ribbonButtonBar4;
 		wxRibbonPage* m_ribbonPage3;
 
 	public:
@@ -89,7 +97,8 @@ class UIEditForm : public wxPanel
 		EditFrameRenderWidget* ui_drawWidget;
 		wxButton* ui_btnButton;
 		wxSlider* m_slider1;
-		wxListBox* m_listBox1;
+		wxSimpleHtmlListBox* m_customControl3;
+		wxPropertyGrid* ui_propertyGrid;
 
 	public:
 
@@ -174,6 +183,31 @@ class UIResizeDialog : public wxDialog
 
 		UIResizeDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Image"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 		~UIResizeDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MyFrame4
+///////////////////////////////////////////////////////////////////////////////
+class MyFrame4 : public wxFrame
+{
+	private:
+
+	protected:
+		wxPanel* m_panel10;
+		wxRibbonBar* m_ribbonBar3;
+		wxRibbonPage* m_ribbonPage5;
+		wxRibbonPanel* m_ribbonPanel5;
+		wxRibbonPanel* m_ribbonPanel6;
+		wxPanel* m_panel11;
+		wxGenericDirCtrl* m_genericDirCtrl1;
+
+	public:
+
+		MyFrame4( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		wxAuiManager m_mgr;
+
+		~MyFrame4();
 
 };
 

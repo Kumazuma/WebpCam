@@ -6,12 +6,7 @@
 #include <unistd.h>
 #endif
 wxAtomicInt g_p = 0;
-wxString GetNUMBER()
-{
-	auto r = wxString::Format(wxT("./%04d"), g_p);
-	wxAtomicInc(g_p);
-	return r;
-}
+
 class MappedFile
 {
 public:
@@ -49,6 +44,7 @@ public:
 	virtual IImageStore* RemoveImages(size_t from, size_t to);
 	virtual bool InsertImages(IImageStore*& image, size_t to) override;
 	virtual std::optional<uint32_t> GetFrameDuration(size_t index) override;
+	virtual void SetFrameDuration(size_t index, uint32_t duration) override;
 };
 CISSaveThread::CISSaveThread(
 	wxFileOutputStream& fOStream,
@@ -162,8 +158,8 @@ CachedImageStorage::CachedImageStorage(
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	DWORD high = 0;
 	DWORD low = GetFileSize(m_hFile, &high);
-	if (high == 0 && low == 0)
-		low = 0x20000000;
+	//if (high == 0 && low == 0)
+		low |= 0x20000000;
 	if (m_hFile == INVALID_HANDLE_VALUE)
 	{
 		wchar_t* text = nullptr;
@@ -283,7 +279,8 @@ IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
 		memcpy(m_mappedFile + page[0], m_mappedFile + oldOffset, page[1]);
 	}
 	m_pages.erase(m_pages.begin() + from , m_pages.begin() + to);
-
+	auto base = m_durations.begin();
+	m_durations.erase(base + from, base + to);
 	return storage;
 }
 
@@ -331,4 +328,9 @@ std::optional<uint32_t> CachedImageStorage::GetFrameDuration(size_t index)
 	if(m_durations.size() <= index)
 		return std::optional<uint32_t>();
 	return m_durations[index];
+}
+
+void CachedImageStorage::SetFrameDuration(size_t index, uint32_t duration)
+{
+	m_durations[index] = duration;
 }

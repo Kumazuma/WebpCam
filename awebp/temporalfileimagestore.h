@@ -52,7 +52,7 @@ public:
 		decltype(m_imageHeight) height,
 		const std::vector<uint32_t> & durations);
 	virtual ~FileImageStore();
-	
+	virtual void SetFrameDuration(size_t index, uint32_t duration);
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual std::pair<wxImage, uint32_t> Get(size_t index) ;
 	virtual std::pair<wxInputStream*, uint32_t> GetRawData(size_t index);
