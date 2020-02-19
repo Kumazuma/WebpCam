@@ -158,3 +158,6 @@ wxString HistoryItemResize::GetDescription() const
 	return description;
 }
 
+void EditCropImageTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
+{
+}

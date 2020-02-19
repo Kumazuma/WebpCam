@@ -120,6 +120,7 @@ void EditFrameRenderWidget::ProcessAnim()
 
 void EditFrameRenderWidget::DoPaint(wxDC& dc)
 {
+	dc.Clear();
 	if(m_bitmap.IsOk())
 		dc.DrawBitmap(m_bitmap, wxPoint(0, 0));
 }

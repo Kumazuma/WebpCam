@@ -38,7 +38,14 @@ public:
 	virtual void Redo(IImageStore*& imageStore) override;
 	virtual wxString GetDescription() const override;
 };
-
+class EditCropImageTool : public IEditTool
+{
+private:
+	wxRect m_crop;
+public:
+	EditCropImageTool(const wxRect& cropRect) : m_crop(cropRect) {}
+	void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
+};
 class EditSetDurationFrame : public IEditTool
 {
 public:

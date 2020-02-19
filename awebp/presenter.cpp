@@ -64,6 +64,7 @@ AppPresenter::AppPresenter(wxEvtHandler * view):
 AppPresenter::~AppPresenter()
 {
 	m_model.UnlinkPresenter(this);
+	isStop = true;
 	if (m_capturer != nullptr)
 	{
 		delete m_capturer;
