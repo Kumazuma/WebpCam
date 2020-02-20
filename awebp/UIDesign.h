@@ -56,6 +56,14 @@
 #define ID_PLAY_BUTTON 1005
 #define ID_HISTORY_LIST 1006
 #define ID_PROPERTY 1007
+#define ID_SPIN_X 1008
+#define ID_SPIN_Y 1009
+#define ID_SPIN_WIDTH 1010
+#define ID_SPIN_HEIGHT 1011
+#define ID_CHOICE_FPS 1012
+#define ID_BTN_START 1013
+#define ID_BTN_STOP 1014
+#define ID_BTN_CLOSE 1015
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame
@@ -202,6 +210,72 @@ class UIResizeDialog : public wxDialog
 
 		UIResizeDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Resize Image"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE );
 		~UIResizeDialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class TopPannel
+///////////////////////////////////////////////////////////////////////////////
+class TopPannel : public wxPanel
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText18;
+		wxSpinCtrl* ui_spinX;
+		wxStaticText* m_staticText19;
+		wxSpinCtrl* ui_spinY;
+		wxStaticText* m_staticText1;
+		wxSpinCtrl* ui_spinWidth;
+		wxStaticText* m_staticText2;
+		wxSpinCtrl* ui_spinHeight;
+
+	public:
+
+		TopPannel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		~TopPannel();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class BottomPanel
+///////////////////////////////////////////////////////////////////////////////
+class BottomPanel : public wxPanel
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText3;
+		wxChoice* ui_choiceFps;
+		wxButton* ui_btnStart;
+		wxButton* ui_btnStop;
+		wxButton* m_button11;
+
+	public:
+
+		BottomPanel( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( -1,-1 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		~BottomPanel();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MyFrame6
+///////////////////////////////////////////////////////////////////////////////
+class MyFrame6 : public wxFrame
+{
+	private:
+
+	protected:
+		wxPanel* m_panel11;
+		wxButton* m_button10;
+		wxPanel* m_panel12;
+		wxButton* m_button9;
+
+	public:
+
+		MyFrame6( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
+		~MyFrame6();
 
 };
 
