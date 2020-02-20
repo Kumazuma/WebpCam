@@ -2,8 +2,8 @@
 #include "editframe.h"
 #include "encoderview.h"
 #include "event.h"
+#include "captureframe.h"
 #include <wx/dcbuffer.h>
-#include "frame.h"
 EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
 	m_presenter(this, imageStore, imageSize)
@@ -168,7 +168,7 @@ void EditFrame::OnRbarBtnRestoreWindow(wxRibbonButtonBarEvent& event)
 
 void EditFrame::OnRBarBtnNewCap(wxRibbonButtonBarEvent& event)
 {
-	auto frame = new CommandFrame(wxT("설정"));
+	auto frame = new CaptureFrame();
 	frame->Show();
 	Close();
 }
