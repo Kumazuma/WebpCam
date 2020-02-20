@@ -26,9 +26,10 @@
 #include <wx/ribbon/bar.h>
 #include <wx/sizer.h>
 #include <wx/frame.h>
+#include <wx/bmpbuttn.h>
+#include <wx/button.h>
 #include "editframelistwidget.h"
 #include "editrenderwidget.h"
-#include <wx/button.h>
 #include <wx/slider.h>
 #include <wx/panel.h>
 #include <wx/htmllbox.h>
@@ -81,6 +82,24 @@ class UIEditFrame : public wxFrame
 		UIEditFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~UIEditFrame();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class MyFrame5
+///////////////////////////////////////////////////////////////////////////////
+class MyFrame5 : public wxFrame
+{
+	private:
+
+	protected:
+		wxBitmapButton* m_bpButton1;
+
+	public:
+
+		MyFrame5( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
+		~MyFrame5();
 
 };
 

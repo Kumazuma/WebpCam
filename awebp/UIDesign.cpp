@@ -52,6 +52,36 @@ UIEditFrame::~UIEditFrame()
 {
 }
 
+MyFrame5::MyFrame5( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer13;
+	bSizer13 = new wxBoxSizer( wxVERTICAL );
+
+	m_bpButton1 = new wxBitmapButton( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
+
+	m_bpButton1->SetBitmap( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton1->SetBitmapDisabled( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton1->SetBitmapPressed( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record_press.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton1->SetBitmapFocus( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton1->SetBitmapCurrent( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record_over.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton1->SetBitmapPosition( wxRIGHT );
+	m_bpButton1->SetToolTip( wxT("Record") );
+
+	bSizer13->Add( m_bpButton1, 0, wxALL, 5 );
+
+
+	this->SetSizer( bSizer13 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+MyFrame5::~MyFrame5()
+{
+}
+
 UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	m_mgr.SetManagedWindow(this);

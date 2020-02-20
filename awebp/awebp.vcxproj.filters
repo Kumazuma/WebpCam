@@ -99,6 +99,9 @@
     <ClCompile Include="imagwebp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="captureframe.cpp">
+      <Filter>소스 파일\capture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h">
@@ -169,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="cfimagestore.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="captureframe.h">
+      <Filter>헤더 파일\capture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
