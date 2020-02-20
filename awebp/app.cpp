@@ -11,9 +11,8 @@ bool AWebpApp::OnInit()
 	SetProcessDPIAware();
 #endif
 	wxInitAllImageHandlers();
-	ui_mainFrame = new CommandFrame(wxT("TEST2"));
-	ui_mainFrame->Show();
-	this->SetTopWindow(ui_mainFrame);
+	CaptureFrame* frame = new CaptureFrame();
+	this->SetTopWindow(frame);
 	return true;
 }
 

@@ -230,6 +230,7 @@ UIRecordFrame::~UIRecordFrame()
 MyFrame3::MyFrame3( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
 
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxVERTICAL );
@@ -325,6 +326,131 @@ UIResizeDialog::UIResizeDialog( wxWindow* parent, wxWindowID id, const wxString&
 }
 
 UIResizeDialog::~UIResizeDialog()
+{
+}
+
+TopPannel::TopPannel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxBoxSizer* bSizer3;
+	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText18 = new wxStaticText( this, wxID_ANY, wxT("X"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText18->Wrap( -1 );
+	bSizer3->Add( m_staticText18, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+
+	ui_spinX = new wxSpinCtrl( this, ID_SPIN_X, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999, 0 );
+	bSizer3->Add( ui_spinX, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_staticText19 = new wxStaticText( this, wxID_ANY, wxT("Y"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText19->Wrap( -1 );
+	bSizer3->Add( m_staticText19, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+
+	ui_spinY = new wxSpinCtrl( this, ID_SPIN_Y, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999, 0 );
+	bSizer3->Add( ui_spinY, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_staticText1 = new wxStaticText( this, wxID_ANY, wxT("Width"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
+	m_staticText1->Wrap( -1 );
+	bSizer3->Add( m_staticText1, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+
+	ui_spinWidth = new wxSpinCtrl( this, ID_SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxTE_PROCESS_ENTER|wxTAB_TRAVERSAL, 0, 9999, 0 );
+	bSizer3->Add( ui_spinWidth, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("Height"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText2->Wrap( -1 );
+	bSizer3->Add( m_staticText2, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+
+	ui_spinHeight = new wxSpinCtrl( this, ID_SPIN_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxTE_PROCESS_ENTER|wxTAB_TRAVERSAL, 0, 9999, 0 );
+	bSizer3->Add( ui_spinHeight, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+
+
+	this->SetSizer( bSizer3 );
+	this->Layout();
+	bSizer3->Fit( this );
+}
+
+TopPannel::~TopPannel()
+{
+}
+
+BottomPanel::BottomPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxBoxSizer* bSizer15;
+	bSizer15 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText3 = new wxStaticText( this, wxID_ANY, wxT("fps"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText3->Wrap( -1 );
+	bSizer15->Add( m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	wxArrayString ui_choiceFpsChoices;
+	ui_choiceFps = new wxChoice( this, ID_CHOICE_FPS, wxDefaultPosition, wxDefaultSize, ui_choiceFpsChoices, 0|wxTAB_TRAVERSAL );
+	ui_choiceFps->SetSelection( 0 );
+	bSizer15->Add( ui_choiceFps, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+
+	ui_btnStart = new wxButton( this, ID_BTN_START, wxT("Start"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
+	bSizer15->Add( ui_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+
+	ui_btnStop = new wxButton( this, ID_BTN_STOP, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
+	bSizer15->Add( ui_btnStop, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+
+	m_button11 = new wxButton( this, ID_BTN_CLOSE, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer15->Add( m_button11, 0, wxALL, 5 );
+
+
+	this->SetSizer( bSizer15 );
+	this->Layout();
+	bSizer15->Fit( this );
+}
+
+BottomPanel::~BottomPanel()
+{
+}
+
+MyFrame6::MyFrame6( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer16;
+	bSizer16 = new wxBoxSizer( wxVERTICAL );
+
+	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_panel11->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+
+	wxBoxSizer* bSizer18;
+	bSizer18 = new wxBoxSizer( wxVERTICAL );
+
+	m_button10 = new wxButton( m_panel11, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer18->Add( m_button10, 0, wxALL, 5 );
+
+
+	m_panel11->SetSizer( bSizer18 );
+	m_panel11->Layout();
+	bSizer18->Fit( m_panel11 );
+	bSizer16->Add( m_panel11, 0, wxEXPAND | wxALL, 5 );
+
+
+	bSizer16->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_panel12 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer17;
+	bSizer17 = new wxBoxSizer( wxVERTICAL );
+
+	m_button9 = new wxButton( m_panel12, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer17->Add( m_button9, 0, wxALL, 5 );
+
+
+	m_panel12->SetSizer( bSizer17 );
+	m_panel12->Layout();
+	bSizer17->Fit( m_panel12 );
+	bSizer16->Add( m_panel12, 0, wxALL|wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer16 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+}
+
+MyFrame6::~MyFrame6()
 {
 }
 

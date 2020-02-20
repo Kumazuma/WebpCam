@@ -158,7 +158,6 @@
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
     <ClCompile Include="event.cpp" />
-    <ClCompile Include="frame.cpp" />
     <ClCompile Include="GDICapturer.cpp" />
     <ClCompile Include="imagwebp.cpp" />
     <ClCompile Include="memoryimagestore.cpp" />
@@ -182,7 +181,6 @@
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />
     <ClInclude Include="event.h" />
-    <ClInclude Include="frame.h" />
     <ClInclude Include="GDICapturer.h" />
     <ClInclude Include="memoryimagestore.h" />
     <ClInclude Include="model.h" />
