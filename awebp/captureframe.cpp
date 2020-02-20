@@ -62,6 +62,10 @@ void CaptureFrame::CalcSizingRect(const wxPoint& mousePosition)
 			break;
 		}
 	}
+	if (m_sizingState == SizingState::SSNone && mousePosition.y < 36)
+	{
+		m_sizingState = SizingState::SSNSEW;
+	}
 }
 wxCursor CaptureFrame::GetSizingCursor()
 {
@@ -79,6 +83,8 @@ wxCursor CaptureFrame::GetSizingCursor()
 	case SizingState::SSN:
 	case SizingState::SSS:
 		return wxCursor(wxCURSOR_SIZENS);
+	case SizingState::SSNSEW:
+		return wxCursor(wxCURSOR_SIZING);
 	default:
 		return wxCursor(wxCURSOR_ARROW);
 	}

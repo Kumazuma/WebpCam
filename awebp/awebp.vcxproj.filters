@@ -81,9 +81,6 @@
     <ClCompile Include="editrenderwidget.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
-    <ClCompile Include="cachedimagestore.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="encoderview.cpp">
       <Filter>소스 파일\encode</Filter>
     </ClCompile>
@@ -156,9 +153,6 @@
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="cachedimagestore.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="EncorderPresenter.h">

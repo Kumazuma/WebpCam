@@ -11,7 +11,8 @@ enum class SizingState
 	SSNE = SSN | SSE,
 	SSNW = SSN | SSW,
 	SSSE = SSS | SSE,
-	SSSW = SSS | SSW
+	SSSW = SSS | SSW,
+	SSNSEW = SSN|SSS|SSE|SSW
 };
 SizingState& operator |= (SizingState& obj, SizingState state);
 
