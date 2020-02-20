@@ -149,6 +149,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="cachedfileimagestore.cpp" />
     <ClCompile Include="captureframe.cpp" />
+    <ClCompile Include="editcropwidget.cpp" />
     <ClCompile Include="editframe.cpp" />
     <ClCompile Include="editframelistwidget.cpp" />
     <ClCompile Include="editframemodel.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="captureframe.h" />
     <ClInclude Include="cfimagestore.h" />
+    <ClInclude Include="editcropwidget.h" />
     <ClInclude Include="editframe.h" />
     <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="editframemodel.h" />

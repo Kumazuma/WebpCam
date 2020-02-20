@@ -9,7 +9,7 @@ private:
 	EncoderPresenter m_presenter;
 	wxGauge* ui_gauge;
 	wxStaticText* ui_staticText;
-	
+
 public:
 	EncodingProgressDialog(wxWindow* parent, IImageStore& store);
 	~EncodingProgressDialog();

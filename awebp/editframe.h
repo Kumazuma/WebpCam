@@ -30,6 +30,7 @@ protected:
 	void OnBtnClickPlay(wxCommandEvent& event);
 	void OnAnimProcessAFrame(wxCommandEvent& event);
 	void OnPropertyValueChanged(wxPropertyGridEvent& event);
+	void OnRBarBtnCropFrame(wxRibbonToolBarEvent& event);
 };
 class EditForm : public UIEditForm
 {
