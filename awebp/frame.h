@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include "UIDesign.h"
 #include "presenter.h"
+#include "captureframe.h"
 enum WidgetID {
 	BTN_START = 1000,
 	BTN_STOP
@@ -24,7 +25,7 @@ public:
 	CommandFrame(const wxString& title);
 	virtual ~CommandFrame();
 protected:
-	CaptureRegionFrame* ui_regionFrame;
+	CaptureFrame* ui_regionFrame;
 	void OnClickBtnStart(wxCommandEvent& event);
 	void OnClickBtnStop(wxCommandEvent& event);
 	void OnSpinWidth(wxSpinEvent& event);

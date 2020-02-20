@@ -91,7 +91,7 @@ CommandFrame::CommandFrame(const wxString& title):
 	m_presenter(this)
 {
 	SetIcon(wxIcon(wxT("std.ico")));
-	ui_regionFrame = new CaptureRegionFrame(this, m_presenter, wxT("캡처영역"));
+	ui_regionFrame = new CaptureFrame(this, m_presenter);
 	ui_regionFrame->Show();
 	ui_btnStart->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStart, this);
 	ui_btnStop->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &CommandFrame::OnClickBtnStop, this);
@@ -127,18 +127,16 @@ void CommandFrame::OnClickBtnStop(wxCommandEvent& event)
 
 void CommandFrame::OnSpinWidth(wxSpinEvent& event)
 {
-	auto size = ui_regionFrame->GetSize();
-	size.x = event.GetValue();
-	size.x += BORDER_THICKNESS * 2;
-	ui_regionFrame->SetSize(size);
+	auto size = m_presenter.GetRecordedRect();
+	size.width = event.GetValue();
+	ui_regionFrame->SetCapturedRect(size);
 }
 
 void CommandFrame::OnSpinHeigt(wxSpinEvent& event)
 {
-	auto size = ui_regionFrame->GetSize();
-	size.y = event.GetValue();
-	size.y += BOTTOM_HEIGHT * 2 + TOP_HEIGHT;
-	ui_regionFrame->SetSize(size);
+	auto size = m_presenter.GetRecordedRect();
+	size.height = event.GetValue();
+	ui_regionFrame->SetCapturedRect(size);
 }
 
 void CommandFrame::OnChoiceFPS(wxCommandEvent& event)

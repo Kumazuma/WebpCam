@@ -10,12 +10,27 @@ bool operator && (SizingState& obj, SizingState state)
 {
 	return ((uint8_t)obj & (uint8_t)state) != 0;
 }
-CaptureFrame::CaptureFrame() :
-	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP),
+CaptureFrame::CaptureFrame(wxWindow* parent, AppPresenter& presenter) :
+	wxFrame(parent, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP |wxFRAME_SHAPED),
+	m_presenter(presenter),
 	m_sizingState(SizingState::SSNone)
 {
 	Centre();
 	Show();
+	auto rc = GetRect();
+	rc.x += 5;
+	rc.width -= 10;
+	rc.y += 36;
+	rc.height -= 41;
+	m_presenter.SetRecordedRect(rc);
+	wxRegion rg{ wxRect(GetSize()) };
+	auto r = wxRect(GetSize());
+	r.x += 5;
+	r.width -= 10;
+	r.y += 36;
+	r.height -= 41;
+	rg.Subtract(r);
+	SetShape(rg);
 }
 
 wxSize CaptureFrame::CvtCaptureRegionToWindowSize(const wxRect& rc)
@@ -27,7 +42,28 @@ wxRect CaptureFrame::CvtWindowSizeToCaptureRegion(const wxSize& size)
 {
 	return wxRect();
 }
-void CaptureFrame::CalcSizingRect(const wxPoint& mousePosition)
+void CaptureFrame::SetRect(const wxRect& rc)
+{
+	
+	this->SetPosition(rc.GetPosition());
+	this->SetSize(rc.GetSize());
+	wxRect temp = rc;
+	temp.x += 5;
+	temp.width -= 10;
+	temp.y += 36;
+	temp.height -= 41;
+	m_presenter.SetRecordedRect(temp);
+}
+void CaptureFrame::SetCapturedRect(wxRect rc)
+{
+	rc.x -= 5;
+	rc.width += 10;
+	rc.y -= 36;
+	rc.height += 41;
+	SetRect(rc);
+	
+}
+void CaptureFrame::CalcSizingDirection(const wxPoint& mousePosition)
 {
 	//기울기 계산. \방향
 	wxSize size = this->GetClientSize();
@@ -91,7 +127,7 @@ wxCursor CaptureFrame::GetSizingCursor()
 }
 void CaptureFrame::OnMouseLeftDown(wxMouseEvent& event)
 {
-	CalcSizingRect(event.GetPosition());
+	CalcSizingDirection(event.GetPosition());
 	SetCursor(GetSizingCursor());
 	if (m_sizingState != SizingState::SSNone)
 	{
@@ -114,7 +150,7 @@ void CaptureFrame::OnMouseMotion(wxMouseEvent& event)
 	//CalcSizingRect(event.GetPosition());
 	if (!m_prevPosition.has_value())
 	{
-		CalcSizingRect(event.GetPosition());
+		CalcSizingDirection(event.GetPosition());
 		SetCursor(GetSizingCursor());
 	}
 	else
@@ -155,9 +191,39 @@ void CaptureFrame::OnMouseLost(wxMouseCaptureLostEvent& event)
 	}
 }
 
+void CaptureFrame::OnSized(wxSizeEvent& event)
+{
+	auto rc = GetRect();
+	rc.x += 5;
+	rc.width -= 10;
+	rc.y += 36;
+	rc.height -= 41;
+	m_presenter.SetRecordedRect(rc);
+	wxRegion rg{ wxRect(GetSize()) };
+	auto r = wxRect(GetSize());
+	r.x += 5;
+	r.width -= 10;
+	r.y += 36;
+	r.height -= 41;
+	rg.Subtract(r);
+	SetShape(rg);
+}
+
+void CaptureFrame::OnMoved(wxMoveEvent& event)
+{
+	auto rc = GetRect();
+	rc.x += 5;
+	rc.width -= 10;
+	rc.y += 36;
+	rc.height -= 41;
+	m_presenter.SetRecordedRect(rc);
+}
+
 wxBEGIN_EVENT_TABLE(CaptureFrame, wxFrame)
 EVT_LEFT_DOWN(CaptureFrame::OnMouseLeftDown)
 EVT_LEFT_UP(CaptureFrame::OnMouseLeftUp)
 EVT_MOTION(CaptureFrame::OnMouseMotion)
 EVT_MOUSE_CAPTURE_LOST(CaptureFrame::OnMouseLost)
+EVT_SIZE(CaptureFrame::OnSized)
+EVT_MOVE(CaptureFrame::OnMoved)
 wxEND_EVENT_TABLE()
