@@ -10,7 +10,8 @@ namespace Edit
 		wxBitmap m_workArea;
 		float m_scale;
 		wxPoint m_centerPoint;
-		wxMemoryDC* m_memDC;
+		wxSharedPtr<wxMemoryDC> m_memDC;
+		std::optional<wxPoint> m_prevMousePosition;
 	public:
 		virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL) override;
 		EditCropToolWidget();
@@ -28,6 +29,8 @@ namespace Edit
 		void OnMouseLeftUp(wxMouseEvent& event);
 		void OnMouseMotion(wxMouseEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
+		void OnKeyDown(wxKeyEvent& event);
+		void OnKeyUp(wxKeyEvent& event);
 	private:
 		wxDECLARE_DYNAMIC_CLASS(EditCropToolWidget);
 		wxDECLARE_EVENT_TABLE();

@@ -9,6 +9,8 @@ public:
 	
 	bool OnInit() override;
 	int OnExit() override;
+	void KeyDown(wxKeyEvent* event);
+	void KeyUp(wxKeyEvent* event);
 protected:
 	
 };

@@ -19,12 +19,14 @@ void Edit::EditCropToolWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 Edit::EditCropToolWidget::EditCropToolWidget():
 	m_presenter(nullptr)
 {
+
 }
 Edit::EditCropToolWidget::EditCropToolWidget(EditFramePresenter& presenter, wxWindow* parent, wxWindowID id):
-	wxScrolledCanvas(parent, id, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxHSCROLL),
+	wxScrolledCanvas(parent, id, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS|wxVSCROLL|wxHSCROLL),
 	m_presenter(&presenter), m_scale(1), m_centerPoint(0,0)
 {
 	SetScrollRate(1, 1);
+	SetFocus();
 	wxImage image;
 	uint32_t du;
 	m_presenter->GetImage(0, image, du);
@@ -67,7 +69,6 @@ void Edit::EditCropToolWidget::OverDraw(wxGraphicsContext* gc)
 }
 Edit::EditCropToolWidget::~EditCropToolWidget()
 {
-	delete m_memDC;
 }
 
 void Edit::EditCropToolWidget::OverDraw()
@@ -114,7 +115,19 @@ void Edit::EditCropToolWidget::OnMouseLeftUp(wxMouseEvent& event)
 }
 void Edit::EditCropToolWidget::OnMouseMotion(wxMouseEvent& event)
 {
-
+	SetFocus();
+	if (m_prevMousePosition)
+	{
+		wxPoint delta = event.GetPosition() - *m_prevMousePosition;
+		//float dx = delta.x / 5.f;
+		//float dy = delta.y / 5.f;
+		delta = delta / 8;
+		
+		m_prevMousePosition = event.GetPosition();
+		auto s = this->GetViewStart() - delta;
+		AdjustScrollbars();
+		Scroll(s);
+	}
 }
 void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
 {
@@ -143,6 +156,30 @@ void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
 
 	}
 }
+void Edit::EditCropToolWidget::OnKeyDown(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_SPACE)
+	{
+		m_prevMousePosition = event.GetPosition();
+		SetCursor(wxCursor(wxStockCursor::wxCURSOR_CROSS));
+	}
+	else
+	{
+
+	}
+}
+void Edit::EditCropToolWidget::OnKeyUp(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_SPACE)
+	{
+		m_prevMousePosition.reset();
+		SetCursor(wxCursor(wxStockCursor::wxCURSOR_ARROW));
+	}
+	else
+	{
+
+	}
+}
 namespace Edit
 {
 	wxIMPLEMENT_DYNAMIC_CLASS(EditCropToolWidget, wxScrolledCanvas);
@@ -151,6 +188,8 @@ namespace Edit
 		EVT_LEFT_UP(EditCropToolWidget::OnMouseLeftUp)
 		EVT_MOTION(EditCropToolWidget::OnMouseMotion)
 		EVT_MOUSEWHEEL(EditCropToolWidget::OnMouseWheel)
+		EVT_KEY_DOWN(EditCropToolWidget::OnKeyDown)
+		EVT_KEY_UP(EditCropToolWidget::OnKeyUp)
 		EVT_PAINT(EditCropToolWidget::OnPaint)
 		EVT_SIZE(EditCropToolWidget::OnSize)
 		EVT_SCROLLWIN(EditCropToolWidget::OnScrollWinEvent)
