@@ -37,6 +37,9 @@
     <Filter Include="소스 파일\edit\editcropwidget">
       <UniqueIdentifier>{7ed0c3de-e5ce-4744-8e82-c71f0d2adcef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\common">
+      <UniqueIdentifier>{877603a0-6bb9-4978-a09d-eb4d04a71746}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app.cpp">
@@ -110,30 +113,6 @@
     <ClInclude Include="app.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="presenter.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="model.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="interface.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="webpencoder.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="memoryimagestore.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="temporalfileimagestore.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GDICapturer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="UIDesign.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="editframe.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
@@ -149,9 +128,6 @@
     <ClInclude Include="editpresenter.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
-    <ClInclude Include="event.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="editrenderwidget.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
@@ -164,17 +140,44 @@
     <ClInclude Include="encoderview.h">
       <Filter>헤더 파일\encode</Filter>
     </ClInclude>
-    <ClInclude Include="webmencoder.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="cfimagestore.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="captureframe.h">
       <Filter>헤더 파일\capture</Filter>
     </ClInclude>
     <ClInclude Include="editcropwidget.h">
       <Filter>헤더 파일\edit</Filter>
+    </ClInclude>
+    <ClInclude Include="cfimagestore.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="event.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="GDICapturer.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="interface.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="memoryimagestore.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>헤더 파일\capture</Filter>
+    </ClInclude>
+    <ClInclude Include="presenter.h">
+      <Filter>헤더 파일\capture</Filter>
+    </ClInclude>
+    <ClInclude Include="temporalfileimagestore.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="UIDesign.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="webmencoder.h">
+      <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="webpencoder.h">
+      <Filter>헤더 파일\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

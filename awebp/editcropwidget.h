@@ -3,7 +3,7 @@
 #include"editpresenter.h"
 namespace Edit
 {
-	class EditCropToolWidget :public wxControl
+	class EditCropToolWidget :public wxScrolledCanvas
 	{
 	private:
 		EditFramePresenter* m_presenter;
@@ -12,6 +12,7 @@ namespace Edit
 		wxPoint m_centerPoint;
 		wxMemoryDC* m_memDC;
 	public:
+		virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL) override;
 		EditCropToolWidget();
 		~EditCropToolWidget();
 		EditCropToolWidget(EditFramePresenter& presenter, wxWindow* parent, wxWindowID id);
