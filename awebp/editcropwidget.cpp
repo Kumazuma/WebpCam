@@ -2,18 +2,116 @@
 #include "editcropwidget.h"
 #include <wx/dcbuffer.h>
 #include <wx/graphics.h>
+#include <wx/rawbmp.h>
+#ifdef __WXMSW__
+#pragma comment(lib, "D2D1.lib") 
+template<class Interface>
+inline void SafeRelease(
+	Interface*& pInterfaceToRelease
+)
+{
+	if (pInterfaceToRelease != NULL)
+	{
+		pInterfaceToRelease->Release();
+
+		pInterfaceToRelease = NULL;
+	}
+}
+template<typename T>
+decltype(D2D1::SizeU()) ToSizeU(const T& obj)
+{
+	return D2D1::SizeU(obj.x, obj.y);
+}
+
+RECT ToRect(const wxRect& obj)
+{
+	return RECT{ obj.x, obj.y,obj.width - obj.x, obj.height- obj.y };
+}
+#endif
+void Edit::EditCropToolWidget::InitDirect2D()
+{
+#ifdef __WXMSW__
+	D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_factory);
+	InitResource();
+#endif
+}
+
+void Edit::EditCropToolWidget::InitResource()
+{
+#ifdef __WXMSW__
+	float dpi = GetDpiForWindow(this->GetHWND());
+	float a = dpi / 96;
+	auto d2SizeU = ToSizeU(GetClientSize() * a);
+	if (!m_renderTarget)
+	{
+		D2D1_RENDER_TARGET_PROPERTIES dxProperties =
+			D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE,
+				D2D1::PixelFormat(DXGI_FORMAT_R8G8B8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
+		auto propertyWndRenderTarget = D2D1::HwndRenderTargetProperties(
+			GetHWND(), ToSizeU(GetClientSize()));
+		
+		FLOAT dpiX, dpiY;
+		
+		m_factory->CreateHwndRenderTarget(&dxProperties,&propertyWndRenderTarget, &m_renderTarget);
+		m_renderTarget->SetDpi(96, 96);
+		
+	}
+	if (!m_bitmap &&
+		m_backbuffer.IsOk())
+	{
+		
+
+	}
+	if (m_backbuffer.IsOk())
+	{
+		int strip = m_backbuffer.GetWidth() * 4;
+		size_t wxh = m_backbuffer.GetHeight() * m_backbuffer.GetWidth();
+		auto imgData = m_backbuffer.GetData();
+		std::vector<uint8_t> data;
+		data.assign(wxh * 4, 0);
+		D2D1_RECT_U d2Size = D2D1::RectU(0, 0, m_backbuffer.GetWidth(), m_backbuffer.GetHeight());
+		for (size_t i = 0; i < wxh; i++)
+		{
+			data[i * 4] = imgData[i * 3];
+			data[i * 4 + 1] = imgData[i * 3 + 1];
+			data[i * 4 + 2] = imgData[i * 3 + 2];
+			data[i * 4 + 3] = 0x00;
+		}
+		if (m_bitmap)
+		{
+			m_bitmap->CopyFromMemory(&d2Size, data.data(), strip);
+		}
+		else
+		{
+			D2D_SIZE_U d2Size = D2D1::SizeU(m_backbuffer.GetWidth(), m_backbuffer.GetHeight());
+			auto d2BitmapProperty = D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_R8G8B8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
+			m_renderTarget->CreateBitmap(d2Size, data.data(), strip, d2BitmapProperty, &m_bitmap);
+		}
+		
+	}
+#endif
+}
+void Edit::EditCropToolWidget::ReleaseResource()
+{
+#ifdef __WXMSW__
+	SafeRelease(m_renderTarget);
+	SafeRelease(m_bitmap);
+	delete m_clientDC;
+	m_clientDC = nullptr;
+#endif
+}
+void Edit::EditCropToolWidget::ReleaseDirect2D()
+{
+#ifdef __WXMSW__
+	ReleaseResource();
+	SafeRelease(m_factory);
+#endif
+}
 void Edit::EditCropToolWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
 	m_centerPoint.x -= dx;
 	m_centerPoint.y -= dy;
-	if (rect != nullptr)
-	{
-
-		wxClientDC dc(this);
-
-		wxBufferedDC bdc(&dc, GetSize());
-		OverDraw();
-	}
+	OverDraw();
 }
 Edit::EditCropToolWidget::EditCropToolWidget():
 	m_presenter(nullptr)
@@ -24,19 +122,19 @@ Edit::EditCropToolWidget::EditCropToolWidget(EditFramePresenter& presenter, wxWi
 	wxScrolledCanvas(parent, id, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS|wxVSCROLL|wxHSCROLL),
 	m_presenter(&presenter), m_scale(1), m_centerPoint(0,0)
 {
+	InitDirect2D();
 	SetScrollRate(1, 1);
 	SetFocus();
-	wxImage image;
-	uint32_t du;
-	m_presenter->GetImage(0, image, du);
-	SetVirtualSize(image.GetSize());
+	auto imgSize = m_presenter->GetImageSize();
+	SetVirtualSize(imgSize);
+	m_cropArea = m_presenter->GetImageSize();
 	AlwaysShowScrollbars();
 	
 	m_workArea.Create(m_presenter->GetImageSize());
 	m_memDC =new wxMemoryDC(m_workArea);
 	m_memDC->Clear();
-	m_memDC->DrawBitmap(image, 0, 0);
-	
+	DoPaint();
+	OverDraw();
 }
 void Edit::EditCropToolWidget::DoPaint()
 {
@@ -44,7 +142,15 @@ void Edit::EditCropToolWidget::DoPaint()
 	uint32_t du;
 	m_presenter->GetImage(0, image, du);
 	m_memDC->DrawBitmap(image,0,0);
+	m_backbuffer = m_workArea.ConvertToImage();
+	InitResource();
 }
+
+Edit::EditCropToolWidget::~EditCropToolWidget()
+{
+	ReleaseDirect2D();
+}
+#ifndef __WXMSW__
 void Edit::EditCropToolWidget::OverDraw(wxGraphicsContext* gc)
 {
 	if (!m_workArea.IsOk())
@@ -66,10 +172,6 @@ void Edit::EditCropToolWidget::OverDraw(wxGraphicsContext* gc)
 	gc->DrawBitmap(m_workArea, 0, 0 , imageSize.x,  imageSize.y);
 	gc->Flush();
 }
-Edit::EditCropToolWidget::~EditCropToolWidget()
-{
-}
-
 void Edit::EditCropToolWidget::OverDraw()
 {
 	wxClientDC dc(this);
@@ -81,12 +183,6 @@ void Edit::EditCropToolWidget::OverDraw()
 	delete gc;
 
 }
-
-void Edit::EditCropToolWidget::OnScrollWinEvent(wxScrollWinEvent& event)
-{
-	event.Skip();
-	OverDraw();
-}
 void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
 {
 	//여기서는 단순히 작업 영역을 다시 출력만 한다.
@@ -96,12 +192,78 @@ void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
 	wxGraphicsContext* gc = wxGraphicsContext::Create(dc);
 	OverDraw(gc);
 	delete gc;
+}
+#else
+void Edit::EditCropToolWidget::OverDraw()
+{
+	//this->Refresh(true, &GetClientRect());
+	//this->
+	if (!m_renderTarget)
+	{
+		InitResource();
+	}
+	float dpi = GetDpiForWindow(this->GetHWND());
+	float a = dpi / 96;
+	wxSize rc = this->GetClientSize();
+	wxSize imageSize = m_workArea.GetSize();
+	wxPoint viewStart = m_centerPoint;
+	if (imageSize.x * m_scale <= rc.x)
+	{
+		viewStart.x = (imageSize.x * m_scale - rc.x * a) / 2;
+	}
+	if (imageSize.y * m_scale <= rc.y)
+	{
+		viewStart.y = (imageSize.y * m_scale - rc.y * a) / 2;
+	}
+	if (m_bitmap == nullptr)
+	{
+		return;
+	}
+	
+	m_renderTarget->BeginDraw();
+	m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+	auto translation = D2D1::Matrix3x2F::Translation(-viewStart.x , -viewStart.y );
+	auto scale = D2D1::Matrix3x2F::Scale(m_scale , m_scale );
+	m_renderTarget->SetTransform(scale * translation);
+	
+	//m_renderTarget->SetTransform(D2D1::Matrix3x2F::Scale(m_scale, m_scale));
+	m_renderTarget->DrawBitmap(m_bitmap, D2D1::RectF(0, 0, m_bitmap->GetSize().width, m_bitmap->GetSize().height));
+
+	auto res = m_renderTarget->EndDraw();
+	if (res == D2DERR_RECREATE_TARGET)
+	{
+		ReleaseResource();
+	}
+	//m_renderTarget->Flush();
 	
 }
-void Edit::EditCropToolWidget::OnSize(wxSizeEvent& event)
+void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
+{
+	wxPaintDC dc(this);
+	dc.UnRef();
+	OverDraw();
+}
+#endif
+void Edit::EditCropToolWidget::OnScrollWinEvent(wxScrollWinEvent& event)
 {
 	event.Skip();
 	OverDraw();
+}
+
+void Edit::EditCropToolWidget::OnSize(wxSizeEvent& event)
+{
+#ifdef __WXMSW__
+	if (m_renderTarget)
+	{
+		float dpi = GetDpiForWindow(this->GetHWND());
+		float a = dpi / 96;
+		auto d2SizeU = ToSizeU(GetClientSize() * a);
+		m_renderTarget->Resize(d2SizeU);
+	}
+#endif
+	OverDraw();
+	event.Skip();
 }
 void Edit::EditCropToolWidget::OnMouseLeftDown(wxMouseEvent& event)
 {
@@ -126,16 +288,18 @@ void Edit::EditCropToolWidget::OnMouseMotion(wxMouseEvent& event)
 		
 		Scroll(s);
 		OverDraw();
+
 	}
 }
 void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
 {
+	if (event.GetWheelRotation() == 0)
+		return;
+	auto sign = event.GetWheelRotation() / (abs(event.GetWheelRotation()));
 	if (event.ControlDown())
 	{
 		auto style = GetWindowStyle();
-		if (event.GetWheelRotation() == 0)
-			return;
-		auto sign = event.GetWheelRotation() / (abs(event.GetWheelRotation()));
+		
 		auto prevScale = m_scale;
 		m_scale += 0.01f * sign* (event.GetWheelDelta() / 120) * 10;
 		if (m_scale <= 0)
@@ -150,9 +314,25 @@ void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
 		
 		AdjustScrollbars();
 		Scroll(t.x, t.y);
-		OverDraw();
+		
 
 	}
+	else 
+	{
+		auto s = this->GetViewStart();
+		auto t = m_workArea.GetSize();
+		if (event.ShiftDown())
+		{
+			s.x -= sign*(m_scale * t.x) / 20;
+		}
+		else
+		{
+			s.y -= sign * (m_scale * t.y) / 20;
+			
+		}
+		Scroll(s.x, s.y);
+	}
+	OverDraw();
 }
 void Edit::EditCropToolWidget::OnKeyDown(wxKeyEvent& event)
 {
@@ -163,7 +343,6 @@ void Edit::EditCropToolWidget::OnKeyDown(wxKeyEvent& event)
 	}
 	else
 	{
-
 	}
 }
 void Edit::EditCropToolWidget::OnKeyUp(wxKeyEvent& event)
@@ -175,7 +354,6 @@ void Edit::EditCropToolWidget::OnKeyUp(wxKeyEvent& event)
 	}
 	else
 	{
-
 	}
 }
 namespace Edit
