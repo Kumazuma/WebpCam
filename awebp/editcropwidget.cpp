@@ -6,15 +6,14 @@ void Edit::EditCropToolWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
 	m_centerPoint.x -= dx;
 	m_centerPoint.y -= dy;
-	wxClientDC dc(this);
+	if (rect != nullptr)
+	{
 
-	wxBufferedDC bdc(&dc, GetSize());
-	
-	bdc.SetBackground(wxBrush(0xCCCCCC));
-	bdc.Clear();
-	wxGraphicsContext* gc = wxGraphicsContext::Create(bdc);
-	OverDraw(gc);
-	delete gc;
+		wxClientDC dc(this);
+
+		wxBufferedDC bdc(&dc, GetSize());
+		OverDraw();
+	}
 }
 Edit::EditCropToolWidget::EditCropToolWidget():
 	m_presenter(nullptr)
@@ -80,15 +79,13 @@ void Edit::EditCropToolWidget::OverDraw()
 	wxGraphicsContext* gc = wxGraphicsContext::Create(bdc);
 	OverDraw(gc);
 	delete gc;
-	auto rc = GetClientSize() / 2;
-	bdc.DrawRectangle(rc.x - 10, rc.y - 10, 20, 20);
 
 }
 
 void Edit::EditCropToolWidget::OnScrollWinEvent(wxScrollWinEvent& event)
 {
 	event.Skip();
-	this->GetScrollHelper()->HandleOnScroll(event);
+	OverDraw();
 }
 void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
 {
@@ -104,6 +101,7 @@ void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
 void Edit::EditCropToolWidget::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
+	OverDraw();
 }
 void Edit::EditCropToolWidget::OnMouseLeftDown(wxMouseEvent& event)
 {
@@ -121,12 +119,13 @@ void Edit::EditCropToolWidget::OnMouseMotion(wxMouseEvent& event)
 		wxPoint delta = event.GetPosition() - *m_prevMousePosition;
 		//float dx = delta.x / 5.f;
 		//float dy = delta.y / 5.f;
-		delta = delta / 8;
-		
-		m_prevMousePosition = event.GetPosition();
-		auto s = this->GetViewStart() - delta;
+		delta = delta / 2;
 		AdjustScrollbars();
+		m_prevMousePosition = event.GetPosition();
+		auto s = m_centerPoint - delta;
+		
 		Scroll(s);
+		OverDraw();
 	}
 }
 void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
@@ -151,17 +150,16 @@ void Edit::EditCropToolWidget::OnMouseWheel(wxMouseEvent& event)
 		
 		AdjustScrollbars();
 		Scroll(t.x, t.y);
-		DoPaint();
 		OverDraw();
 
 	}
 }
 void Edit::EditCropToolWidget::OnKeyDown(wxKeyEvent& event)
 {
-	if (event.GetKeyCode() == WXK_SPACE)
+	if (event.GetKeyCode() == WXK_SPACE && !m_prevMousePosition)
 	{
 		m_prevMousePosition = event.GetPosition();
-		SetCursor(wxCursor(wxStockCursor::wxCURSOR_CROSS));
+		SetCursor(wxCursor(wxStockCursor::wxCURSOR_SIZING));
 	}
 	else
 	{
