@@ -51,19 +51,21 @@
 #define ID_NEW_CAPTURE 1000
 #define ID_SAVE_FILE 1001
 #define ID_RESIZE_FRAME 1002
-#define ID_STORE_WINDOW 1003
-#define ID_DRAW_WIDGET 1004
-#define ID_PLAY_BUTTON 1005
-#define ID_HISTORY_LIST 1006
-#define ID_PROPERTY 1007
-#define ID_SPIN_X 1008
-#define ID_SPIN_Y 1009
-#define ID_SPIN_WIDTH 1010
-#define ID_SPIN_HEIGHT 1011
-#define ID_CHOICE_FPS 1012
-#define ID_BTN_START 1013
-#define ID_BTN_STOP 1014
-#define ID_BTN_CLOSE 1015
+#define ID_CROP_TOOL 1003
+#define ID_STORE_WINDOW 1004
+#define ID_MAIN_PANE 1005
+#define ID_DRAW_WIDGET 1006
+#define ID_PLAY_BUTTON 1007
+#define ID_HISTORY_LIST 1008
+#define ID_PROPERTY 1009
+#define ID_SPIN_X 1010
+#define ID_SPIN_Y 1011
+#define ID_SPIN_WIDTH 1012
+#define ID_SPIN_HEIGHT 1013
+#define ID_CHOICE_FPS 1014
+#define ID_BTN_START 1015
+#define ID_BTN_STOP 1016
+#define ID_BTN_CLOSE 1017
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame
@@ -87,7 +89,7 @@ class UIEditFrame : public wxFrame
 
 	public:
 
-		UIEditFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		UIEditFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxWANTS_CHARS );
 
 		~UIEditFrame();
 

@@ -33,6 +33,7 @@ UIEditFrame::UIEditFrame( wxWindow* parent, wxWindowID id, const wxString& title
 	m_ribbonToolBar1 = new wxRibbonToolBar( m_ribbonPanel3, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonToolBar1->AddTool( wxID_DELETE, wxArtProvider::GetBitmap( wxART_DELETE, wxART_TOOLBAR ), wxT("선택된 프레임을 제거합니다"));
 	m_ribbonToolBar1->AddTool( ID_RESIZE_FRAME, wxBitmap( wxT("expand(2).png"), wxBITMAP_TYPE_ANY ), wxT("이미지의 크기를 조절합니다"));
+	m_ribbonToolBar1->AddTool( ID_CROP_TOOL, wxArtProvider::GetBitmap( wxART_CUT, wxART_TOOLBAR ), wxEmptyString);
 	m_ribbonPanel7 = new wxRibbonPanel( m_ribbonPage1, wxID_ANY, wxT("기타") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
 	m_ribbonButtonBar4 = new wxRibbonButtonBar( m_ribbonPanel7, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_ribbonButtonBar4->AddButton( ID_STORE_WINDOW, wxT("창복구"), wxBitmap( wxT("restore.png"), wxBITMAP_TYPE_ANY ), wxEmptyString);
@@ -90,7 +91,7 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	ui_frameList = new FrameListWidget( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, wxT("ui_frameList") );
 	m_mgr.AddPane( ui_frameList, wxAuiPaneInfo() .Left() .CaptionVisible( false ).CloseButton( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
 
-	m_panel1 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_panel1 = new wxPanel( this, ID_MAIN_PANE, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_mgr.AddPane( m_panel1, wxAuiPaneInfo() .Center() .Caption( wxT("테스트") ).CaptionVisible( false ).CloseButton( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).DockFixed( true ).BottomDockable( false ).TopDockable( false ).LeftDockable( false ).RightDockable( false ).Floatable( false ).CentrePane() );
 
 	wxBoxSizer* bSizer2;

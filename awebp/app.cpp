@@ -1,6 +1,5 @@
 ﻿#include "wx/wxprec.h"
 #include "app.h"
-#include "frame.h"
 #include "captureframe.h"
 
 wxIMPLEMENT_APP(AWebpApp);

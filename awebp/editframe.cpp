@@ -3,9 +3,10 @@
 #include "encoderview.h"
 #include "event.h"
 #include "captureframe.h"
+#include "editcropwidget.h"
 #include <wx/dcbuffer.h>
 EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
-	UIEditFrame(nullptr, wxID_ANY, wxT("edit form")),
+	UIEditFrame(nullptr, wxID_ANY, wxT("edit form") ),
 	m_presenter(this, imageStore, imageSize)
 {
 	SetIcon(wxICON(AAAAA));
@@ -202,6 +203,35 @@ void EditFrame::OnPropertyValueChanged(wxPropertyGridEvent& event)
 	}
 }
 
+void EditFrame::OnRBarBtnCropFrame(wxRibbonToolBarEvent& event)
+{
+	auto pane = FindWindowById(ID_MAIN_PANE);
+	auto info = ui_editForm->m_mgr.GetPane(pane).Hide();
+	//ui_editForm->m_mgr.GetPane(FindWindowById(ID_MAIN_PANE)).Hide();
+	auto* croptoolwidget = new Edit::EditCropToolWidget(m_presenter, pane->GetParent(), 5050);
+	
+	ui_editForm->m_mgr.AddPane(croptoolwidget, wxAuiPaneInfo().Center().Caption(wxT("테스트")).CaptionVisible(false).CloseButton(false).Movable(false).Dock().Resizable().FloatingSize(wxDefaultSize).DockFixed(true).BottomDockable(false).TopDockable(false).LeftDockable(false).RightDockable(false).Floatable(false).CentrePane());
+	ui_editForm->m_mgr.Update();
+}
+
+void EditFrame::OnKeyDown(wxKeyEvent& event)
+{
+	//auto win = FindWindowById(5050);
+	//if (win != nullptr)
+	//{
+	//	wxPostEvent(win, event);
+	//}
+}
+
+void EditFrame::OnKeyUp(wxKeyEvent& event)
+{
+	//auto win = FindWindowById(5050);
+	//if (win != nullptr)
+	//{
+	//	wxPostEvent(win, event);
+	//}
+}
+
 EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	UIEditForm(parent),
 	m_presenter(presenter)
@@ -233,6 +263,8 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 }
 
 wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)
+EVT_KEY_DOWN(EditFrame::OnKeyDown)
+EVT_KEY_DOWN(EditFrame::OnKeyUp)
 EVT_BUTTON(ID_PLAY_BUTTON, EditFrame::OnBtnClickPlay)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_SAVE_FILE, EditFrame::OnRbarBtnSaveFile)
 EVT_RIBBONBUTTONBAR_CLICKED(wxID_UNDO, EditFrame::OnRbarBtnUndo)
@@ -241,5 +273,6 @@ EVT_RIBBONBUTTONBAR_CLICKED(ID_NEW_CAPTURE, EditFrame::OnRBarBtnNewCap)
 EVT_RIBBONBUTTONBAR_CLICKED(ID_STORE_WINDOW, EditFrame::OnRbarBtnRestoreWindow)
 EVT_RIBBONTOOLBAR_CLICKED(ID_RESIZE_FRAME, EditFrame::OnRbarBtnResizeFrames)
 EVT_RIBBONTOOLBAR_CLICKED(wxID_DELETE, EditFrame::OnRbarBtnDeleteFrames)
+EVT_RIBBONTOOLBAR_CLICKED(ID_CROP_TOOL, EditFrame::OnRBarBtnCropFrame)
 //EVT_PG_CHANGED(ID_PROPERTY, )
 wxEND_EVENT_TABLE()
