@@ -41,7 +41,7 @@ void Edit::EditCropToolWidget::InitResource()
 #ifdef __WXMSW__
 	float dpi = GetDpiForWindow(this->GetHWND());
 	float a = dpi / 96;
-	auto d2SizeU = ToSizeU(GetClientSize() * a);
+	auto d2SizeU = ToSizeU(GetClientSize());
 	if (!m_renderTarget)
 	{
 		D2D1_RENDER_TARGET_PROPERTIES dxProperties =
@@ -96,8 +96,6 @@ void Edit::EditCropToolWidget::ReleaseResource()
 #ifdef __WXMSW__
 	SafeRelease(m_renderTarget);
 	SafeRelease(m_bitmap);
-	delete m_clientDC;
-	m_clientDC = nullptr;
 #endif
 }
 void Edit::EditCropToolWidget::ReleaseDirect2D()
@@ -112,6 +110,7 @@ void Edit::EditCropToolWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 	m_centerPoint.x -= dx;
 	m_centerPoint.y -= dy;
 	OverDraw();
+	
 }
 Edit::EditCropToolWidget::EditCropToolWidget():
 	m_presenter(nullptr)
@@ -198,6 +197,12 @@ void Edit::EditCropToolWidget::OverDraw()
 {
 	//this->Refresh(true, &GetClientRect());
 	//this->
+	auto now = wxGetLocalTimeMillis().GetValue();
+	if (now - m_lastRenderTime < 5)
+	{
+		return;
+	}
+	m_lastRenderTime = now;
 	if (!m_renderTarget)
 	{
 		InitResource();
@@ -209,11 +214,11 @@ void Edit::EditCropToolWidget::OverDraw()
 	wxPoint viewStart = m_centerPoint;
 	if (imageSize.x * m_scale <= rc.x)
 	{
-		viewStart.x = (imageSize.x * m_scale - rc.x * a) / 2;
+		viewStart.x = (imageSize.x * m_scale - rc.x ) / 2;
 	}
 	if (imageSize.y * m_scale <= rc.y)
 	{
-		viewStart.y = (imageSize.y * m_scale - rc.y * a) / 2;
+		viewStart.y = (imageSize.y * m_scale - rc.y ) / 2;
 	}
 	if (m_bitmap == nullptr)
 	{
@@ -258,7 +263,7 @@ void Edit::EditCropToolWidget::OnSize(wxSizeEvent& event)
 	{
 		float dpi = GetDpiForWindow(this->GetHWND());
 		float a = dpi / 96;
-		auto d2SizeU = ToSizeU(GetClientSize() * a);
+		auto d2SizeU = ToSizeU(GetClientSize());
 		m_renderTarget->Resize(d2SizeU);
 	}
 #endif

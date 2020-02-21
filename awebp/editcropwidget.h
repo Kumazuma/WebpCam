@@ -16,6 +16,7 @@ namespace Edit
 		wxSharedPtr<wxMemoryDC> m_memDC;
 		std::optional<wxPoint> m_prevMousePosition;
 		wxRect m_cropArea;
+		int64_t m_lastRenderTime = 0;
 	public:
 		virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL) override;
 		EditCropToolWidget();
@@ -27,6 +28,7 @@ namespace Edit
 #ifndef __WXMSW__
 		void OverDraw(wxGraphicsContext* gc);
 #else
+		
 		ID2D1Factory* m_factory;
 		ID2D1HwndRenderTarget* m_renderTarget;
 		ID2D1Bitmap* m_bitmap;
