@@ -8,7 +8,8 @@ namespace Edit
 	private:
 		EditFramePresenter* m_presenter;
 		wxBitmap m_workArea;
-		int m_scale;
+		float m_scale;
+		wxPoint m_centerPoint;
 		wxMemoryDC* m_memDC;
 	public:
 		EditCropToolWidget();
@@ -17,9 +18,11 @@ namespace Edit
 	protected:
 		void DoPaint();
 		void OverDraw();
+		void OverDraw(wxGraphicsContext* gc);
 	protected:
 		void OnScrollWinEvent(wxScrollWinEvent& event);
 		void OnPaint(wxPaintEvent& event);
+		void OnSize(wxSizeEvent& event);
 		void OnMouseLeftDown(wxMouseEvent& event);
 		void OnMouseLeftUp(wxMouseEvent& event);
 		void OnMouseMotion(wxMouseEvent& event);
