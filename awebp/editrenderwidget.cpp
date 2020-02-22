@@ -69,14 +69,14 @@ void Edit::EditRenderWidget::InitResource()
 		m_renderTarget->SetDpi(96, 96);
 		
 	}
-	if (m_backbuffer.IsOk())
+	if (m_selectedImage.IsOk())
 	{
-		int strip = m_backbuffer.GetWidth() * 4;
-		size_t wxh = m_backbuffer.GetHeight() * m_backbuffer.GetWidth();
-		auto imgData = m_backbuffer.GetData();
+		int strip = m_selectedImage.GetWidth() * 4;
+		size_t wxh = m_selectedImage.GetHeight() * m_selectedImage.GetWidth();
+		auto imgData = m_selectedImage.GetData();
 		std::vector<uint8_t> data;
 		data.assign(wxh * 4, 0);
-		D2D1_RECT_U d2Size = D2D1::RectU(0, 0, m_backbuffer.GetWidth(), m_backbuffer.GetHeight());
+		D2D1_RECT_U d2Size = D2D1::RectU(0, 0, m_selectedImage.GetWidth(), m_selectedImage.GetHeight());
 		for (size_t i = 0; i < wxh; i++)
 		{
 			data[i * 4] = imgData[i * 3];
@@ -88,10 +88,10 @@ void Edit::EditRenderWidget::InitResource()
 		
 		if (m_bitmap)
 		{
-			if (ToSizeU(m_backbuffer.GetSize()) != m_bitmap->GetPixelSize())
+			if (ToSizeU(m_selectedImage.GetSize()) != m_bitmap->GetPixelSize())
 			{
 				m_bitmap->Release();
-				D2D_SIZE_U d2Size = ToSizeU(m_backbuffer.GetSize());
+				D2D_SIZE_U d2Size = ToSizeU(m_selectedImage.GetSize());
 				auto d2BitmapProperty = D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_R8G8B8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
 				m_renderTarget->CreateBitmap(d2Size, data.data(), strip, d2BitmapProperty, &m_bitmap);
 			}
@@ -102,7 +102,7 @@ void Edit::EditRenderWidget::InitResource()
 		}
 		else
 		{
-			D2D_SIZE_U d2Size = ToSizeU(m_backbuffer.GetSize());
+			D2D_SIZE_U d2Size = ToSizeU(m_selectedImage.GetSize());
 			auto d2BitmapProperty = D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_R8G8B8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
 			m_renderTarget->CreateBitmap(d2Size, data.data(), strip, d2BitmapProperty, &m_bitmap);
 		}
@@ -160,10 +160,33 @@ void Edit::EditRenderWidget::Init()
 	m_cropArea.y = (m_cropArea.height - min) / 2;
 	m_cropArea.width = min;
 	m_cropArea.height = min;
-
-
-	m_workArea.Create(m_presenter->GetImageSize());
-	
+//
+	SafeRelease(m_cropAreaRegion);
+	m_factory->CreatePathGeometry(&m_cropAreaRegion);
+	ID2D1GeometrySink* pSink = NULL;
+	m_cropAreaRegion->Open(&pSink);
+	pSink->SetFillMode(D2D1_FILL_MODE_WINDING);
+	D2D1_POINT_2F points[] = {
+		D2D1::Point2F(0, 0),
+		D2D1::Point2F(0, imgSize.y),
+		D2D1::Point2F(imgSize.x, imgSize.y),
+		D2D1::Point2F(imgSize.x, 0),
+		D2D1::Point2F(0, 0)
+	};
+	D2D1_POINT_2F points2[] = {
+		D2D1::Point2F(m_cropArea.x, m_cropArea.y),
+		D2D1::Point2F(m_cropArea.x + m_cropArea.width, m_cropArea.y),
+		D2D1::Point2F(m_cropArea.x + m_cropArea.width, m_cropArea.y + m_cropArea.height),
+		D2D1::Point2F(m_cropArea.x, m_cropArea.y + m_cropArea.height),
+		D2D1::Point2F(m_cropArea.x, m_cropArea.y)
+	};
+	pSink->BeginFigure(D2D1::Point2F(m_cropArea.x, m_cropArea.y), D2D1_FIGURE_BEGIN_FILLED);
+	pSink->AddLines(points2, ARRAYSIZE(points2));
+	pSink->AddLines(points, ARRAYSIZE(points));
+	pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+	pSink->Close();
+	SafeRelease(pSink);
+//
 	DoPaint();
 	OverDraw();
 }
@@ -171,7 +194,7 @@ void Edit::EditRenderWidget::DoPaint()
 {
 	if (!m_presenter)
 		return;
-	if (m_selectedImage.IsOk())
+	/*if (m_selectedImage.IsOk())
 	{
 		if (m_selectedImage.GetSize() != m_workArea.GetSize())
 		{
@@ -181,7 +204,7 @@ void Edit::EditRenderWidget::DoPaint()
 		memDC.DrawBitmap(m_selectedImage, 0, 0);
 	}
 	
-	m_backbuffer = m_workArea.ConvertToImage();
+	m_backbuffer = m_workArea.ConvertToImage();*/
 	InitResource();
 }
 
@@ -249,10 +272,14 @@ void Edit::EditRenderWidget::OverDraw()
 	{
 		InitResource();
 	}
+	if (!m_selectedImage.IsOk())
+	{
+		return;
+	}
 	float dpi = GetDpiForWindow(this->GetHWND());
 	float a = dpi / 96;
 	wxSize rc = this->GetClientSize();
-	wxSize imageSize = m_workArea.GetSize();
+	wxSize imageSize = m_selectedImage.GetSize();
 	wxPoint viewStart = m_centerPoint;
 	if (imageSize.x * m_scale <= rc.x)
 	{
@@ -274,6 +301,11 @@ void Edit::EditRenderWidget::OverDraw()
 	auto scale = D2D1::Matrix3x2F::Scale(m_scale , m_scale );
 	m_renderTarget->SetTransform(scale * translation);
 	m_renderTarget->DrawBitmap(m_bitmap, D2D1::RectF(0, 0, m_bitmap->GetSize().width, m_bitmap->GetSize().height));
+	ID2D1SolidColorBrush* solidBrush = nullptr;
+	m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0x000000), &solidBrush);
+	solidBrush->SetOpacity(0.5f);
+	m_renderTarget->FillGeometry(m_cropAreaRegion, solidBrush);
+	SafeRelease(solidBrush);
 
 	auto res = m_renderTarget->EndDraw();
 	if (res == D2DERR_RECREATE_TARGET)
@@ -350,9 +382,9 @@ void Edit::EditRenderWidget::OnMouseWheel(wxMouseEvent& event)
 		{
 			m_scale = 0.1f;
 		}
-		SetVirtualSize(m_workArea.GetSize() * m_scale );
+		SetVirtualSize(m_selectedImage.GetSize() * m_scale );
 		auto s = this->GetViewStart();
-		auto t = m_workArea.GetSize();
+		auto t = m_selectedImage.GetSize();
 		t.x =(m_scale * s.x) / prevScale;
 		t.y =(m_scale * s.y) / prevScale;
 		
@@ -364,7 +396,7 @@ void Edit::EditRenderWidget::OnMouseWheel(wxMouseEvent& event)
 	else 
 	{
 		auto s = this->GetViewStart();
-		auto t = m_workArea.GetSize();
+		auto t = m_selectedImage.GetSize();
 		if (event.ShiftDown())
 		{
 			s.x -= sign*(m_scale * t.x) / 20;
@@ -378,6 +410,7 @@ void Edit::EditRenderWidget::OnMouseWheel(wxMouseEvent& event)
 	}
 	OverDraw();
 }
+
 void Edit::EditRenderWidget::OnKeyDown(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_SPACE && !m_prevMousePosition)
@@ -451,6 +484,7 @@ void Edit::EditRenderWidget::ProcessAnim()
 			if (!duration.has_value())
 			{
 				m_index = 0;
+				duration = m_presenter->GetFrameDuration(*m_index);
 				continue;
 			}
 		}

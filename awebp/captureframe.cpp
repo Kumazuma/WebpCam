@@ -17,21 +17,21 @@ bool operator && (SizingState& obj, SizingState state)
 CaptureFrame::CaptureFrame() :
 	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize,wxSYSTEM_MENU| wxSTAY_ON_TOP |wxFRAME_SHAPED),
 	m_presenter(this),
-	m_sizingState(SizingState::SSNone)
+	m_sizingState(SizingState::None)
 {
 	SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 	auto sizer = new wxBoxSizer(wxVERTICAL);
 	wxPanel* panel = new TopPannel(this);
-	
-	panel->SetMaxClientSize(wxSize(99999, 36));
+	panel->Bind(wxEVT_MOTION, &CaptureFrame::OnChildMouseMotion, this);
+	panel->SetMaxClientSize(wxSize(99999, TOP_PANEL_HEIGHT));
 	panel->SetWindowStyle(panel->GetWindowStyle() | wxSIMPLE_BORDER);
-	sizer->Add(panel, 0, wxALL  , 5);
-	sizer->Add(0,0, 1, wxEXPAND, 5);
+	sizer->Add(panel, 0, wxALL  , BORDER_THICKNESS);
+	sizer->Add(0,0, 1, wxEXPAND, BORDER_THICKNESS);
 
 	panel = new BottomPanel(this);
-	panel->SetMaxClientSize(wxSize(99999, 36));
-	sizer->Add(panel, 0, wxALL | wxEXPAND, 5);
-
+	panel->SetMaxClientSize(wxSize(99999, BOTTOM_PANEL_HEIGHT));
+	panel->Bind(wxEVT_MOTION, &CaptureFrame::OnChildMouseMotion, this);
+	sizer->Add(panel, 0, wxALL | wxEXPAND, BORDER_THICKNESS);
 	SetSizer(sizer);
 	Layout();
 	Centre();
@@ -62,7 +62,11 @@ CaptureFrame::CaptureFrame() :
 	FindWindowById(ID_BTN_STOP)->Disable();
 	this->Bind(EVT_RefreshView, &CaptureFrame::OnRefleshView, this);
 }
-
+void CaptureFrame::OnChildMouseMotion(wxMouseEvent& event)
+{
+	event.Skip();
+	SetCursor(wxCursor(wxStockCursor::wxCURSOR_ARROW));
+}
 wxRect CaptureFrame::CvtCaptureRegionToWindowRect(const wxRect& rc)
 {
 	wxRect res = rc;
@@ -90,68 +94,104 @@ void CaptureFrame::SetRect(const wxRect& rc)
 	wxRect rect = CvtWindowRectToCaptureRegion(rc);
 	m_presenter.SetRecordedRect(rect);
 }
+
 void CaptureFrame::SetCapturedRect(wxRect rc)
 {
 	wxRect rect = CvtCaptureRegionToWindowRect(rc);
 	SetRect(rect);
 }
+bool CaptureFrame::GetHitTests(const wxPoint& pt, wxWindow* window )
+{
+	if (window == nullptr)
+	{
+		return GetHitTests(pt, this);
+	}
+	else
+	{
+		auto& t = window->GetChildren();
+		for (auto child : window->GetChildren())
+		{
+			if (GetHitTests(pt, child))
+			{
+				return true;
+			}
+			wxPoint point = window->ScreenToClient(pt);
+			if (window->HitTest(point) == wxHT_WINDOW_INSIDE)
+			{
+				return true;
+			}
+
+		}
+	}
+	
+	return false;
+}
 void CaptureFrame::CalcSizingDirection(const wxPoint& mousePosition)
 {
-	//기울기 계산. \방향
+	wxPoint screenPosition = ClientToScreen(mousePosition);
+
+	
+	
 	wxSize size = this->GetClientSize();
 	float degree;
 	degree = float(size.y) / float(size.x);
+	//기울기 계산. \방향
 	float calc1 = degree * mousePosition.x;
+	//기울기 계산. /방향
 	float calc2 = size.y - degree * mousePosition.x;
 	char state = (calc2 < mousePosition.y) << 1 | (calc1 < mousePosition.y);
 	wxClientDC dc(this);
 	wxRegion region{ wxRect(size) };
-	region.Subtract(wxRect(size).Deflate(5));
-	m_sizingState = SizingState::SSNone;
+	region.Subtract(wxRect(size).Deflate(BORDER_THICKNESS));
+	m_sizingState = SizingState::None;
 	if (region.Contains(mousePosition) == wxRegionContain::wxInRegion)
 	{
-		m_sizingState |= wxRect(wxPoint(0, 0), wxPoint(5, 5)).Contains(mousePosition)? SizingState::SSNW : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(size.x - 5, size.y - 5), wxPoint(size.x, size.y)).Contains(mousePosition) ? SizingState::SSSE : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(size.x - 5, 0), wxPoint(size.x, 5)).Contains(mousePosition) ? SizingState::SSNE : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(0, size.y - 5), wxPoint(5, size.y)).Contains(mousePosition) ? SizingState::SSSW : m_sizingState;
+		m_sizingState |= wxRect(wxPoint(0, 0), wxPoint(BORDER_THICKNESS, BORDER_THICKNESS)).Contains(mousePosition)? SizingState::NorthWest : m_sizingState;
+		m_sizingState |= wxRect(wxPoint(size.x - BORDER_THICKNESS, size.y - BORDER_THICKNESS), wxPoint(size.x, size.y)).Contains(mousePosition) ? SizingState::SouthEast : m_sizingState;
+		m_sizingState |= wxRect(wxPoint(size.x - BORDER_THICKNESS, 0), wxPoint(size.x, BORDER_THICKNESS)).Contains(mousePosition) ? SizingState::NorthEast : m_sizingState;
+		m_sizingState |= wxRect(wxPoint(0, size.y - BORDER_THICKNESS), wxPoint(BORDER_THICKNESS, size.y)).Contains(mousePosition) ? SizingState::SouthWest : m_sizingState;
 		switch (state)
 		{
 		case 0:
-			m_sizingState |= SizingState::SSN;
+			m_sizingState |= SizingState::North;
 			break;
 		case 1:
-			m_sizingState |= SizingState::SSW;
+			m_sizingState |= SizingState::West;
 			break;
 		case 2:
-			m_sizingState |= SizingState::SSE;
+			m_sizingState |= SizingState::East;
 			break;
 		case 3:
-			m_sizingState |= SizingState::SSS;
+			m_sizingState |= SizingState::South;
 			break;
 		}
 	}
-	if (m_sizingState == SizingState::SSNone && mousePosition.y < TOP_PANEL_HEIGHT)
+	else
 	{
-		m_sizingState = SizingState::SSNSEW;
+
+	}
+	if (m_sizingState == SizingState::None && mousePosition.y < TOP_PANEL_HEIGHT + BORDER_THICKNESS)
+	{
+		m_sizingState = SizingState::All;
 	}
 }
 wxCursor CaptureFrame::GetSizingCursor()
 {
 	switch (m_sizingState)
 	{
-	case SizingState::SSNW:
-	case SizingState::SSSE:
+	case SizingState::NorthWest:
+	case SizingState::SouthEast:
 		return wxCursor(wxCURSOR_SIZENWSE);
-	case SizingState::SSNE:
-	case SizingState::SSSW:
+	case SizingState::NorthEast:
+	case SizingState::SouthWest:
 		return wxCursor(wxCURSOR_SIZENESW);
-	case SizingState::SSW:
-	case SizingState::SSE:
+	case SizingState::West:
+	case SizingState::East:
 		return wxCursor(wxCURSOR_SIZEWE);
-	case SizingState::SSN:
-	case SizingState::SSS:
+	case SizingState::North:
+	case SizingState::South:
 		return wxCursor(wxCURSOR_SIZENS);
-	case SizingState::SSNSEW:
+	case SizingState::All:
 		return wxCursor(wxCURSOR_SIZING);
 	default:
 		return wxCursor(wxCURSOR_ARROW);
@@ -161,7 +201,7 @@ void CaptureFrame::OnMouseLeftDown(wxMouseEvent& event)
 {
 	CalcSizingDirection(event.GetPosition());
 	SetCursor(GetSizingCursor());
-	if (m_sizingState != SizingState::SSNone)
+	if (m_sizingState != SizingState::None)
 	{
 		this->CaptureMouse();
 		m_prevPosition = this->ClientToScreen(event.GetPosition());
@@ -192,21 +232,21 @@ void CaptureFrame::OnMouseMotion(wxMouseEvent& event)
 		auto deltaPos = *m_prevPosition - nowPosition;
 		m_prevPosition = nowPosition;
 		auto rect = this->GetRect();
-		if (m_sizingState && SizingState::SSW)
+		if (m_sizingState && SizingState::West)
 		{
 			rect.x -= deltaPos.x;
 			rect.width += deltaPos.x;
 		}
-		if (m_sizingState && SizingState::SSE)
+		if (m_sizingState && SizingState::East)
 		{
 			rect.width -= deltaPos.x;
 		}
-		if (m_sizingState && SizingState::SSN)
+		if (m_sizingState && SizingState::North)
 		{
 			rect.y -= deltaPos.y;
 			rect.height += deltaPos.y;
 		}
-		if (m_sizingState && SizingState::SSS)
+		if (m_sizingState && SizingState::South)
 		{
 			rect.height -= deltaPos.y;
 		}
@@ -223,6 +263,11 @@ void CaptureFrame::OnMouseLost(wxMouseCaptureLostEvent& event)
 	{
 		m_prevPosition.reset();
 	}
+}
+
+void CaptureFrame::OnMouseLeave(wxMouseEvent& event)
+{
+	SetCursor(wxStockCursor::wxCURSOR_ARROW);
 }
 
 void CaptureFrame::OnSized(wxSizeEvent& event)

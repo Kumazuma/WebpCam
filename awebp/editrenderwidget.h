@@ -16,7 +16,6 @@ namespace Edit
 		uint32_t m_duration;
 		int64_t m_lastTick;
 		EditFramePresenter* m_presenter;
-		wxBitmap m_workArea;
 		float m_scale;
 		wxPoint m_centerPoint;
 		
@@ -49,7 +48,7 @@ namespace Edit
 		ID2D1Factory* m_factory;
 		ID2D1HwndRenderTarget* m_renderTarget;
 		ID2D1Bitmap* m_bitmap;
-		wxImage m_backbuffer;
+		ID2D1PathGeometry* m_cropAreaRegion;
 		wxClientDC* m_clientDC;
 		void InitDirect2D();
 		void ReleaseDirect2D();
