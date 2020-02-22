@@ -123,7 +123,7 @@ class UIEditForm : public wxPanel
 	protected:
 		FrameListWidget* ui_frameList;
 		wxPanel* m_panel1;
-		EditFrameRenderWidget* ui_drawWidget;
+		Edit::EditRenderWidget* ui_drawWidget;
 		wxButton* ui_btnButton;
 		wxSlider* m_slider1;
 		wxSimpleHtmlListBox* m_customControl3;

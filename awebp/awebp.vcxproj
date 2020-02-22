@@ -153,12 +153,11 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="cachedfileimagestore.cpp" />
     <ClCompile Include="captureframe.cpp" />
-    <ClCompile Include="editcropwidget.cpp" />
+    <ClCompile Include="editrenderwidget.cpp" />
     <ClCompile Include="editframe.cpp" />
     <ClCompile Include="editframelistwidget.cpp" />
     <ClCompile Include="editframemodel.cpp" />
     <ClCompile Include="editpresenter.cpp" />
-    <ClCompile Include="editrenderwidget.cpp" />
     <ClCompile Include="edittool.cpp" />
     <ClCompile Include="encoderview.cpp" />
     <ClCompile Include="EncorderPresenter.cpp" />
@@ -177,12 +176,11 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="captureframe.h" />
     <ClInclude Include="cfimagestore.h" />
-    <ClInclude Include="editcropwidget.h" />
+    <ClInclude Include="editrenderwidget.h" />
     <ClInclude Include="editframe.h" />
     <ClInclude Include="editframelistwidget.h" />
     <ClInclude Include="editframemodel.h" />
     <ClInclude Include="editpresenter.h" />
-    <ClInclude Include="editrenderwidget.h" />
     <ClInclude Include="edittool.h" />
     <ClInclude Include="encoderview.h" />
     <ClInclude Include="EncorderPresenter.h" />

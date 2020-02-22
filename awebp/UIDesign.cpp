@@ -97,7 +97,7 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 
-	ui_drawWidget = new EditFrameRenderWidget( m_panel1, ID_DRAW_WIDGET, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, wxT("ui_drawWidget") );
+	ui_drawWidget = new Edit::EditRenderWidget( m_panel1, ID_DRAW_WIDGET, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, wxT("ui_drawWidget") );
 	bSizer2->Add( ui_drawWidget, 1, wxALL|wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer11;

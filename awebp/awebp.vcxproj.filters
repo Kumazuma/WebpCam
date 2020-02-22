@@ -63,9 +63,6 @@
     <ClCompile Include="editpresenter.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
-    <ClCompile Include="editrenderwidget.cpp">
-      <Filter>소스 파일\edit</Filter>
-    </ClCompile>
     <ClCompile Include="encoderview.cpp">
       <Filter>소스 파일\encode</Filter>
     </ClCompile>
@@ -105,7 +102,7 @@
     <ClCompile Include="UIDesign.cpp">
       <Filter>소스 파일\common</Filter>
     </ClCompile>
-    <ClCompile Include="editcropwidget.cpp">
+    <ClCompile Include="editrenderwidget.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,9 +125,6 @@
     <ClInclude Include="editpresenter.h">
       <Filter>헤더 파일\edit</Filter>
     </ClInclude>
-    <ClInclude Include="editrenderwidget.h">
-      <Filter>헤더 파일\edit</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -142,9 +136,6 @@
     </ClInclude>
     <ClInclude Include="captureframe.h">
       <Filter>헤더 파일\capture</Filter>
-    </ClInclude>
-    <ClInclude Include="editcropwidget.h">
-      <Filter>헤더 파일\edit</Filter>
     </ClInclude>
     <ClInclude Include="cfimagestore.h">
       <Filter>헤더 파일\common</Filter>
@@ -178,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="webpencoder.h">
       <Filter>헤더 파일\common</Filter>
+    </ClInclude>
+    <ClInclude Include="editrenderwidget.h">
+      <Filter>헤더 파일\edit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

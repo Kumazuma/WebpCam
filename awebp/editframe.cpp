@@ -3,7 +3,7 @@
 #include "encoderview.h"
 #include "event.h"
 #include "captureframe.h"
-#include "editcropwidget.h"
+#include "editrenderwidget.h"
 #include <wx/dcbuffer.h>
 EditFrame::EditFrame(IImageStore* imageStore, const wxSize& imageSize):
 	UIEditFrame(nullptr, wxID_ANY, wxT("edit form") ),
@@ -131,7 +131,7 @@ void EditFrame::OnSelectFramePaint(wxPaintEvent& event)
 void EditFrame::OnListItemSelected(wxCommandEvent& event)
 {
 	m_lastSelectedIndex = event.GetSelection();
-	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), EditFrameRenderWidget)->SetSelectImage(m_lastSelectedIndex);
+	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), Edit::EditRenderWidget)->SetSelectImage(m_lastSelectedIndex);
 	auto progrid = wxDynamicCast(FindWindowById(ID_PROPERTY), wxPropertyGrid);
 	auto t = wxDynamicCast(event.GetEventObject(), FrameListWidget);
 	auto selections = t->GetSelections();
@@ -176,7 +176,7 @@ void EditFrame::OnRBarBtnNewCap(wxRibbonButtonBarEvent& event)
 
 void EditFrame::OnBtnClickPlay(wxCommandEvent& event)
 {
-	auto widget = wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), EditFrameRenderWidget);
+	auto widget = wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), Edit::EditRenderWidget);
 	if (widget != nullptr)
 	{
 		auto index = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->GetSelection();
@@ -205,13 +205,7 @@ void EditFrame::OnPropertyValueChanged(wxPropertyGridEvent& event)
 
 void EditFrame::OnRBarBtnCropFrame(wxRibbonToolBarEvent& event)
 {
-	auto pane = FindWindowById(ID_MAIN_PANE);
-	auto info = ui_editForm->m_mgr.GetPane(pane).Hide();
-	//ui_editForm->m_mgr.GetPane(FindWindowById(ID_MAIN_PANE)).Hide();
-	auto* croptoolwidget = new Edit::EditCropToolWidget(m_presenter, pane->GetParent(), 5050);
 	
-	ui_editForm->m_mgr.AddPane(croptoolwidget, wxAuiPaneInfo().Center().Caption(wxT("테스트")).CaptionVisible(false).CloseButton(false).Movable(false).Dock().Resizable().FloatingSize(wxDefaultSize).DockFixed(true).BottomDockable(false).TopDockable(false).LeftDockable(false).RightDockable(false).Floatable(false).CentrePane());
-	ui_editForm->m_mgr.Update();
 }
 
 void EditFrame::OnKeyDown(wxKeyEvent& event)
