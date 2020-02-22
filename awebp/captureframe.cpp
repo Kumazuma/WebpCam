@@ -5,19 +5,12 @@
 #include "UIDesign.h"
 #include "editframe.h"
 #include "event.h"
-SizingState& operator |= (SizingState& obj, SizingState state)
-{
-	obj = (SizingState)((uint8_t)obj | (uint8_t)state);
-	return obj;
-}
-bool operator && (SizingState& obj, SizingState state)
-{
-	return ((uint8_t)obj & (uint8_t)state) != 0;
-}
+#include "util.h"
+
 CaptureFrame::CaptureFrame() :
 	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize,wxSYSTEM_MENU| wxSTAY_ON_TOP |wxFRAME_SHAPED),
 	m_presenter(this),
-	m_sizingState(SizingState::None)
+	m_sizingState(DirectionState::None)
 {
 	SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 	auto sizer = new wxBoxSizer(wxVERTICAL);
@@ -72,8 +65,8 @@ wxRect CaptureFrame::CvtCaptureRegionToWindowRect(const wxRect& rc)
 	wxRect res = rc;
 	res.x -= BORDER_THICKNESS;
 	res.width += BORDER_THICKNESS * 2;
-	res.y -= TOP_PANEL_HEIGHT + BORDER_THICKNESS;
-	res.height += BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT;
+	res.y -= TOP_PANEL_HEIGHT + BORDER_THICKNESS + BORDER_THICKNESS / 2;
+	res.height += BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT + BORDER_THICKNESS / 2;
 	return res;
 }
 
@@ -82,8 +75,8 @@ wxRect CaptureFrame::CvtWindowRectToCaptureRegion(const wxRect& rc)
 	wxRect res = rc;
 	res.x += BORDER_THICKNESS;
 	res.width -= BORDER_THICKNESS * 2;
-	res.y += TOP_PANEL_HEIGHT + BORDER_THICKNESS;
-	res.height -= BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT;
+	res.y += TOP_PANEL_HEIGHT + BORDER_THICKNESS + BORDER_THICKNESS/2;
+	res.height -= BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT + BORDER_THICKNESS / 2;
 	return res;
 }
 void CaptureFrame::SetRect(const wxRect& rc)
@@ -100,108 +93,35 @@ void CaptureFrame::SetCapturedRect(wxRect rc)
 	wxRect rect = CvtCaptureRegionToWindowRect(rc);
 	SetRect(rect);
 }
-bool CaptureFrame::GetHitTests(const wxPoint& pt, wxWindow* window )
-{
-	if (window == nullptr)
-	{
-		return GetHitTests(pt, this);
-	}
-	else
-	{
-		auto& t = window->GetChildren();
-		for (auto child : window->GetChildren())
-		{
-			if (GetHitTests(pt, child))
-			{
-				return true;
-			}
-			wxPoint point = window->ScreenToClient(pt);
-			if (window->HitTest(point) == wxHT_WINDOW_INSIDE)
-			{
-				return true;
-			}
-
-		}
-	}
-	
-	return false;
-}
 void CaptureFrame::CalcSizingDirection(const wxPoint& mousePosition)
 {
-	wxPoint screenPosition = ClientToScreen(mousePosition);
-
-	
-	
 	wxSize size = this->GetClientSize();
-	float degree;
-	degree = float(size.y) / float(size.x);
-	//기울기 계산. \방향
-	float calc1 = degree * mousePosition.x;
-	//기울기 계산. /방향
-	float calc2 = size.y - degree * mousePosition.x;
-	char state = (calc2 < mousePosition.y) << 1 | (calc1 < mousePosition.y);
-	wxClientDC dc(this);
+	auto direction = GetDirection(size, mousePosition);
 	wxRegion region{ wxRect(size) };
 	region.Subtract(wxRect(size).Deflate(BORDER_THICKNESS));
-	m_sizingState = SizingState::None;
 	if (region.Contains(mousePosition) == wxRegionContain::wxInRegion)
 	{
-		m_sizingState |= wxRect(wxPoint(0, 0), wxPoint(BORDER_THICKNESS, BORDER_THICKNESS)).Contains(mousePosition)? SizingState::NorthWest : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(size.x - BORDER_THICKNESS, size.y - BORDER_THICKNESS), wxPoint(size.x, size.y)).Contains(mousePosition) ? SizingState::SouthEast : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(size.x - BORDER_THICKNESS, 0), wxPoint(size.x, BORDER_THICKNESS)).Contains(mousePosition) ? SizingState::NorthEast : m_sizingState;
-		m_sizingState |= wxRect(wxPoint(0, size.y - BORDER_THICKNESS), wxPoint(BORDER_THICKNESS, size.y)).Contains(mousePosition) ? SizingState::SouthWest : m_sizingState;
-		switch (state)
-		{
-		case 0:
-			m_sizingState |= SizingState::North;
-			break;
-		case 1:
-			m_sizingState |= SizingState::West;
-			break;
-		case 2:
-			m_sizingState |= SizingState::East;
-			break;
-		case 3:
-			m_sizingState |= SizingState::South;
-			break;
-		}
+		direction |= wxRect(wxPoint(0, 0), wxPoint(BORDER_THICKNESS, BORDER_THICKNESS)).Contains(mousePosition)? DirectionState::NorthWest : direction;
+		direction |= wxRect(wxPoint(size.x - BORDER_THICKNESS, size.y - BORDER_THICKNESS), wxPoint(size.x, size.y)).Contains(mousePosition) ? DirectionState::SouthEast : direction;
+		direction |= wxRect(wxPoint(size.x - BORDER_THICKNESS, 0), wxPoint(size.x, BORDER_THICKNESS)).Contains(mousePosition) ? DirectionState::NorthEast : direction;
+		direction |= wxRect(wxPoint(0, size.y - BORDER_THICKNESS), wxPoint(BORDER_THICKNESS, size.y)).Contains(mousePosition) ? DirectionState::SouthWest : direction;
 	}
 	else
 	{
+		direction = DirectionState::None;
+	}
+	if (direction == DirectionState::None && mousePosition.y < TOP_PANEL_HEIGHT + BORDER_THICKNESS)
+	{
+		direction = DirectionState::All;
+	}
 
-	}
-	if (m_sizingState == SizingState::None && mousePosition.y < TOP_PANEL_HEIGHT + BORDER_THICKNESS)
-	{
-		m_sizingState = SizingState::All;
-	}
-}
-wxCursor CaptureFrame::GetSizingCursor()
-{
-	switch (m_sizingState)
-	{
-	case SizingState::NorthWest:
-	case SizingState::SouthEast:
-		return wxCursor(wxCURSOR_SIZENWSE);
-	case SizingState::NorthEast:
-	case SizingState::SouthWest:
-		return wxCursor(wxCURSOR_SIZENESW);
-	case SizingState::West:
-	case SizingState::East:
-		return wxCursor(wxCURSOR_SIZEWE);
-	case SizingState::North:
-	case SizingState::South:
-		return wxCursor(wxCURSOR_SIZENS);
-	case SizingState::All:
-		return wxCursor(wxCURSOR_SIZING);
-	default:
-		return wxCursor(wxCURSOR_ARROW);
-	}
+	m_sizingState = direction;
 }
 void CaptureFrame::OnMouseLeftDown(wxMouseEvent& event)
 {
 	CalcSizingDirection(event.GetPosition());
-	SetCursor(GetSizingCursor());
-	if (m_sizingState != SizingState::None)
+	SetCursor(GetSizingCursor(m_sizingState));
+	if (m_sizingState != DirectionState::None)
 	{
 		this->CaptureMouse();
 		m_prevPosition = this->ClientToScreen(event.GetPosition());
@@ -223,7 +143,7 @@ void CaptureFrame::OnMouseMotion(wxMouseEvent& event)
 	if (!m_prevPosition.has_value())
 	{
 		CalcSizingDirection(event.GetPosition());
-		SetCursor(GetSizingCursor());
+		SetCursor(GetSizingCursor(m_sizingState));
 	}
 	else if(!m_presenter.IsRecording())
 	{
@@ -232,21 +152,21 @@ void CaptureFrame::OnMouseMotion(wxMouseEvent& event)
 		auto deltaPos = *m_prevPosition - nowPosition;
 		m_prevPosition = nowPosition;
 		auto rect = this->GetRect();
-		if (m_sizingState && SizingState::West)
+		if (m_sizingState && DirectionState::West)
 		{
 			rect.x -= deltaPos.x;
 			rect.width += deltaPos.x;
 		}
-		if (m_sizingState && SizingState::East)
+		if (m_sizingState && DirectionState::East)
 		{
 			rect.width -= deltaPos.x;
 		}
-		if (m_sizingState && SizingState::North)
+		if (m_sizingState && DirectionState::North)
 		{
 			rect.y -= deltaPos.y;
 			rect.height += deltaPos.y;
 		}
-		if (m_sizingState && SizingState::South)
+		if (m_sizingState && DirectionState::South)
 		{
 			rect.height -= deltaPos.y;
 		}

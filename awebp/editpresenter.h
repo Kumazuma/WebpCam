@@ -20,6 +20,9 @@ public:
 	size_t GetHistoryCursor();
 	bool DeleteFrame(size_t start, size_t end);
 	bool ResizeImage(const wxSize& reImageSize);
+	bool CropImage();
+	wxRect GetCropRect();
+	void SetCropRect(const wxRect& rc);
 	void Undo();
 	void Redo();
 	const wxVector<const IHistoryItem*>& GetHistory() const;

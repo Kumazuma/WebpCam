@@ -153,11 +153,52 @@ void HistoryItemResize::Redo(IImageStore*& imageStore)
 wxString HistoryItemResize::GetDescription() const
 {
 	wxString description;
-	wxImage image = m_imageStore->Get(0).first;
 	description << wxT("이미지 리사이즈(") << m_sizeResizeTo.GetWidth()<<wxT(", ")<< m_sizeResizeTo.GetHeight() << wxT(")");
 	return description;
 }
 
 void EditCropImageTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
+	auto builder = imageStore->CreateBuilder(m_crop.GetSize());
+	for (int i = 0; i < imageStore->GetCount(); i++)
+	{
+
+		auto item = imageStore->Get(i);
+		auto croped = item.first.GetSubImage(m_crop);
+		builder->PushBack(croped, item.second);
+	}
+	historyItem = new HistoryCropImage(imageStore, m_crop);
+	imageStore = IImageStoreBuilder::BuildStore(builder);
+
+}
+
+HistoryCropImage::HistoryCropImage(IImageStore* imageStore, const wxRect& crop):
+	m_imageStore(imageStore), m_crop(crop)
+{
+
+}
+
+HistoryCropImage::~HistoryCropImage()
+{
+	delete m_imageStore;
+}
+
+void HistoryCropImage::Undo(IImageStore*& imageStore)
+{
+	std::swap(imageStore, m_imageStore);
+}
+
+void HistoryCropImage::Redo(IImageStore*& imageStore)
+{
+	std::swap(m_imageStore, imageStore);
+}
+
+wxString HistoryCropImage::GetDescription() const
+{
+	wxString description;
+	description << wxT("잘라내기(") <<
+		m_crop.x << wxT(", ") << m_crop.y << wxT(", ")<<
+		m_crop.width<< wxT(", ") << m_crop.height <<
+		wxT(")");
+	return description;
 }

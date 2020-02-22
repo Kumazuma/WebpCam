@@ -4,24 +4,26 @@
 #include<d2d1.h>
 #include<d2d1helper.h>
 #include "event.h"
+#include "util.h"
 namespace Edit
 {
 	class EditRenderWidget :public wxScrolledCanvas
 	{
 	private:
+		EditFramePresenter* m_presenter;
+		std::optional<wxPoint> m_prevMousePosition;
 		std::optional<size_t> m_index;
+		wxImage m_selectedImage;
 		wxTimer* m_timer;
 		bool m_isPlaying;
-		wxImage m_selectedImage;
 		uint32_t m_duration;
 		int64_t m_lastTick;
-		EditFramePresenter* m_presenter;
+		
 		float m_scale;
 		wxPoint m_centerPoint;
-		
-		std::optional<wxPoint> m_prevMousePosition;
-		wxRect m_cropArea;
+
 		int64_t m_lastRenderTime = 0;
+		DirectionState m_direction = DirectionState::None;
 	public:
 		virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL) override;
 		EditRenderWidget();
@@ -34,6 +36,9 @@ namespace Edit
 		{
 			Init();
 		}
+		void RefreshView();
+		void MoveView(wxPoint delta);
+		void UpdateCropRect(wxPoint delta);
 		void SetPresenter(EditFramePresenter* presenter);
 		void SetSelectImage(std::optional<size_t> index);
 		void PlayAnimImage();

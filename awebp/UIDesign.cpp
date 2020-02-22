@@ -380,21 +380,21 @@ BottomPanel::BottomPanel( wxWindow* parent, wxWindowID id, const wxPoint& pos, c
 
 	m_staticText3 = new wxStaticText( this, wxID_ANY, wxT("fps"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText3->Wrap( -1 );
-	bSizer15->Add( m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizer15->Add( m_staticText3, 0, wxALL|wxALIGN_BOTTOM, 5 );
 
 	wxArrayString ui_choiceFpsChoices;
 	ui_choiceFps = new wxChoice( this, ID_CHOICE_FPS, wxDefaultPosition, wxDefaultSize, ui_choiceFpsChoices, 0|wxTAB_TRAVERSAL );
 	ui_choiceFps->SetSelection( 0 );
-	bSizer15->Add( ui_choiceFps, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizer15->Add( ui_choiceFps, 0, wxRIGHT|wxLEFT|wxALIGN_BOTTOM, 5 );
 
 	ui_btnStart = new wxButton( this, ID_BTN_START, wxT("Start"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
-	bSizer15->Add( ui_btnStart, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT|wxLEFT, 5 );
+	bSizer15->Add( ui_btnStart, 0, wxRIGHT|wxLEFT|wxALIGN_BOTTOM, 5 );
 
 	ui_btnStop = new wxButton( this, ID_BTN_STOP, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
-	bSizer15->Add( ui_btnStop, 0, wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
+	bSizer15->Add( ui_btnStop, 0, wxRIGHT|wxLEFT|wxALIGN_BOTTOM, 5 );
 
 	m_button11 = new wxButton( this, ID_BTN_CLOSE, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer15->Add( m_button11, 0, wxALL, 5 );
+	bSizer15->Add( m_button11, 0, wxALIGN_BOTTOM|wxRIGHT|wxLEFT, 5 );
 
 
 	this->SetSizer( bSizer15 );

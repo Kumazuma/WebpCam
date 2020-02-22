@@ -49,6 +49,7 @@ void EditFrame::OnRefreshView(wxCommandEvent& event)
 	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget) ;
 	widgets->ClearChildren();
 	widgets->Hide();
+	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), Edit::EditRenderWidget)->RefreshView();
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
 		auto* temp = new FrameListItemWidget(widgets, &m_presenter, i);
@@ -205,7 +206,7 @@ void EditFrame::OnPropertyValueChanged(wxPropertyGridEvent& event)
 
 void EditFrame::OnRBarBtnCropFrame(wxRibbonToolBarEvent& event)
 {
-	
+	m_presenter.CropImage();
 }
 
 void EditFrame::OnKeyDown(wxKeyEvent& event)

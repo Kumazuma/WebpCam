@@ -38,6 +38,18 @@ public:
 	virtual void Redo(IImageStore*& imageStore) override;
 	virtual wxString GetDescription() const override;
 };
+class HistoryCropImage : public IHistoryItem
+{
+private:
+	IImageStore* m_imageStore;
+	wxRect m_crop;
+public:
+	HistoryCropImage(IImageStore* imageStore, const wxRect& crop);
+	~HistoryCropImage();
+	virtual void Undo(IImageStore*& imageStore) override;
+	virtual void Redo(IImageStore*& imageStore) override;
+	virtual wxString GetDescription() const override;
+};
 class EditCropImageTool : public IEditTool
 {
 private:

@@ -170,6 +170,7 @@
     <ClCompile Include="interface.cpp" />
     <ClCompile Include="temporalfileimagestore.cpp" />
     <ClCompile Include="UIDesign.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="webpencoder.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="temporalfileimagestore.h" />
     <ClInclude Include="UIDesign.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="webmencoder.h" />
     <ClInclude Include="webpencoder.h" />
   </ItemGroup>

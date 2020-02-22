@@ -7,6 +7,7 @@ EditFramePresenter::EditFramePresenter(wxWindow* parent, IImageStore* imageStore
 	m_model(imageStore)
 {
 	this->SetNextHandler(parent);
+	m_model.SetCropRect(m_model.GetImageStore()->GetImageSize());
 }
 
 bool EditFramePresenter::GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration)
@@ -87,6 +88,50 @@ bool EditFramePresenter::ResizeImage(const wxSize& reImageSize)
 
 	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
 	return res;
+}
+
+bool EditFramePresenter::CropImage()
+{
+	wxRect cropArea = m_model.GetCropRect();
+	if (cropArea.GetSize() == m_model.GetImageStore()->GetImageSize())
+	{
+		return false;
+	}
+	EditCropImageTool resizeTool(cropArea);
+	IHistoryItem* historyItem = nullptr;
+	resizeTool.Execute(m_model.GetImageStore(), 0, 0, historyItem);
+	bool res = historyItem != nullptr;
+	if (res)
+	{
+		AddHistoryItem(historyItem);
+	}
+	m_model.SetCropRect(m_model.GetImageStore()->GetImageSize());
+	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	return false;
+}
+
+wxRect EditFramePresenter::GetCropRect()
+{
+	return m_model.GetCropRect();
+}
+
+void EditFramePresenter::SetCropRect(const wxRect& temp)
+{
+	auto imgSize = m_model.GetImageStore()->GetImageSize();
+	if (temp.x >= 0 &&
+		temp.y >= 0 &&
+		temp.width >= 10 &&
+		temp.height >= 10 &&
+		(temp.width + temp.x) <= imgSize.GetWidth() &&
+		(temp.height + temp.y) <= imgSize.GetHeight())
+	{
+		m_model.SetCropRect(temp);
+	}
+	else
+	{
+		m_model.SetCropRect(m_model.GetCropRect());
+	}
+	
 }
 
 void EditFramePresenter::Undo()
