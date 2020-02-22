@@ -5,6 +5,7 @@
 #include"interface.h"
 #include"editpresenter.h"
 #include <wx/dcbuffer.h>
+#include <wx/graphics.h>
 class FrameListItemWidget;
 class FrameListWidget : public wxScrolledCanvas
 {
@@ -12,6 +13,7 @@ private:
     wxVector<FrameListItemWidget*> m_items;
     //마우스 처리를 위한 변수들...
     std::optional<wxPoint> m_dragStartPosition;
+    wxGraphicsRenderer* m_renderer;
 public:
     FrameListWidget();
     FrameListWidget(wxWindow* parent,
@@ -28,8 +30,9 @@ public:
     void SetSelection(size_t index);
     void ClearChildren();
 protected:
-    void DoPaint(wxDC& dc);
-    void DoPaint() { wxClientDC dc(this); wxBufferedDC bufferdDC(&dc, GetSize()); DoPaint(bufferdDC); }
+    template <class DC>
+    void DoPaint(DC& dc);
+    void DoPaint() { wxClientDC dc(this);  DoPaint(dc); }
     void Init();
     void UpdateItemsImageLoad();
     virtual wxSize DoGetBestSize() const;
@@ -52,7 +55,8 @@ class FrameListItemWidget
 {
     friend class FrameListWidget;
 private:
-    wxBitmap m_bitmap;
+
+    wxImage m_thumnail;
     size_t m_duration;
     bool m_isSelected;
     bool m_isShown;
@@ -61,9 +65,7 @@ private:
     size_t m_index;
     wxPoint m_position;
     wxSize m_size;
-    wxBitmap m_virtualScreen;
 public:
-    wxBitmap& GetBitmap();
     bool IsSelected() { return m_isSelected; }
     void ItemSelect();
     void ItemUnselect();
@@ -80,6 +82,7 @@ public:
     wxRect GetRect() { return wxRect(m_position, m_size); }
     void SetPosition(const wxPoint& point) { m_position = point; }
     void OnPaint(const wxPoint& viewport, wxDC& dc);
+    void OnPaint(wxGraphicsContext& gc);
     void SetSize(const wxSize& size) { m_size = size; }
 protected:
     const size_t HEIGHT_PER_DPI = 256 / 96;
@@ -87,3 +90,5 @@ protected:
     void DoPaint();
 private:
 };
+
+

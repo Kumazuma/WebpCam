@@ -1,6 +1,5 @@
 ﻿#include "wx/wxprec.h"
 #include "editrenderwidget.h"
-#include <wx/dcbuffer.h>
 #include "event.h"
 EditFrameRenderWidget::EditFrameRenderWidget():
 	m_timer(nullptr)
@@ -36,8 +35,7 @@ void EditFrameRenderWidget::SetSelectImage(std::optional<size_t> index)
 		m_bitmap = img;
 	}
 	wxClientDC dc(this);
-	wxBufferedDC bufferdDc(&dc, GetClientSize());
-	DoPaint(bufferdDc);
+	DoPaint(dc);
 }
 
 void EditFrameRenderWidget::PlayAnimImage()
@@ -71,14 +69,18 @@ void EditFrameRenderWidget::PlayAnimImage()
 	m_duration = duration;
 	m_lastTick = wxGetLocalTimeMillis().GetValue();
 	wxClientDC dc(this);
-	wxBufferedDC bufferdDc(&dc, GetClientSize());
-	DoPaint(bufferdDc);
+	DoPaint(dc);
 }
 
 void EditFrameRenderWidget::Init()
 {
 	m_timer = new wxTimer(this);
 	m_isPlaying = false;
+#ifdef wxUSE_GRAPHICS_DIRECT2D
+	m_renderer = wxGraphicsRenderer::GetDirect2DRenderer();
+#else
+	m_renderer = wxGraphicsRenderer::GetDefaultRenderer();
+#endif
 }
 
 void EditFrameRenderWidget::ProcessAnim()
@@ -115,21 +117,42 @@ void EditFrameRenderWidget::ProcessAnim()
 		}
 		m_duration = due - cap;
 		wxClientDC dc(this);
-		wxBufferedDC bufferdDc(&dc, GetClientSize());
-		DoPaint(bufferdDc);
+		DoPaint(dc);
 	}
 }
 
-void EditFrameRenderWidget::DoPaint(wxDC& dc)
+void EditFrameRenderWidget::DoPaint(wxClientDC& dc)
 {
-	dc.Clear();
-	if(m_bitmap.IsOk())
-		dc.DrawBitmap(m_bitmap, wxPoint(0, 0));
+	auto context = m_renderer->CreateContext(dc);
+	if (m_bitmap.IsOk())
+	{
+		wxSize rc = this->GetClientSize();
+		wxSize imageSize = m_bitmap.GetSize();
+		wxPoint viewStart(0,0);
+		if (imageSize.x  <= rc.x)
+		{
+			viewStart.x = (imageSize.x  - rc.x) / 2;
+		}
+		if (imageSize.y  <= rc.y)
+		{
+			viewStart.y = (imageSize.y  - rc.y) / 2;
+		}
+		context->Translate(-viewStart.x, -viewStart.y);
+		context->DrawBitmap(m_bitmap, 
+			0, 0,
+			imageSize.x, imageSize.y);
+	}
+	delete context;
+}
+
+void EditFrameRenderWidget::DoPaint()
+{
+
 }
 
 void EditFrameRenderWidget::OnPaint(wxPaintEvent& event)
 {
-	wxBufferedPaintDC dc(this);
+	wxPaintDC dc(this);
 	DoPaint(dc);
 }
 

@@ -3,6 +3,7 @@
 #include <wx/dcbuffer.h>
 #include <wx/graphics.h>
 #include <wx/rawbmp.h>
+#include <math.h>
 #ifdef __WXMSW__
 #pragma comment(lib, "D2D1.lib") 
 template<class Interface>
@@ -127,6 +128,14 @@ Edit::EditCropToolWidget::EditCropToolWidget(EditFramePresenter& presenter, wxWi
 	auto imgSize = m_presenter->GetImageSize();
 	SetVirtualSize(imgSize);
 	m_cropArea = m_presenter->GetImageSize();
+	//TEST
+	auto min =std::min(m_cropArea.width, m_cropArea.height);
+	m_cropArea.x = (m_cropArea.width - min  ) / 2;
+	m_cropArea.y = (m_cropArea.height - min) / 2;
+	m_cropArea.width = min;
+	m_cropArea.height = min;
+	
+	
 	AlwaysShowScrollbars();
 	
 	m_workArea.Create(m_presenter->GetImageSize());
@@ -140,7 +149,21 @@ void Edit::EditCropToolWidget::DoPaint()
 	wxImage image;
 	uint32_t du;
 	m_presenter->GetImage(0, image, du);
-	m_memDC->DrawBitmap(image,0,0);
+	//m_memDC->DrawBitmap(image,0,0);
+	//auto * gc = wxGraphicsContext::Create(*m_memDC);
+	//auto s = image.GetSize();
+	//gc->DrawBitmap(image,0,0,s.GetWidth(), s.GetHeight() );
+	//wxRegion rc(wxRect(0,0,s.x,s.y));
+	//rc.Subtract(wxRegion(m_cropArea));
+	//wxGraphicsPath path = gc->CreatePath();
+	//wxBrush brush(wxColor(0,0,0,128), wxBrushStyle::wxBRUSHSTYLE_SOLID);
+	//path.AddRectangle(0, 0, s.GetWidth(), s.GetHeight());
+	//path.AddRectangle(m_cropArea.x, m_cropArea.y, m_cropArea.width, m_cropArea.height);
+	//
+	//gc->SetBrush(brush);
+	//gc->FillPath(path);
+	//delete gc;
+	//
 	m_backbuffer = m_workArea.ConvertToImage();
 	InitResource();
 }
@@ -230,9 +253,7 @@ void Edit::EditCropToolWidget::OverDraw()
 	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 	auto translation = D2D1::Matrix3x2F::Translation(-viewStart.x , -viewStart.y );
 	auto scale = D2D1::Matrix3x2F::Scale(m_scale , m_scale );
-	m_renderTarget->SetTransform(scale * translation);
-	
-	//m_renderTarget->SetTransform(D2D1::Matrix3x2F::Scale(m_scale, m_scale));
+	m_renderTarget->SetTransform(translation  * scale);
 	m_renderTarget->DrawBitmap(m_bitmap, D2D1::RectF(0, 0, m_bitmap->GetSize().width, m_bitmap->GetSize().height));
 
 	auto res = m_renderTarget->EndDraw();
@@ -240,7 +261,6 @@ void Edit::EditCropToolWidget::OverDraw()
 	{
 		ReleaseResource();
 	}
-	//m_renderTarget->Flush();
 	
 }
 void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)

@@ -4,11 +4,7 @@
 #include <wx/dcbuffer.h>
 const int IMAGE_RESIZE_SiZE = 128;
 const int WIDGET_BORDER = 5;
-wxBitmap& FrameListItemWidget::GetBitmap()
-{
-	// TODO: 여기에 return 문을 삽입합니다.
-	return m_virtualScreen;
-}
+
 inline void FrameListItemWidget::ItemSelect()
 { 
 	m_isSelected = true; 
@@ -33,14 +29,16 @@ FrameListItemWidget::~FrameListItemWidget()
 
 void FrameListItemWidget::LoadData()
 {
-	if (m_presenter == nullptr)
-	{
-		return;
-	}
-	if (m_bitmap.IsOk())
-	{
-		return;
-	}
+}
+
+void FrameListItemWidget::UnloadData()
+{
+
+}
+
+
+inline void FrameListItemWidget::Init()
+{
 	auto& presenter = *m_presenter;
 	wxImage image;
 	uint32_t duration;
@@ -63,28 +61,10 @@ void FrameListItemWidget::LoadData()
 		float radio = float(IMAGE_RESIZE_SiZE) / *max;
 		*max = IMAGE_RESIZE_SiZE;
 		*min = *min * radio;
-		image.Rescale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
-		m_bitmap = image;
-		m_virtualScreen.Create(m_size);
+	 	m_thumnail =  image.Rescale(size.x, size.y, wxIMAGE_QUALITY_NEAREST);
+
 		DoPaint();
 	}
-}
-
-void FrameListItemWidget::UnloadData()
-{
-	if (m_bitmap.IsOk())
-	{
-		m_bitmap.UnRef();
-	}
-	if (m_virtualScreen.IsOk())
-	{
-		m_virtualScreen.UnRef();
-	}
-}
-
-
-inline void FrameListItemWidget::Init()
-{
 }
 
 inline wxSize FrameListItemWidget::GetBestSize() const {
@@ -93,28 +73,54 @@ inline wxSize FrameListItemWidget::GetBestSize() const {
 
 void FrameListItemWidget::OnPaint(const wxPoint& viewport, wxDC& dc)
 {
-	if (m_virtualScreen.IsOk())
+	if (m_thumnail.IsOk())
 	{
-		dc.DrawBitmap(m_virtualScreen, m_position - viewport);
+		wxColour bgColor = wxColour(255, 255, 255);
+		if (m_isSelected)
+		{
+			bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+		}
+		dc.SetBrush(wxBrush(bgColor));
+		dc.DrawRectangle(m_position - viewport, m_size);
+		wxPoint gap = (wxPoint(m_size.x, m_size.y) - m_thumnail.GetSize()) / 2;
+		dc.DrawBitmap(m_thumnail, m_position - viewport + gap);
+	}
+}
+void FrameListItemWidget::OnPaint(wxGraphicsContext& gc)
+{
+	if (m_thumnail.IsOk())
+	{
+		wxColour bgColor = wxColour(255, 255, 255);
+		if (m_isSelected)
+		{
+			bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+		}
+		gc.SetBrush(wxBrush(bgColor));
+		auto pos = m_position ;
+		wxPoint gap = (wxPoint(m_size.x, m_size.y) - m_thumnail.GetSize()) / 2;
+		gc.DrawRectangle(pos.x,pos.y, m_size.x,m_size.y);
+		pos = m_position + gap;
+		auto thSize = m_thumnail.GetSize();
+		gc.DrawBitmap(m_thumnail, pos.x, pos.y,thSize.x, thSize.y);
 	}
 }
 void FrameListItemWidget::DoPaint()
 {
-	wxMemoryDC dc(m_virtualScreen);
-	wxColour bgColor = wxColour(255, 255, 255);
-	if (m_isSelected)
-	{
-		bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-	}
-	dc.SetBrush(wxBrush(bgColor));
-	dc.DrawRectangle(m_size);
-	//dc.DrawRectangle(5, 5, 256, 256);
-	if (m_bitmap.IsOk())
-	{
-		int x = (IMAGE_RESIZE_SiZE - m_bitmap.GetWidth()) / 2;
-		int y = (IMAGE_RESIZE_SiZE - m_bitmap.GetHeight()) / 2;
-		dc.DrawBitmap(m_bitmap, wxPoint(5 + x, 5 + y));
-	}
+	//wxMemoryDC dc(m_virtualScreen);
+	//wxColour bgColor = wxColour(255, 255, 255);
+	//if (m_isSelected)
+	//{
+	//	bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+	//}
+	//dc.SetBrush(wxBrush(bgColor));
+	//dc.DrawRectangle(m_size);
+	////dc.DrawRectangle(5, 5, 256, 256);
+	//if (m_bitmap.IsOk())
+	//{
+	//	int x = (IMAGE_RESIZE_SiZE - m_bitmap.GetWidth()) / 2;
+	//	int y = (IMAGE_RESIZE_SiZE - m_bitmap.GetHeight()) / 2;
+	//	dc.DrawBitmap(m_bitmap, wxPoint(5 + x, 5 + y));
+	//}
 }
 
 FrameListWidget::FrameListWidget():
@@ -203,6 +209,12 @@ void FrameListWidget::ClearChildren()
 }
 
 void FrameListWidget::Init() {
+#ifdef wxUSE_GRAPHICS_DIRECT2D
+	m_renderer = wxGraphicsRenderer::GetDirect2DRenderer();
+#else
+	m_renderer = wxGraphicsRenderer::GetDefaultRenderer();
+	
+#endif
 	long style = this->GetWindowStyle();
 	SetMinSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
 	SetSize(wxSize(IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2, IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2));
@@ -248,19 +260,25 @@ void FrameListWidget::OnSized(wxSizeEvent& event)
 	event.Skip();
 	UpdateItemsImageLoad();
 }
-void FrameListWidget::DoPaint(wxDC& dc)
+template<class DC>
+void FrameListWidget::DoPaint(DC& dc)
 {
-	dc.Clear();
+	auto gc = m_renderer->CreateContext(dc);
+	
 	auto viewStart = GetViewStart() * (IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2);
-	auto viewRect = wxRect(viewStart, GetSize());
+	auto viewRect = wxRect(viewStart, GetClientSize());
+	gc->Translate(-viewStart.x, -viewStart.y);
+	gc->SetBrush(wxBrush(wxColour(0xFF, 0xFF, 0xFF), wxBRUSHSTYLE_SOLID));
+	gc->DrawRectangle(viewStart.x, viewStart.y, viewRect.width, viewRect.height);
 	for (auto it : m_items)
 	{
 		//실제로 화면에 보일 때만 갱신한다.
 		if (viewRect.Contains(it->GetPosition()))
 		{
-			it->OnPaint(viewStart, dc);
+			it->OnPaint(*gc);
 		}
 	}
+	delete gc;
 }
 void FrameListWidget::OnPaint(wxPaintEvent& event)
 {
