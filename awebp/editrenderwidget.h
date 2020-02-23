@@ -7,7 +7,7 @@
 #include "util.h"
 namespace Edit
 {
-	class EditRenderWidget :public wxScrolledCanvas
+	class EditRenderWidget :public wxControl
 	{
 	private:
 		EditFramePresenter* m_presenter;
@@ -20,11 +20,19 @@ namespace Edit
 		int64_t m_lastTick;
 		
 		float m_scale;
-		wxPoint m_centerPoint;
+		wxPoint m_viewStart;
 
 		int64_t m_lastRenderTime = 0;
 		DirectionState m_direction = DirectionState::None;
 	public:
+		//스크롤 처리를 위한 메소드들
+		void AdjustScrollbars();
+		int AdjectScroll(const int value, const  float factorInImage, const  float factorInScreen);
+		void SetScrollRate(int x, int y);
+		wxPoint GetViewStart();
+		void Scroll(int x, int y);
+		void Scroll(const wxPoint& pt) { Scroll(pt.x, pt.y); }
+		void ScrollOnWhell(const wxPoint& pt);
 		virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL) override;
 		EditRenderWidget();
 		~EditRenderWidget();
@@ -32,7 +40,7 @@ namespace Edit
 			wxWindow* parent, wxWindowID winid,
 			const wxPoint& pos, const wxSize& size,
 			long style, const wxValidator& val, const wxString& name) :
-			wxScrolledCanvas(parent, winid, pos, size, style,name)
+			wxControl(parent, winid, pos, size, style |wxVSCROLL |wxHSCROLL, val, name)
 		{
 			Init();
 		}
@@ -54,6 +62,7 @@ namespace Edit
 		ID2D1HwndRenderTarget* m_renderTarget;
 		ID2D1Bitmap* m_bitmap;
 		ID2D1PathGeometry* m_cropAreaRegion;
+		ID2D1PathGeometry* m_cropAreaDotLines;
 		wxClientDC* m_clientDC;
 		void InitDirect2D();
 		void ReleaseDirect2D();
@@ -61,7 +70,8 @@ namespace Edit
 		void ReleaseResource();
 #endif
 	protected:
-		void OnScrollWinEvent(wxScrollWinEvent& event);
+		void OnScrollThubTrack(wxScrollWinEvent& event);
+		//void OnScrollWinEvent(wxScrollWinEvent& event);
 		void OnPaint(wxPaintEvent& event);
 		void OnSize(wxSizeEvent& event);
 		void OnMouseLeftDown(wxMouseEvent& event);

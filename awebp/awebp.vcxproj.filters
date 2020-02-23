@@ -108,6 +108,9 @@
     <ClCompile Include="util.cpp">
       <Filter>소스 파일\common</Filter>
     </ClCompile>
+    <ClCompile Include="editrenderwidget-scrollbar.cpp">
+      <Filter>소스 파일\edit</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h">

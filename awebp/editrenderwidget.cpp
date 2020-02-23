@@ -111,10 +111,6 @@ void Edit::EditRenderWidget::InitResource()
 		}
 		SafeRelease(m_cropAreaRegion);
 		auto imgSize = m_selectedImage.GetSize();
-		m_factory->CreatePathGeometry(&m_cropAreaRegion);
-		ID2D1GeometrySink* pSink = NULL;
-		m_cropAreaRegion->Open(&pSink);
-		pSink->SetFillMode(D2D1_FILL_MODE_WINDING);
 		D2D1_POINT_2F points[] = {
 			D2D1::Point2F(0, 0),
 			D2D1::Point2F(0, imgSize.y),
@@ -130,19 +126,33 @@ void Edit::EditRenderWidget::InitResource()
 			D2D1::Point2F(cropArea.x, cropArea.y + cropArea.height),
 			D2D1::Point2F(cropArea.x, cropArea.y)
 		};
+		ID2D1GeometrySink* pSink = NULL;
+		m_factory->CreatePathGeometry(&m_cropAreaRegion);
+		m_cropAreaRegion->Open(&pSink);
+		pSink->SetFillMode(D2D1_FILL_MODE_WINDING);
 		pSink->BeginFigure(D2D1::Point2F(cropArea.x, cropArea.y), D2D1_FIGURE_BEGIN_FILLED);
 		pSink->AddLines(points2, ARRAYSIZE(points2));
 		pSink->AddLines(points, ARRAYSIZE(points));
 		pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
 		pSink->Close();
 		SafeRelease(pSink);
-		
+		SafeRelease(m_cropAreaDotLines);
+		m_factory->CreatePathGeometry(&m_cropAreaDotLines);
+		m_cropAreaDotLines->Open(&pSink);
+		pSink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+		pSink->BeginFigure(D2D1::Point2F(cropArea.x, cropArea.y), D2D1_FIGURE_BEGIN_FILLED);
+		pSink->AddLines(points2, ARRAYSIZE(points2));
+		pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+		pSink->Close();
+		SafeRelease(pSink);
 	}
 #endif
 }
 void Edit::EditRenderWidget::ReleaseResource()
 {
 #ifdef __WXMSW__
+	SafeRelease(m_cropAreaDotLines);
+	SafeRelease(m_cropAreaRegion);
 	SafeRelease(m_renderTarget);
 	SafeRelease(m_bitmap);
 #endif
@@ -154,10 +164,13 @@ void Edit::EditRenderWidget::ReleaseDirect2D()
 	SafeRelease(m_factory);
 #endif
 }
+void Edit::EditRenderWidget::ScrollOnWhell(const wxPoint& pt)
+{
+}
 void Edit::EditRenderWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
-	m_centerPoint.x += dx;
-	m_centerPoint.y += dy;
+	m_viewStart.x += dx;
+	m_viewStart.y += dy;
 	OverDraw();
 	
 }
@@ -169,7 +182,7 @@ Edit::EditRenderWidget::EditRenderWidget():
 void Edit::EditRenderWidget::Init()
 {
 	InitDirect2D();
-	SetScrollRate(1, 1);
+	
 	SetFocus();
 	if (!m_presenter)
 	{
@@ -217,12 +230,16 @@ void Edit::EditRenderWidget::Init()
 		auto imageSize = m_selectedImage.GetSize();
 		if (imageSize.x * m_scale <= clientSize.x)
 		{
-			m_centerPoint.x = (clientSize.x  - imageSize.x * m_scale) / 2;
+			m_viewStart.x = (clientSize.x  - imageSize.x * m_scale) / 2;
 		}
 		if (imageSize.y * m_scale <= clientSize.y)
 		{
-			m_centerPoint.y = (clientSize.y - imageSize.y * m_scale) / 2;
+			m_viewStart.y = (clientSize.y - imageSize.y * m_scale) / 2;
 		}
+
+		SetScrollbar(wxVERTICAL, 0, clientSize.y , imageSize.y * m_scale);
+		SetScrollbar(wxHORIZONTAL, 0, clientSize.x, imageSize.x * m_scale);
+
 	}
 	
 //
@@ -317,16 +334,36 @@ void Edit::EditRenderWidget::OverDraw()
 	m_renderTarget->BeginDraw();
 	m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
-	auto translation = D2D1::Matrix3x2F::Translation(m_centerPoint.x , m_centerPoint.y );
+	auto translation = D2D1::Matrix3x2F::Translation(m_viewStart.x , m_viewStart.y );
 	auto scale = D2D1::Matrix3x2F::Scale(m_scale , m_scale );
 	m_renderTarget->SetTransform(scale * translation);
 	m_renderTarget->DrawBitmap(m_bitmap, D2D1::RectF(0, 0, m_bitmap->GetSize().width, m_bitmap->GetSize().height));
 	if (m_cropAreaRegion)
 	{
+		float dashes[] = { 2.f,2.f };
+		ID2D1StrokeStyle* strokeStyle;
+		m_factory->CreateStrokeStyle(
+			D2D1::StrokeStyleProperties(
+				D2D1_CAP_STYLE_FLAT,
+				D2D1_CAP_STYLE_FLAT,
+				D2D1_CAP_STYLE_SQUARE,
+				D2D1_LINE_JOIN_MITER,
+				10.0f,
+				D2D1_DASH_STYLE_CUSTOM,
+				3.0f),
+			dashes,
+			ARRAYSIZE(dashes),
+			&strokeStyle
+		);
 		ID2D1SolidColorBrush* solidBrush = nullptr;
 		m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0x000000), &solidBrush);
+		
 		solidBrush->SetOpacity(0.5f);
 		m_renderTarget->FillGeometry(m_cropAreaRegion, solidBrush);
+		solidBrush->SetOpacity(1);
+		solidBrush->SetColor(D2D1::ColorF(1, 1, 1));
+		m_renderTarget->DrawGeometry(m_cropAreaDotLines, solidBrush, 1, strokeStyle);
+		SafeRelease(strokeStyle);
 		SafeRelease(solidBrush);
 	}
 	
@@ -345,9 +382,53 @@ void Edit::EditRenderWidget::OnPaint(wxPaintEvent& event)
 	OverDraw();
 }
 #endif
-void Edit::EditRenderWidget::OnScrollWinEvent(wxScrollWinEvent& event)
+void Edit::EditRenderWidget::OnScrollThubTrack(wxScrollWinEvent& event)
 {
-	event.Skip();
+	int range = this->GetScrollRange(event.GetOrientation());
+	int pos = event.GetPosition();//event.GetPosition();
+	int thumbs = this->GetScrollThumb(event.GetOrientation());
+	wxSize imgSize = m_presenter->GetImageSize();
+	float imgWidth = imgSize.x * m_scale;
+	float imgHeight = imgSize.y * m_scale;
+	auto viewStart = GetViewStart();
+	int* factorViewStart = nullptr;
+	int factorScreen = 0;
+	float factorImage = 0;
+	switch (event.GetOrientation())
+	{
+	case wxVERTICAL:
+		factorScreen = GetClientSize().y;
+		factorViewStart = &viewStart.y;
+		factorImage = imgHeight;
+		break;
+	case wxHORIZONTAL:
+		factorScreen = GetClientSize().x;
+		factorViewStart = &viewStart.x;
+		factorImage = imgWidth;
+		break;
+	}
+	//페이지의 크기가 윈도우 축 크기보다 작다면
+	if (thumbs < factorScreen)
+	{
+		//좌상단이다, 따라서 뷰 시작 좌표를 더한다.
+		//*factorViewStart = *factorViewStart - pos;
+	}
+
+	if (-pos != *factorViewStart)
+	{
+		*factorViewStart = -pos;
+		Scroll(viewStart);
+	}
+	else
+	{
+
+	}
+	
+	//스크롤 범위가 이미지 보다 크다면
+	if(range > factorImage)
+	{
+		//우하단이다, 따라서... 할 것은 없다.
+	}
 	OverDraw();
 }
 
@@ -376,24 +457,28 @@ void Edit::EditRenderWidget::OnMouseLeftDown(wxMouseEvent& event)
 		rc.y *= m_scale;
 		rc.width *= m_scale;
 		rc.height *= m_scale;
-		wxPoint s = m_centerPoint;
+		wxPoint s = m_viewStart;
 		wxSize imgSize = m_selectedImage.GetSize();
 		rc.x += s.x;
 		rc.y += s.y;
-		rc.Deflate(-4);
+		rc.Deflate(-16);
 		auto res = GetDirection(rc, mPosition);
 
 		if (res != DirectionState::None )
 		{
-			//마우스로 크롭 영역을 조작한다
-			m_direction = res;
-			m_prevMousePosition = event.GetPosition();
+			rc.Deflate(32);
+			if (!rc.Contains(mPosition))
+			{
+				//마우스로 크롭 영역을 조작한다
+				m_direction = res;
+				m_prevMousePosition = event.GetPosition();
+			}
 		}
 		else
 		{
 			res = DirectionState::None;
 		}
-		SetCursor(GetSizingCursor(res));
+		SetCursor(GetSizingCursor(m_direction));
 	}
 }
 void Edit::EditRenderWidget::OnMouseLeftUp(wxMouseEvent& event)
@@ -429,16 +514,19 @@ void Edit::EditRenderWidget::OnMouseMotion(wxMouseEvent& event)
 		rc.y *= m_scale;
 		rc.width *= m_scale;
 		rc.height *= m_scale;
-		wxPoint s = m_centerPoint;
+		wxPoint s = m_viewStart;
 		wxSize imgSize = m_selectedImage.GetSize();
 		rc.x += s.x;
 		rc.y += s.y;
-		rc.Deflate(-4);
+		rc.Deflate(-16);
 		auto res = GetDirection(rc, mPosition);
-		if (res != DirectionState::None && rc.Deflate(4).Contains(mPosition))
+		rc.Deflate(32);
+		if (rc.Contains(mPosition))
 		{
-			SetCursor(GetSizingCursor(res));
+			//마우스로 크롭 영역을 조작한다
+			res = DirectionState::None;
 		}
+		SetCursor(GetSizingCursor(res));
 		return;
 	}
 	
@@ -469,55 +557,42 @@ void Edit::EditRenderWidget::OnMouseWheel(wxMouseEvent& event)
 {
 	if (event.GetWheelRotation() == 0)
 		return;
+	if (!m_selectedImage.IsOk())
+		return;
 	auto sign = event.GetWheelRotation() / (abs(event.GetWheelRotation()));
 	if (event.ControlDown())
 	{
 		auto style = GetWindowStyle();
-		
+		//이동전 이미지 중심의 XY
+		wxPoint ptPrevCenter = GetViewStart();
+		auto g = m_selectedImage.GetSize() * m_scale;
+		ptPrevCenter += g / 2;
+
 		auto prevScale = m_scale;
 		m_scale += 0.01f * sign* (event.GetWheelDelta() / 120) * 10;
 		if (m_scale <= 0)
 		{
 			m_scale = 0.1f;
 		}
-		SetVirtualSize((m_selectedImage.GetSize() * m_scale) + wxSize(1,1) );
-		auto s = this->GetViewStart();
-		
-		auto t = m_selectedImage.GetSize();
-		t.x =(m_scale * s.x) / prevScale;
-		t.y =(m_scale * s.y) / prevScale;
-		auto clientSize = GetClientSize();
-		auto imageSize = m_selectedImage.GetSize();
-		if (imageSize.x * m_scale <= clientSize.x)
-		{
-			m_centerPoint.x = (clientSize.x - imageSize.x * m_scale) / 2;
-		}
-		else
-		{
-			m_centerPoint.x = GetViewStart().x;
-		}
-		if (imageSize.y * m_scale <= clientSize.y)
-		{
-			m_centerPoint.y = (clientSize.y - imageSize.y * m_scale) / 2;
-		}
-		else
-		{
-			m_centerPoint.y = GetViewStart().y;
-		}
 		AdjustScrollbars();
-		Scroll(t.x, t.y);
+		wxPoint ptNowCenter = GetViewStart();
+		 g = m_selectedImage.GetSize() * m_scale;
+		ptNowCenter += g / 2;
+		wxPoint delta = ptPrevCenter - ptNowCenter;
+		ptPrevCenter -= g / 2;
+		Scroll(ptPrevCenter);
 	}
-	else 
+	else if(m_selectedImage.IsOk())
 	{
 		auto s = this->GetViewStart();
 		auto t = m_selectedImage.GetSize();
 		if (event.ShiftDown())
 		{
-			s.x -= sign*(m_scale * t.x) / 20;
+			s.x += sign*(m_scale * t.x) / 20;
 		}
 		else
 		{
-			s.y -= sign * (m_scale * t.y) / 20;
+			s.y += sign * (m_scale * t.y) / 20;
 			
 		}
 		Scroll(s.x, s.y);
@@ -559,13 +634,12 @@ void Edit::EditRenderWidget::MoveView(wxPoint delta)
 {
 	if (delta.x || delta.y)
 	{
-		auto s = GetViewStart() - delta;
+		auto s = GetViewStart() + delta;
 		
 		auto b = GetBestSize();
 		auto c = GetClientSize();
 		int unitX;
 		int unitY;
-		GetScrollPixelsPerUnit(&unitX, &unitY);
 		//this->GetScro;
 		Scroll(s);
   		//this->GetScrollHelper()->SetScrollbars(unitX, unitY, b.x, b.y, s.x, s.y,true);
@@ -724,8 +798,8 @@ void Edit::EditRenderWidget::PlayAnimImage()
 
 namespace Edit
 {
-	wxIMPLEMENT_DYNAMIC_CLASS(EditRenderWidget, wxScrolledCanvas);
-	wxBEGIN_EVENT_TABLE(EditRenderWidget, wxScrolledCanvas)
+	wxIMPLEMENT_DYNAMIC_CLASS(EditRenderWidget, wxControl);
+	wxBEGIN_EVENT_TABLE(EditRenderWidget, wxControl)
 		EVT_LEFT_DOWN(EditRenderWidget::OnMouseLeftDown)
 		EVT_LEFT_UP(EditRenderWidget::OnMouseLeftUp)
 		EVT_MOTION(EditRenderWidget::OnMouseMotion)
@@ -736,7 +810,7 @@ namespace Edit
 		EVT_SIZE(EditRenderWidget::OnSize)
 		EVT_TIMER(wxID_ANY, EditRenderWidget::OnTimer)
 		EVT_IDLE(EditRenderWidget::OnIdle)
-		EVT_SCROLLWIN(EditRenderWidget::OnScrollWinEvent)
+		EVT_SCROLLWIN_THUMBTRACK(EditRenderWidget::OnScrollThubTrack)
 	wxEND_EVENT_TABLE()
 }
 

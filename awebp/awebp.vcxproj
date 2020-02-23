@@ -153,6 +153,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="cachedfileimagestore.cpp" />
     <ClCompile Include="captureframe.cpp" />
+    <ClCompile Include="editrenderwidget-scrollbar.cpp" />
     <ClCompile Include="editrenderwidget.cpp" />
     <ClCompile Include="editframe.cpp" />
     <ClCompile Include="editframelistwidget.cpp" />
