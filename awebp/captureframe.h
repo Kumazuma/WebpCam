@@ -12,6 +12,7 @@ private:
 	DirectionState m_sizingState;
 	std::optional<wxPoint> m_prevPosition;
 	AppPresenter m_presenter;
+	int m_recoredRectScale;
 public:
 	CaptureFrame();
 	void SetCapturedRect(wxRect rc);
@@ -40,6 +41,7 @@ protected:
 	void OnClickSave(wxCommandEvent& event);
 	void OnRefleshView(wxCommandEvent& event);
 	void OnClickClose(wxCommandEvent& event);
+	void OnDPIChageEvent(wxDPIChangedEvent& event);
 private:
 	
 	wxDECLARE_EVENT_TABLE();

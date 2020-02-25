@@ -7,7 +7,7 @@ wxIMPLEMENT_APP(AWebpApp);
 bool AWebpApp::OnInit()
 {
 #ifdef __WXMSW__
-	SetProcessDPIAware();
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 #endif
 	wxInitAllImageHandlers();
 	CaptureFrame* frame = new CaptureFrame();

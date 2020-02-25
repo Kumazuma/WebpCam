@@ -7,22 +7,27 @@
 #include "event.h"
 #include "util.h"
 const auto STYLE_CAPTURE_FRAME = wxSIMPLE_BORDER | wxSYSTEM_MENU | wxSTAY_ON_TOP | wxFRAME_SHAPED;
+#define DPI_SCALE(x) ((x * m_recoredRectScale) / 100)
 CaptureFrame::CaptureFrame() :
 	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize, STYLE_CAPTURE_FRAME),
 	m_presenter(this),
 	m_sizingState(DirectionState::None)
 {
 	SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+	//wxFrame::GetDPI
+	//Windows API의 GetDpiForWindow()와 동일하다.
+	wxSize size = GetDPI();
+	m_recoredRectScale = (size.x * 100) / 96;
 	auto sizer = new wxBoxSizer(wxVERTICAL);
 	wxPanel* panel = new TopPannel(this);
 	panel->Bind(wxEVT_MOTION, &CaptureFrame::OnChildMouseMotion, this);
-	panel->SetMaxClientSize(wxSize(99999, TOP_PANEL_HEIGHT));
+	panel->SetMaxClientSize(wxSize(99999, DPI_SCALE(TOP_PANEL_HEIGHT)));
 	panel->SetWindowStyle(panel->GetWindowStyle() | wxSIMPLE_BORDER);
 	sizer->Add(panel, 0, wxALL  , BORDER_THICKNESS);
 	sizer->Add(0,0, 1, wxEXPAND, BORDER_THICKNESS);
 
 	panel = new BottomPanel(this);
-	panel->SetMaxClientSize(wxSize(99999, BOTTOM_PANEL_HEIGHT));
+	panel->SetMaxClientSize(wxSize(99999, DPI_SCALE(BOTTOM_PANEL_HEIGHT)));
 	panel->Bind(wxEVT_MOTION, &CaptureFrame::OnChildMouseMotion, this);
 	sizer->Add(panel, 0, wxALL | wxEXPAND, BORDER_THICKNESS);
 	SetSizer(sizer);
@@ -62,11 +67,12 @@ void CaptureFrame::OnChildMouseMotion(wxMouseEvent& event)
 }
 wxRect CaptureFrame::CvtCaptureRegionToWindowRect(const wxRect& rc)
 {
+
 	wxRect res = rc;
 	res.x -= BORDER_THICKNESS;
 	res.width += BORDER_THICKNESS * 2;
-	res.y -= TOP_PANEL_HEIGHT + BORDER_THICKNESS + BORDER_THICKNESS / 2;
-	res.height += BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT + BORDER_THICKNESS / 2;
+	res.y -= DPI_SCALE(TOP_PANEL_HEIGHT) + BORDER_THICKNESS + BORDER_THICKNESS / 2;
+	res.height += BORDER_THICKNESS * 2 + DPI_SCALE(TOP_PANEL_HEIGHT) + DPI_SCALE(BOTTOM_PANEL_HEIGHT)  + BORDER_THICKNESS / 2;
 	return res;
 }
 
@@ -75,8 +81,8 @@ wxRect CaptureFrame::CvtWindowRectToCaptureRegion(const wxRect& rc)
 	wxRect res = rc;
 	res.x += BORDER_THICKNESS;
 	res.width -= BORDER_THICKNESS * 2;
-	res.y += TOP_PANEL_HEIGHT + BORDER_THICKNESS + BORDER_THICKNESS/2;
-	res.height -= BORDER_THICKNESS * 2 + TOP_PANEL_HEIGHT + BOTTOM_PANEL_HEIGHT + BORDER_THICKNESS / 2;
+	res.y += DPI_SCALE(TOP_PANEL_HEIGHT) + BORDER_THICKNESS + BORDER_THICKNESS / 2;
+	res.height -= BORDER_THICKNESS * 2 + DPI_SCALE(TOP_PANEL_HEIGHT) + DPI_SCALE(BOTTOM_PANEL_HEIGHT)  + BORDER_THICKNESS / 2;
 	return res;
 }
 void CaptureFrame::SetRect(const wxRect& rc)
@@ -295,6 +301,10 @@ void CaptureFrame::OnClickClose(wxCommandEvent& event)
 {
 	Close();
 }
+void CaptureFrame::OnDPIChageEvent(wxDPIChangedEvent& event)
+{
+	m_recoredRectScale = (event.GetNewDPI().x * 100) / 96;
+}
 wxBEGIN_EVENT_TABLE(CaptureFrame, wxFrame)
 EVT_LEFT_DOWN(CaptureFrame::OnMouseLeftDown)
 EVT_LEFT_UP(CaptureFrame::OnMouseLeftUp)
@@ -302,4 +312,5 @@ EVT_MOTION(CaptureFrame::OnMouseMotion)
 EVT_MOUSE_CAPTURE_LOST(CaptureFrame::OnMouseLost)
 EVT_SIZE(CaptureFrame::OnSized)
 EVT_MOVE(CaptureFrame::OnMoved)
+EVT_DPI_CHANGED(CaptureFrame::OnDPIChageEvent)
 wxEND_EVENT_TABLE()
