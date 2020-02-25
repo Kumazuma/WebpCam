@@ -15,5 +15,6 @@ enum class DirectionState
 };
 DirectionState& operator |= (DirectionState& obj, DirectionState state);
 bool operator && (DirectionState& obj, DirectionState state);
+//position의 좌표가 박스 안의 중심점을 기준으로 상하좌우 어디에 있는 지를 구한다. NE, NW, SE, SW, All은 결과값으로 나오지 않는다.
 DirectionState GetDirection(const wxRect& rect, const wxPoint& position);
 wxCursor GetSizingCursor(DirectionState state);

@@ -54,6 +54,7 @@ AppPresenter::AppPresenter(wxEvtHandler * view):
 	m_captureThreadHelper(nullptr),
 	m_view(view)
 {
+	this->SetNextHandler(view);
 	m_model.LinkPresenter(this);
 	this->Bind(EVT_PropertyChanged, &AppPresenter::OnModelPropertyChanged, this,ModelPropertyId::IsRecording);
 	this->Bind(EVT_PropertyChanged, &AppPresenter::OnModelPropertyChanged, this, ModelPropertyId::RecordedRect);
@@ -97,15 +98,6 @@ void AppPresenter::StartRecording()
 	m_capturer = new GDICapturer();
 
 	m_imageStoreBuilder = new CachedImageStorageBuilder(size);
-	if (m_model.IsUsingTemporalFile())
-	{
-		
-	}	
-	else
-	{
-		//TODO: Not yet implement;
-		//m_imageStore = new MemoryImageStore();
-	}
 	m_capturer->BeginCapture(this, recordedRect, (int)m_model.GetFPS());
 	//m_timer->Start((int)m_model.GetFPS()); 
 	auto* thread = new CaptureThread();

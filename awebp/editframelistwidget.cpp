@@ -106,21 +106,6 @@ void FrameListItemWidget::OnPaint(wxGraphicsContext& gc)
 }
 void FrameListItemWidget::DoPaint()
 {
-	//wxMemoryDC dc(m_virtualScreen);
-	//wxColour bgColor = wxColour(255, 255, 255);
-	//if (m_isSelected)
-	//{
-	//	bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-	//}
-	//dc.SetBrush(wxBrush(bgColor));
-	//dc.DrawRectangle(m_size);
-	////dc.DrawRectangle(5, 5, 256, 256);
-	//if (m_bitmap.IsOk())
-	//{
-	//	int x = (IMAGE_RESIZE_SiZE - m_bitmap.GetWidth()) / 2;
-	//	int y = (IMAGE_RESIZE_SiZE - m_bitmap.GetHeight()) / 2;
-	//	dc.DrawBitmap(m_bitmap, wxPoint(5 + x, 5 + y));
-	//}
 }
 
 FrameListWidget::FrameListWidget():

@@ -11,9 +11,9 @@ class FrameListWidget : public wxScrolledCanvas
 {
 private:
     wxVector<FrameListItemWidget*> m_items;
+    wxGraphicsRenderer* m_renderer;
     //마우스 처리를 위한 변수들...
     std::optional<wxPoint> m_dragStartPosition;
-    wxGraphicsRenderer* m_renderer;
 public:
     FrameListWidget();
     FrameListWidget(wxWindow* parent,

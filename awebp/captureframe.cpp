@@ -6,9 +6,9 @@
 #include "editframe.h"
 #include "event.h"
 #include "util.h"
-
+const auto STYLE_CAPTURE_FRAME = wxSIMPLE_BORDER | wxSYSTEM_MENU | wxSTAY_ON_TOP | wxFRAME_SHAPED;
 CaptureFrame::CaptureFrame() :
-	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize,wxSYSTEM_MENU| wxSTAY_ON_TOP |wxFRAME_SHAPED),
+	wxFrame(nullptr, wxID_ANY, wxT("캡처"), wxDefaultPosition, wxDefaultSize, STYLE_CAPTURE_FRAME),
 	m_presenter(this),
 	m_sizingState(DirectionState::None)
 {

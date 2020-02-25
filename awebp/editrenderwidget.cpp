@@ -350,7 +350,7 @@ void Edit::EditRenderWidget::OverDraw()
 				D2D1_LINE_JOIN_MITER,
 				10.0f,
 				D2D1_DASH_STYLE_CUSTOM,
-				3.0f),
+				0.5f),
 			dashes,
 			ARRAYSIZE(dashes),
 			&strokeStyle
@@ -642,6 +642,7 @@ void Edit::EditRenderWidget::MoveView(wxPoint delta)
 		int unitY;
 		//this->GetScro;
 		Scroll(s);
+		OverDraw();
   		//this->GetScrollHelper()->SetScrollbars(unitX, unitY, b.x, b.y, s.x, s.y,true);
 		//this->GetScrollHelper()->AdjustScrollbars();
 	}
