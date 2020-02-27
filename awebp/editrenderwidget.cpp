@@ -171,7 +171,7 @@ void Edit::EditRenderWidget::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
 	m_viewStart.x += dx;
 	m_viewStart.y += dy;
-	OverDraw();
+	Paint();
 	
 }
 Edit::EditRenderWidget::EditRenderWidget():
@@ -243,10 +243,10 @@ void Edit::EditRenderWidget::Init()
 	}
 	
 //
-	DoPaint();
-	OverDraw();
+	ReloadPaintResource();
+	Paint();
 }
-void Edit::EditRenderWidget::DoPaint()
+void Edit::EditRenderWidget::ReloadPaintResource()
 {
 	if (!m_presenter)
 		return;
@@ -303,12 +303,12 @@ void Edit::EditCropToolWidget::OnPaint(wxPaintEvent& event)
 	delete gc;
 }
 #else
-void Edit::EditRenderWidget::OverDraw()
+void Edit::EditRenderWidget::Paint()
 {
 	//this->Refresh(true, &GetClientRect());
 	//this->
 	auto now = wxGetLocalTimeMillis().GetValue();
-	if (now - m_lastRenderTime < 5)
+	if (now - m_lastRenderTime < 1)
 	{
 		return;
 	}
@@ -379,7 +379,7 @@ void Edit::EditRenderWidget::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 	dc.UnRef();
-	OverDraw();
+	Paint();
 }
 #endif
 void Edit::EditRenderWidget::OnScrollThubTrack(wxScrollWinEvent& event)
@@ -429,7 +429,7 @@ void Edit::EditRenderWidget::OnScrollThubTrack(wxScrollWinEvent& event)
 	{
 		//우하단이다, 따라서... 할 것은 없다.
 	}
-	OverDraw();
+	Paint();
 }
 
 void Edit::EditRenderWidget::OnSize(wxSizeEvent& event)
@@ -441,9 +441,11 @@ void Edit::EditRenderWidget::OnSize(wxSizeEvent& event)
 		float a = dpi / 96;
 		auto d2SizeU = ToSizeU(GetClientSize());
 		m_renderTarget->Resize(d2SizeU);
+		ReloadPaintResource();
 	}
 #endif
-	OverDraw();
+	
+	Paint();
 	event.Skip();
 }
 void Edit::EditRenderWidget::OnMouseLeftDown(wxMouseEvent& event)
@@ -494,8 +496,8 @@ void Edit::EditRenderWidget::OnMouseLeftUp(wxMouseEvent& event)
 			m_prevMousePosition.reset();
 		}
 		//화면 갱신
-		DoPaint();
-		OverDraw();
+		ReloadPaintResource();
+		Paint();
 
 	}
 }
@@ -544,8 +546,8 @@ void Edit::EditRenderWidget::OnMouseMotion(wxMouseEvent& event)
 		wxPoint delta = event.GetPosition()  - *m_prevMousePosition;
 		UpdateCropRect(delta);
 		//화면 갱신
-		DoPaint();
-		OverDraw();
+		ReloadPaintResource();
+		Paint();
 		m_prevMousePosition = event.GetPosition();
 	}
 	else
@@ -597,7 +599,7 @@ void Edit::EditRenderWidget::OnMouseWheel(wxMouseEvent& event)
 		}
 		Scroll(s.x, s.y);
 	}
-	OverDraw();
+	Paint();
 }
 
 void Edit::EditRenderWidget::OnKeyDown(wxKeyEvent& event)
@@ -621,7 +623,7 @@ void Edit::EditRenderWidget::OnKeyUp(wxKeyEvent& event)
 		wxPoint delta = event.GetPosition() + GetViewStart() - *m_prevMousePosition;
 		
 		MoveView(delta);
-		OverDraw();
+		Paint();
 		m_prevMousePosition.reset();
 		SetCursor(wxCursor(wxStockCursor::wxCURSOR_ARROW));
 	}
@@ -629,6 +631,7 @@ void Edit::EditRenderWidget::OnKeyUp(wxKeyEvent& event)
 void Edit::EditRenderWidget::RefreshView()
 {
 	Init();
+	Paint();
 }
 void Edit::EditRenderWidget::MoveView(wxPoint delta)
 {
@@ -642,7 +645,7 @@ void Edit::EditRenderWidget::MoveView(wxPoint delta)
 		int unitY;
 		//this->GetScro;
 		Scroll(s);
-		OverDraw();
+		Paint();
   		//this->GetScrollHelper()->SetScrollbars(unitX, unitY, b.x, b.y, s.x, s.y,true);
 		//this->GetScrollHelper()->AdjustScrollbars();
 	}
@@ -722,8 +725,8 @@ void Edit::EditRenderWidget::SetSelectImage(std::optional<size_t> index)
 		m_scale = 1.0;
 		Init();
 	}
-	DoPaint();
-	OverDraw();
+	ReloadPaintResource();
+	Paint();
 }
 void Edit::EditRenderWidget::ProcessAnim()
 {
@@ -759,8 +762,8 @@ void Edit::EditRenderWidget::ProcessAnim()
 			m_selectedImage = img;
 		}
 		m_duration = due - cap;
-		DoPaint();
-		OverDraw();
+		ReloadPaintResource();
+		Paint();
 	}
 }
 void Edit::EditRenderWidget::PlayAnimImage()
@@ -793,8 +796,8 @@ void Edit::EditRenderWidget::PlayAnimImage()
 	}
 	m_duration = duration;
 	m_lastTick = wxGetLocalTimeMillis().GetValue();
-	DoPaint();
-	OverDraw();
+	ReloadPaintResource();
+	Paint();
 }
 
 namespace Edit

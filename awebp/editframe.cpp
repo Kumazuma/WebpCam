@@ -161,11 +161,14 @@ void EditFrame::OnRbarBtnRestoreWindow(wxRibbonButtonBarEvent& event)
 {
 	auto& mgr = ui_editForm->GetAuiManger();
 	auto win = FindWindowById(ID_HISTORY_LIST);
-	auto pane = mgr.GetPane(win);
-	//pane.Right();
-	pane.Dock().Right();
-	mgr.RestorePane(pane);
+	auto& historyListAuiPane = mgr.GetPane(win);
+
+	historyListAuiPane.Dock().Right().Show();
+	auto& propertyGridAuiPane = mgr.GetPane(FindWindowById(ID_PROPERTY));
+	propertyGridAuiPane.Dock().Right().Show();
+	
 	mgr.Update();
+
 }
 
 void EditFrame::OnRBarBtnNewCap(wxRibbonButtonBarEvent& event)
@@ -231,7 +234,7 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	UIEditForm(parent),
 	m_presenter(presenter)
 {
-	ui_frameList->Hide();
+	ui_drawWidget->SetPresenter(&presenter);
 	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
 	{
 		auto* temp = new FrameListItemWidget(ui_frameList, &m_presenter, i);
@@ -253,8 +256,7 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	ui_propertyGrid->Append(new wxPropertyCategory(wxT("Frame Information")));
 	ui_propertyGrid->Append(new wxUIntProperty(wxT("시간(ms)"), wxT("PROPERTY_FRAME_DURATION")));
 
-	ui_frameList->Show();
-	ui_drawWidget->SetPresenter(&presenter);
+	
 }
 
 wxBEGIN_EVENT_TABLE(EditFrame, wxFrame)

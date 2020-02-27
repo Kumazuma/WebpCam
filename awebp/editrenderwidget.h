@@ -40,7 +40,8 @@ namespace Edit
 			wxWindow* parent, wxWindowID winid,
 			const wxPoint& pos, const wxSize& size,
 			long style, const wxValidator& val, const wxString& name) :
-			wxControl(parent, winid, pos, size, style |wxVSCROLL |wxHSCROLL, val, name)
+			wxControl(parent, winid, pos, size, style |wxVSCROLL |wxHSCROLL, val, name),
+			m_presenter(nullptr), m_renderTarget(nullptr)
 		{
 			Init();
 		}
@@ -52,8 +53,8 @@ namespace Edit
 		void PlayAnimImage();
 	protected:
 		void Init();
-		void DoPaint();
-		void OverDraw();
+		void ReloadPaintResource();
+		void Paint();
 #ifndef __WXMSW__
 		void OverDraw(wxGraphicsContext* gc);
 #else
