@@ -14,6 +14,7 @@ private:
     wxGraphicsRenderer* m_renderer;
     //마우스 처리를 위한 변수들...
     std::optional<wxPoint> m_dragStartPosition;
+    EditFramePresenter* m_presenter = nullptr;
 public:
     FrameListWidget();
     FrameListWidget(wxWindow* parent,
@@ -24,22 +25,23 @@ public:
         const wxValidator& val = wxDefaultValidator,
         const wxString& name = "FrameListWidgets");
     ~FrameListWidget();
-    int AddFrameImage(FrameListItemWidget* item);
+    void SetPresenter(EditFramePresenter* presenter);
     std::vector<size_t> GetSelections();
     std::optional<size_t> GetSelection();
     void SetSelection(size_t index);
-    void ClearChildren();
+    //void ClearChildren();
+    void RefreshView();
 protected:
     template <class DC>
     void DoPaint(DC& dc);
     void DoPaint() { wxClientDC dc(this);  DoPaint(dc); }
     void Init();
-    void UpdateItemsImageLoad();
     virtual wxSize DoGetBestSize() const;
     void AlignItems();
     void OnScrolledEvent(wxScrollWinEvent& event);
     void OnSized(wxSizeEvent& event);
     void OnPaint(wxPaintEvent& event);
+    void ClearItems();
     /*
     아래부터는 클릭 및 선택에 대한 이벤트 핸들러들.
     */
@@ -74,8 +76,7 @@ public:
         EditFramePresenter* presenter, size_t index);
     ~FrameListItemWidget();
 
-    void LoadData();
-    void UnloadData();
+    void ReloadData();
     wxSize GetBestSize() const;
     wxSize GetSize() { return m_size; }
     wxPoint GetPosition() { return m_position; }

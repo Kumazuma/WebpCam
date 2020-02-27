@@ -23,6 +23,8 @@ public:
 	bool CropImage();
 	wxRect GetCropRect();
 	void SetCropRect(const wxRect& rc);
+	void SetSelectFrameIndex( size_t index);
+	std::optional<size_t> GetSelectFrameIndex();
 	void Undo();
 	void Redo();
 	const wxVector<const IHistoryItem*>& GetHistory() const;

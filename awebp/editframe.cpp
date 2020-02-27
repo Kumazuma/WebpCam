@@ -24,20 +24,6 @@ EditFrame::~EditFrame()
 {
 }
 
-void EditFrame::DoPaint(wxDC& dc)
-{
-	if (m_lastSelectedIndex.has_value())
-	{
-		wxImage image;
-		uint32_t duration;
-		m_presenter.GetImage(*m_lastSelectedIndex, image, duration);
-		if (image.IsOk())
-		{
-			dc.DrawBitmap(image, 0, 0);
-		}
-	}
-}
-
 void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 {
 	wxDialog* frame = new EncodingProgressDialog(this, m_presenter.GetImageStore());
@@ -46,17 +32,10 @@ void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 
 void EditFrame::OnRefreshView(wxCommandEvent& event)
 {
-	auto widgets = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget) ;
-	widgets->ClearChildren();
-	widgets->Hide();
+	wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget)->RefreshView();
 	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), Edit::EditRenderWidget)->RefreshView();
-	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
-	{
-		auto* temp = new FrameListItemWidget(widgets, &m_presenter, i);
-		widgets->AddFrameImage(temp);
-	}
-	widgets->Show();
-	widgets->PostSizeEvent();
+	
+	
 	auto lbHistory = wxDynamicCast(this->FindWindowById(ID_HISTORY_LIST), wxSimpleHtmlListBox);
 	if (lbHistory != nullptr)
 	{
@@ -122,17 +101,10 @@ void EditFrame::OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event)
 	delete dialog;
 }
 
-void EditFrame::OnSelectFramePaint(wxPaintEvent& event)
-{
-	auto widget = wxDynamicCast(this->FindWindow(wxT("ui_frameList")), FrameListWidget);
-	wxBufferedPaintDC dc(wxDynamicCast(event.GetEventObject(), wxWindow));
-	DoPaint(dc);
-}
 
 void EditFrame::OnListItemSelected(wxCommandEvent& event)
 {
-	m_lastSelectedIndex = event.GetSelection();
-	wxDynamicCast(FindWindowById(ID_DRAW_WIDGET), Edit::EditRenderWidget)->SetSelectImage(m_lastSelectedIndex);
+	m_presenter.SetSelectFrameIndex(event.GetSelection());
 	auto progrid = wxDynamicCast(FindWindowById(ID_PROPERTY), wxPropertyGrid);
 	auto t = wxDynamicCast(event.GetEventObject(), FrameListWidget);
 	auto selections = t->GetSelections();
@@ -235,11 +207,7 @@ EditForm::EditForm(wxWindow* parent, EditFramePresenter& presenter) :
 	m_presenter(presenter)
 {
 	ui_drawWidget->SetPresenter(&presenter);
-	for (int i = 0; i < m_presenter.GetImagesCount(); i++)
-	{
-		auto* temp = new FrameListItemWidget(ui_frameList, &m_presenter, i);
-		ui_frameList->AddFrameImage(temp);
-	}
+	ui_frameList->SetPresenter(&presenter);
 	wxPGProperty* PROPERTY_IMAGE_SIZE;
 	
 	ui_propertyGrid->Append(new wxPropertyCategory(wxT("Project Information")));

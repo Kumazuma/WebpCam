@@ -112,7 +112,28 @@ bool EditFramePresenter::CropImage()
 
 wxRect EditFramePresenter::GetCropRect()
 {
-	return m_model.GetCropRect();
+	auto rect = m_model.GetCropRect();
+	auto imageSize = m_model.GetImageStore()->GetImageSize();
+	if (rect.x < 0)
+	{
+		rect.width -= rect.x;
+		rect.x = 0;
+	}
+	if (rect.y < 0)
+	{
+		rect.height -= rect.y;
+		rect.y = 0;
+	}
+	if (rect.GetWidth() > imageSize.GetWidth())
+	{
+		rect.SetWidth(imageSize.GetWidth());
+	}
+	if (rect.GetHeight() > imageSize.GetHeight())
+	{
+		rect.SetHeight(imageSize.GetHeight());
+	}
+	m_model.SetCropRect(rect);
+	return rect;
 }
 
 void EditFramePresenter::SetCropRect(const wxRect& temp)
@@ -132,6 +153,39 @@ void EditFramePresenter::SetCropRect(const wxRect& temp)
 		m_model.SetCropRect(m_model.GetCropRect());
 	}
 	
+}
+
+void EditFramePresenter::SetSelectFrameIndex( size_t index)
+{
+	auto store = m_model.GetImageStore();
+	
+	if (store->GetCount() == 0)
+	{
+		m_model.SetSelectFrameIndex(std::nullopt);
+	}
+	else if (index >= store->GetCount())
+	{
+		index = store->GetCount() - 1;
+	}
+	m_model.SetSelectFrameIndex(index);
+	wxCommandEvent* e = new wxCommandEvent(EVT_RefreshView);
+	e->SetEventObject(this);
+	this->QueueEvent(e);
+}
+
+std::optional<size_t> EditFramePresenter::GetSelectFrameIndex()
+{
+	auto index = m_model.GetSelectFrameIndex();
+	if (!index)
+	{
+		return index;
+	}
+	if (*index >= m_model.GetImageStore()->GetCount())
+	{
+		m_model.SetSelectFrameIndex(std::nullopt);
+		index = std::nullopt;
+	}
+	return index;
 }
 
 void EditFramePresenter::Undo()

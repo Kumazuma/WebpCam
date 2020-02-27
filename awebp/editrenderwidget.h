@@ -10,17 +10,17 @@ namespace Edit
 	class EditRenderWidget :public wxControl
 	{
 	private:
-		EditFramePresenter* m_presenter;
-		std::optional<wxPoint> m_prevMousePosition;
-		std::optional<size_t> m_index;
-		wxImage m_selectedImage;
-		wxTimer* m_timer;
-		bool m_isPlaying;
-		uint32_t m_duration;
-		int64_t m_lastTick;
+		EditFramePresenter* m_presenter = nullptr;
+		std::optional<wxPoint> m_prevMousePosition = std::nullopt;
+		std::optional<size_t> m_index = std::nullopt;
+		wxImage m_selectedImage = wxImage();
+		wxTimer* m_timer = nullptr;
+		bool m_isPlaying = false;
+		uint32_t m_duration = 0;
+		int64_t m_lastTick = 0;
 		
-		float m_scale;
-		wxPoint m_viewStart;
+		float m_scale = 1;
+		wxPoint m_viewStart = wxPoint(0,0);
 
 		int64_t m_lastRenderTime = 0;
 		DirectionState m_direction = DirectionState::None;
@@ -49,7 +49,6 @@ namespace Edit
 		void MoveView(wxPoint delta);
 		void UpdateCropRect(wxPoint delta);
 		void SetPresenter(EditFramePresenter* presenter);
-		void SetSelectImage(std::optional<size_t> index);
 		void PlayAnimImage();
 	protected:
 		void Init();
@@ -59,12 +58,12 @@ namespace Edit
 		void OverDraw(wxGraphicsContext* gc);
 #else
 		
-		ID2D1Factory* m_factory;
-		ID2D1HwndRenderTarget* m_renderTarget;
-		ID2D1Bitmap* m_bitmap;
-		ID2D1PathGeometry* m_cropAreaRegion;
-		ID2D1PathGeometry* m_cropAreaDotLines;
-		wxClientDC* m_clientDC;
+		ID2D1Factory* m_factory = nullptr;
+		ID2D1HwndRenderTarget* m_renderTarget = nullptr;
+		ID2D1Bitmap* m_bitmap = nullptr;
+		ID2D1PathGeometry* m_cropAreaRegion = nullptr;
+		ID2D1PathGeometry* m_cropAreaDotLines = nullptr;
+		wxClientDC* m_clientDC = nullptr;
 		void InitDirect2D();
 		void ReleaseDirect2D();
 		void InitResource();
@@ -81,6 +80,7 @@ namespace Edit
 		void OnMouseWheel(wxMouseEvent& event);
 		void OnKeyDown(wxKeyEvent& event);
 		void OnKeyUp(wxKeyEvent& event);
+		void OnMouseCaptureLostEvent(wxMouseCaptureLostEvent& event);
 	protected:
 		void OnTimer(wxTimerEvent& event);
 		void OnIdle(wxIdleEvent& event);

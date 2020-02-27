@@ -27,13 +27,9 @@ FrameListItemWidget::~FrameListItemWidget()
 {
 }
 
-void FrameListItemWidget::LoadData()
+void FrameListItemWidget::ReloadData()
 {
-}
-
-void FrameListItemWidget::UnloadData()
-{
-
+	Init();
 }
 
 
@@ -126,17 +122,12 @@ FrameListWidget::FrameListWidget(
 
 FrameListWidget::~FrameListWidget()
 {
-	ClearChildren();
+	ClearItems();
 }
 
-int FrameListWidget::AddFrameImage(FrameListItemWidget* item)
-{
-	
-	int index = m_items.size();
-	item->ItemUnselect();
-	m_items.push_back(item);
-	this->AlignItems();
-	return index;
+void FrameListWidget::SetPresenter(EditFramePresenter* presenter)
+{ 
+	m_presenter = presenter; RefreshView();
 }
 
 std::vector<size_t> FrameListWidget::GetSelections()
@@ -178,19 +169,43 @@ void FrameListWidget::SetSelection(size_t index)
 			m_items[i]->ItemUnselect();
 		}
 	}
-	UpdateItemsImageLoad();
 	DoPaint();
 }
 
-void FrameListWidget::ClearChildren()
+void FrameListWidget::ClearItems()
 {
-	//this->DestroyChildren();
-	for (auto it : m_items)
+	for (auto* it : m_items)
 	{
 		delete it;
 	}
 	m_items.clear();
-	this->Refresh(true);
+}
+void FrameListWidget::RefreshView()
+{
+	if (m_presenter == nullptr)
+		return;
+	auto selectedIndex = m_presenter->GetSelectFrameIndex();
+	if (m_items.size() != m_presenter->GetImagesCount())
+	{
+		ClearItems();
+		for (int i = 0; i < m_presenter->GetImagesCount(); i++)
+		{
+			auto* temp = new FrameListItemWidget(this, m_presenter, i);
+			temp->ItemUnselect();
+			m_items.push_back(temp);
+		}
+		AlignItems();
+	}
+	
+	for (int i = 0; i < m_items.size(); i++)
+	{
+		m_items[i]->ReloadData();
+		if (i == selectedIndex)
+		{
+			m_items[i]->ItemSelect();
+		}
+	}
+	DoPaint();
 }
 
 void FrameListWidget::Init() {
@@ -234,16 +249,11 @@ void FrameListWidget::AlignItems()
 void FrameListWidget::OnScrolledEvent(wxScrollWinEvent& event)
 {
 	event.Skip();
-		 this->CallAfter([this]()
-		{
-			UpdateItemsImageLoad();
-		});
 }
 
 void FrameListWidget::OnSized(wxSizeEvent& event)
 {
 	event.Skip();
-	UpdateItemsImageLoad();
 }
 template<class DC>
 void FrameListWidget::DoPaint(DC& dc)
@@ -269,28 +279,6 @@ void FrameListWidget::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
 	DoPaint(dc);
-}
-void FrameListWidget::UpdateItemsImageLoad()
-{
-	auto viewViewStart = GetViewStart();
-	int viewStartY = viewViewStart.y;
-	
-	int viewEndY = viewStartY + GetSize().GetHeight() / IMAGE_RESIZE_SiZE + WIDGET_BORDER * 2;
-	if (viewEndY <= 0)
-		return;
-	for (int i = 0 ; i <m_items.size() ;i++)
-	{
-		if (viewStartY <= i && i <= viewEndY)
-		{
-			m_items[i]->LoadData();
-		}
-		else
-		{
-			m_items[i]->UnloadData();
-		}
-		m_items[i]->DoPaint();
-	}
-	DoPaint();
 }
 void FrameListWidget::OnMouseLeftDown(wxMouseEvent& event)
 {

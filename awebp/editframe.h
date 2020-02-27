@@ -10,13 +10,12 @@ class EditFrame : public UIEditFrame
 private:
 	EditFramePresenter m_presenter;
 	EditForm* ui_editForm;
-	std::optional<size_t> m_lastSelectedIndex;
+	
 	wxAuiManager* m_manager;
 public:
 	EditFrame(IImageStore* imageStore,const wxSize& imageSize);
 	virtual ~EditFrame();
 protected:
-	void DoPaint(wxDC& dc);
 	void OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event);
 	void OnRefreshView(wxCommandEvent& event);
 	void OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event);

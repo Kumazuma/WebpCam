@@ -70,6 +70,7 @@ void Edit::EditRenderWidget::InitResource()
 		m_renderTarget->SetDpi(96, 96);
 		
 	}
+	
 	if (m_selectedImage.IsOk())
 	{
 		int strip = m_selectedImage.GetWidth() * 4;
@@ -628,9 +629,38 @@ void Edit::EditRenderWidget::OnKeyUp(wxKeyEvent& event)
 		SetCursor(wxCursor(wxStockCursor::wxCURSOR_ARROW));
 	}
 }
+void Edit::EditRenderWidget::OnMouseCaptureLostEvent(wxMouseCaptureLostEvent& event)
+{
+
+}
 void Edit::EditRenderWidget::RefreshView()
 {
-	Init();
+	auto it = m_presenter->GetSelectFrameIndex();
+	if (m_isPlaying)
+	{
+		m_timer->Stop();
+		m_isPlaying = false;
+	}
+	m_index = it;
+	wxImage img;
+	m_presenter->GetImage(*m_index, img, m_duration);
+	bool needInit = false;
+	if (!m_selectedImage.IsOk())
+	{
+		needInit = true;
+	}
+	else
+	{
+		needInit = m_selectedImage.GetSize() != img.GetSize();
+	}
+	m_selectedImage = img;
+	if (needInit)
+	{
+		m_scale = 1.0;
+		Init();
+	}
+	ReloadPaintResource();
+	
 	Paint();
 }
 void Edit::EditRenderWidget::MoveView(wxPoint delta)
@@ -699,34 +729,6 @@ void Edit::EditRenderWidget::OnIdle(wxIdleEvent& event)
 	{
 		ProcessAnim();
 	}
-}
-void Edit::EditRenderWidget::SetSelectImage(std::optional<size_t> index)
-{
-	if (m_isPlaying)
-	{
-		m_timer->Stop();
-		m_isPlaying = false;
-	}
-	m_index = index;
-	wxImage img;
-	m_presenter->GetImage(*m_index, img, m_duration);
-	bool needInit = false;
-	if (!m_selectedImage.IsOk())
-	{
-		needInit = true;
-	}
-	else
-	{
-		needInit = m_selectedImage.GetSize() != img.GetSize();
-	}
-	m_selectedImage = img;
-	if (needInit)
-	{
-		m_scale = 1.0;
-		Init();
-	}
-	ReloadPaintResource();
-	Paint();
 }
 void Edit::EditRenderWidget::ProcessAnim()
 {
