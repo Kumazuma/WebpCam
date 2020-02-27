@@ -30,7 +30,6 @@
 #include <wx/button.h>
 #include "editframelistwidget.h"
 #include "editrenderwidget.h"
-#include <wx/slider.h>
 #include <wx/panel.h>
 #include <wx/htmllbox.h>
 #include <wx/propgrid/propgrid.h>
@@ -125,7 +124,6 @@ class UIEditForm : public wxPanel
 		wxPanel* m_panel1;
 		Edit::EditRenderWidget* ui_drawWidget;
 		wxButton* ui_btnButton;
-		wxSlider* m_slider1;
 		wxSimpleHtmlListBox* m_customControl3;
 		wxPropertyGrid* ui_propertyGrid;
 

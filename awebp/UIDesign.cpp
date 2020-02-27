@@ -106,9 +106,6 @@ UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	ui_btnButton = new wxButton( m_panel1, ID_PLAY_BUTTON, wxT("재생"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer11->Add( ui_btnButton, 0, wxALL, 5 );
 
-	m_slider1 = new wxSlider( m_panel1, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL );
-	bSizer11->Add( m_slider1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
 
 	bSizer2->Add( bSizer11, 0, wxEXPAND, 5 );
 
