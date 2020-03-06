@@ -4,7 +4,8 @@
 #include "event.h"
 
 #include<wx/log.h>
-#define ERROR_HANDLER(func, condi, handle) {auto __ret = func; if(__ret condi){ handle; return;}}
+#define BEGIN_ERROR_HANDLE(func, condi) {auto __ret = func; if(__ret condi){
+#define END_ERROR_HANDLE }return;}
 #define IsNULL ==nullptr
 #define IsNotNull !=nullptr
 #define RETURN() __ret
@@ -24,12 +25,9 @@ WebmEncoder::WebmEncoder():
 {
 	m_codecEncode = avcodec_find_encoder(AVCodecID::AV_CODEC_ID_VP9);
 	m_context = avcodec_alloc_context3(m_codecEncode);
-	ERROR_HANDLER(
-		avformat_alloc_output_context2(&m_formatContext, nullptr, "webm", nullptr),
-		!= 0,
-		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("webm파일 포맷을 만들 수 없습니다."))
-	);
-	
+	BEGIN_ERROR_HANDLE(avformat_alloc_output_context2(&m_formatContext, nullptr, "webm", nullptr),!= 0);
+		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("webm파일 포맷을 만들 수 없습니다."));
+	END_ERROR_HANDLE
 	
 	m_formatContext->oformat->video_codec = AV_CODEC_ID_VP9;
 	m_formatContext->oformat->audio_codec = AV_CODEC_ID_NONE;
@@ -60,11 +58,9 @@ WebmEncoder::~WebmEncoder()
 void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore)
 {
 	m_stream = avformat_new_stream(m_formatContext, m_codecEncode);
-	ERROR_HANDLER(
-		m_stream,
-		IsNULL,
-		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("비디오 인코드 스트림을 만들 수 없습니다."))
-	);
+	BEGIN_ERROR_HANDLE(m_stream, IsNULL);
+		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("비디오 인코드 스트림을 만들 수 없습니다."));
+	END_ERROR_HANDLE
 	m_stream->id = m_formatContext->nb_streams - 1;
 
 	auto imgSize = imageStore.GetImageSize();
@@ -83,19 +79,15 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	/* Some formats want stream headers to be separate. */
 	if (m_formatContext->oformat->flags & AVFMT_GLOBALHEADER)
 		m_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-	ERROR_HANDLER(
-		avio_open(&m_formatContext->pb, filePath.ToUTF8().data(), AVIO_FLAG_WRITE),
-		< 0, 
-		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("파일 열기에 실패했습니다."))
-	);
-	ERROR_HANDLER(
-		avformat_write_header(m_formatContext, &m_opt),
-		< 0,
-		{
-			wxString msg = av_err2str(RETURN());
-			wxLogGeneric(wxLogLevelValues::wxLOG_Error, msg);
-		}
-	);
+	BEGIN_ERROR_HANDLE(avio_open(&m_formatContext->pb, filePath.ToUTF8().data(), AVIO_FLAG_WRITE),< 0);
+		wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("파일 열기에 실패했습니다."));
+	END_ERROR_HANDLE
+	BEGIN_ERROR_HANDLE(avformat_write_header(m_formatContext, &m_opt), < 0);
+	char bff[AV_ERROR_MAX_STRING_SIZE];
+	wxString msg = av_make_error_string(bff, AV_ERROR_MAX_STRING_SIZE, RETURN());
+	wxLogGeneric(wxLogLevelValues::wxLOG_Error, msg);
+	END_ERROR_HANDLE
+
 	avcodec_open2(m_context, m_codecEncode, nullptr);
 	avcodec_parameters_from_context(m_stream->codecpar, m_context);
 	
@@ -119,14 +111,9 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 		m_context->width, m_context->height,
 		AV_PIX_FMT_RGB24,
 		SCALE_FLAGS, NULL, NULL, NULL);
-	ERROR_HANDLER(
-		swsContext,
-		IsNULL,
-		{
-			wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("SwsContext초기화에 실패했습니다"));
-		}
-	);
-
+	BEGIN_ERROR_HANDLE(swsContext,IsNULL);
+	wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("SwsContext초기화에 실패했습니다"));
+	END_ERROR_HANDLE
 	for (int i = 0; i < imageStore.GetCount(); i++)
 	{
 		av_init_packet(m_pkt);
@@ -149,6 +136,7 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			m_pictureEncoded->linesize);
 		m_pictureEncoded->pts = i;
 		avcodec_encode_video2(m_context, m_pkt, m_pictureEncoded, &got_packet);
+		
 		if (!got_packet)
 			continue;
 		/* rescale output packet timestamp values from codec to stream timebase */
