@@ -70,12 +70,12 @@ void* CISSaveThread::Entry()
 		}
 		i++;
 		wxString tempName = wxString::Format(wxT("%d.tmp"), i);
-		wxZlibOutputStream stream(m_fOStream, 1);
+		
 		
 		auto s = data.first->GetSize();
 		auto bits = data.first->GetData();
-		stream.WriteAll(bits, s.x * s.y * 3l);
-		stream.Close();
+		m_fOStream.WriteAll(bits, s.x * s.y * 3l);
+
 		auto ts = m_fOStream.TellO();
 		m_bytesCounts.push_back(ts - preOffset);
 		preOffset = ts;
@@ -224,13 +224,7 @@ std::pair<wxImage, uint32_t> CachedImageStorage::Get(size_t index)
 {
 	auto s = m_pages[index];
 	wxMemoryInputStream memIStream(m_mappedFile + s[0], s[1]);
-	wxZlibInputStream zIStream(memIStream);
-
-	uint8_t* mem = (uint8_t*)malloc(3 * m_imageSize.x * m_imageSize.y);
-
-	wxMemoryOutputStream memOStream(mem, 3 * m_imageSize.x * m_imageSize.y);
-	memOStream.Write(zIStream);
-	wxImage image(m_imageSize, mem);
+	wxImage image(m_imageSize, m_mappedFile + s[0], true);
 
 	return std::pair<wxImage, uint32_t>(image,m_durations[index]);
 }
@@ -239,8 +233,7 @@ std::pair<wxInputStream*, uint32_t> CachedImageStorage::GetRawData(size_t index)
 {
 	auto s = m_pages[index];
 	wxMemoryInputStream* memIStream = new wxMemoryInputStream(m_mappedFile + s[0], s[1]);
-	wxZlibInputStream* zIStream = new wxZlibInputStream(memIStream);
-	return std::pair<wxInputStream*, uint32_t>(zIStream, m_durations[index]);
+	return std::pair<wxInputStream*, uint32_t>(memIStream, m_durations[index]);
 }
 
 size_t CachedImageStorage::GetCount() const

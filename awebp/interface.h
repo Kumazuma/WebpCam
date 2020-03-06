@@ -49,6 +49,7 @@ struct IEncoder
 	virtual wxString GetFileFilter() =0;
 	virtual wxString GetFileExtension() = 0;
 	virtual void StopEncode() = 0;
+	virtual void SetQuality(int) = 0;
 	virtual ~IEncoder() {}
 };
 //화면을 캡쳐하는 인터페이스
@@ -75,3 +76,48 @@ struct IEditTool
 	virtual ~IEditTool() {}
 	virtual void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem ) = 0;
 };
+//
+template<typename T, typename FREE_FUNCTION>
+class Wrapper
+{
+private:
+	T* m_ptr;
+	FREE_FUNCTION m_freeFunction;
+public:
+	Wrapper(const Wrapper& obj) = delete;
+	Wrapper(T* ptr, FREE_FUNCTION free);
+	Wrapper(Wrapper&& move);
+	T* operator ->() const
+	{
+		return m_ptr;
+	}
+	T* get() const
+	{
+		return m_ptr;
+	}
+	~Wrapper()
+	{
+		if(m_ptr)
+			m_freeFunction(m_ptr);
+	}
+};
+template<typename T, typename FREE_FUNCTION>
+Wrapper<T, FREE_FUNCTION> GetWrapper(T* obj, FREE_FUNCTION func)
+{
+	return Wrapper<T, FREE_FUNCTION>(obj, func);
+}
+
+template<typename T, typename FREE_FUNCTION>
+inline Wrapper<T, FREE_FUNCTION>::Wrapper(T* ptr, FREE_FUNCTION free):
+	m_ptr(ptr),
+	m_freeFunction(free)
+{
+	
+}
+
+template<typename T, typename FREE_FUNCTION>
+inline Wrapper<T, FREE_FUNCTION>::Wrapper(Wrapper&& move)
+{
+	m_ptr = move.m_ptr;
+	m_freeFunction = move.m_freeFunction;
+}

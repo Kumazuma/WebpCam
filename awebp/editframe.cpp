@@ -26,8 +26,9 @@ EditFrame::~EditFrame()
 
 void EditFrame::OnRbarBtnSaveFile(wxRibbonButtonBarEvent& event)
 {
-	wxDialog* frame = new EncodingProgressDialog(this, m_presenter.GetImageStore());
+	wxDialog* frame = new EncodingDialog(this, m_presenter.GetImageStore());
 	frame->ShowModal();
+	delete frame;
 }
 
 void EditFrame::OnRefreshView(wxCommandEvent& event)

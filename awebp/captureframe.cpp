@@ -90,6 +90,7 @@ void CaptureFrame::SetRect(const wxRect& rc)
 	
 	this->SetPosition(rc.GetPosition());
 	this->SetSize(rc.GetSize());
+	this->Layout();
 	wxRect rect = CvtWindowRectToCaptureRegion(rc);
 	m_presenter.SetRecordedRect(rect);
 }

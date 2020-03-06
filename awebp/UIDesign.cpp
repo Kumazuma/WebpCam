@@ -53,36 +53,6 @@ UIEditFrame::~UIEditFrame()
 {
 }
 
-MyFrame5::MyFrame5( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
-{
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-
-	wxBoxSizer* bSizer13;
-	bSizer13 = new wxBoxSizer( wxVERTICAL );
-
-	m_bpButton1 = new wxBitmapButton( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
-
-	m_bpButton1->SetBitmap( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
-	m_bpButton1->SetBitmapDisabled( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
-	m_bpButton1->SetBitmapPressed( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record_press.png"), wxBITMAP_TYPE_ANY ) );
-	m_bpButton1->SetBitmapFocus( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record.png"), wxBITMAP_TYPE_ANY ) );
-	m_bpButton1->SetBitmapCurrent( wxBitmap( wxT("C:\\Users\\qwead\\Downloads\\record_over.png"), wxBITMAP_TYPE_ANY ) );
-	m_bpButton1->SetBitmapPosition( wxRIGHT );
-	m_bpButton1->SetToolTip( wxT("Record") );
-
-	bSizer13->Add( m_bpButton1, 0, wxALL, 5 );
-
-
-	this->SetSizer( bSizer13 );
-	this->Layout();
-
-	this->Centre( wxBOTH );
-}
-
-MyFrame5::~MyFrame5()
-{
-}
-
 UIEditForm::UIEditForm( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	m_mgr.SetManagedWindow(this);
@@ -127,159 +97,6 @@ UIEditForm::~UIEditForm()
 {
 	m_mgr.UnInit();
 
-}
-
-UIRecordFrame::UIRecordFrame( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
-{
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
-
-	wxBoxSizer* bSizer8;
-	bSizer8 = new wxBoxSizer( wxVERTICAL );
-
-	m_panel30 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
-
-	wxFlexGridSizer* fgSizer1;
-	fgSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
-	fgSizer1->AddGrowableCol( 1 );
-	fgSizer1->SetFlexibleDirection( wxBOTH );
-	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
-
-	m_staticText1 = new wxStaticText( m_panel30, wxID_ANY, wxT("Width"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL );
-	m_staticText1->Wrap( -1 );
-	fgSizer1->Add( m_staticText1, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
-
-	ui_spinWidth = new wxSpinCtrl( m_panel30, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxTE_PROCESS_ENTER|wxTAB_TRAVERSAL, 0, 9999, 0 );
-	fgSizer1->Add( ui_spinWidth, 0, wxALL|wxEXPAND, 5 );
-
-	m_staticText2 = new wxStaticText( m_panel30, wxID_ANY, wxT("Height"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText2->Wrap( -1 );
-	fgSizer1->Add( m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
-
-	ui_spinHeight = new wxSpinCtrl( m_panel30, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxTE_PROCESS_ENTER|wxTAB_TRAVERSAL, 0, 9999, 0 );
-	fgSizer1->Add( ui_spinHeight, 0, wxALL|wxEXPAND, 5 );
-
-	m_staticText3 = new wxStaticText( m_panel30, wxID_ANY, wxT("fps"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText3->Wrap( -1 );
-	fgSizer1->Add( m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
-
-	wxArrayString ui_choiceFpsChoices;
-	ui_choiceFps = new wxChoice( m_panel30, wxID_ANY, wxDefaultPosition, wxDefaultSize, ui_choiceFpsChoices, 0|wxTAB_TRAVERSAL );
-	ui_choiceFps->SetSelection( 0 );
-	fgSizer1->Add( ui_choiceFps, 0, wxALL|wxEXPAND, 5 );
-
-	m_staticText5 = new wxStaticText( m_panel30, wxID_ANY, wxT("method"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText5->Wrap( 1 );
-	fgSizer1->Add( m_staticText5, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL, 5 );
-
-	wxArrayString m_choice2Choices;
-	m_choice2 = new wxChoice( m_panel30, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choice2Choices, 0|wxTAB_TRAVERSAL );
-	m_choice2->SetSelection( 0 );
-	fgSizer1->Add( m_choice2, 1, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
-
-
-	bSizer3->Add( fgSizer1, 0, wxEXPAND, 5 );
-
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
-
-	ui_chkUsingTempFile = new wxCheckBox( m_panel30, wxID_ANY, wxT("Store image as file temporally (it makes using memory less)"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
-	ui_chkUsingTempFile->SetValue(true);
-	bSizer5->Add( ui_chkUsingTempFile, 0, wxALL, 5 );
-
-
-	bSizer3->Add( bSizer5, 0, wxEXPAND, 5 );
-
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
-
-	ui_btnStart = new wxButton( m_panel30, wxID_ANY, wxT("Start"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
-	bSizer4->Add( ui_btnStart, 1, wxALL|wxEXPAND, 5 );
-
-	ui_btnStop = new wxButton( m_panel30, wxID_ANY, wxT("Stop"), wxDefaultPosition, wxDefaultSize, 0|wxTAB_TRAVERSAL );
-	bSizer4->Add( ui_btnStop, 1, wxALL|wxEXPAND, 5 );
-
-
-	bSizer3->Add( bSizer4, 0, wxEXPAND, 5 );
-
-	ui_lblLog = new wxStaticText( m_panel30, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	ui_lblLog->Wrap( -1 );
-	bSizer3->Add( ui_lblLog, 0, wxALL|wxEXPAND, 5 );
-
-
-	m_panel30->SetSizer( bSizer3 );
-	m_panel30->Layout();
-	bSizer3->Fit( m_panel30 );
-	bSizer8->Add( m_panel30, 1, wxEXPAND, 5 );
-
-
-	this->SetSizer( bSizer8 );
-	this->Layout();
-
-	this->Centre( wxBOTH );
-}
-
-UIRecordFrame::~UIRecordFrame()
-{
-}
-
-MyFrame3::MyFrame3( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
-{
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
-
-	wxBoxSizer* bSizer6;
-	bSizer6 = new wxBoxSizer( wxVERTICAL );
-
-	m_scrolledWindow1 = new wxScrolledWindow( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxALWAYS_SHOW_SB|wxHSCROLL|wxVSCROLL );
-	m_scrolledWindow1->SetScrollRate( 5, 5 );
-	wxBoxSizer* bSizer7;
-	bSizer7 = new wxBoxSizer( wxVERTICAL );
-
-	m_panel4 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	m_panel4->SetBackgroundColour( wxColour( 255, 0, 0 ) );
-
-	bSizer7->Add( m_panel4, 1, wxEXPAND | wxALL, 5 );
-
-	m_panel45 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	bSizer7->Add( m_panel45, 1, wxEXPAND | wxALL, 5 );
-
-	m_panel44 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	bSizer7->Add( m_panel44, 1, wxEXPAND | wxALL, 5 );
-
-	m_panel43 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	bSizer7->Add( m_panel43, 1, wxEXPAND | wxALL, 5 );
-
-	m_panel42 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	bSizer7->Add( m_panel42, 1, wxEXPAND | wxALL, 5 );
-
-	m_panel41 = new wxPanel( m_scrolledWindow1, wxID_ANY, wxDefaultPosition, wxSize( 500,500 ), wxTAB_TRAVERSAL );
-	bSizer7->Add( m_panel41, 1, wxEXPAND | wxALL, 5 );
-
-
-	m_scrolledWindow1->SetSizer( bSizer7 );
-	m_scrolledWindow1->Layout();
-	bSizer7->Fit( m_scrolledWindow1 );
-	bSizer6->Add( m_scrolledWindow1, 1, wxEXPAND | wxALL, 5 );
-
-	m_treeCtrl1 = new wxTreeCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE );
-	bSizer6->Add( m_treeCtrl1, 0, wxALL, 5 );
-
-	m_treeListCtrl1 = new wxTreeListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTL_DEFAULT_STYLE );
-
-	bSizer6->Add( m_treeListCtrl1, 1, wxEXPAND | wxALL, 5 );
-
-
-	this->SetSizer( bSizer6 );
-	this->Layout();
-
-	this->Centre( wxBOTH );
-}
-
-MyFrame3::~MyFrame3()
-{
 }
 
 UIResizeDialog::UIResizeDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -403,95 +220,72 @@ BottomPanel::~BottomPanel()
 {
 }
 
-MyFrame6::MyFrame6( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+UIEncodingDialog::UIEncodingDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
-	wxBoxSizer* bSizer16;
-	bSizer16 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer19;
+	bSizer19 = new wxBoxSizer( wxVERTICAL );
 
-	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_panel11->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW ) );
+	wxFlexGridSizer* fgSizer2;
+	fgSizer2 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer2->AddGrowableCol( 1 );
+	fgSizer2->SetFlexibleDirection( wxBOTH );
+	fgSizer2->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
 
-	wxBoxSizer* bSizer18;
-	bSizer18 = new wxBoxSizer( wxVERTICAL );
+	m_staticText13 = new wxStaticText( this, wxID_ANY, wxT("파일 종류"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText13->Wrap( -1 );
+	fgSizer2->Add( m_staticText13, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	m_button10 = new wxButton( m_panel11, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer18->Add( m_button10, 0, wxALL, 5 );
+	wxArrayString m_choice5Choices;
+	m_choice5 = new wxChoice( this, ID_FILE_TYPE, wxDefaultPosition, wxDefaultSize, m_choice5Choices, 0 );
+	m_choice5->SetSelection( 0 );
+	fgSizer2->Add( m_choice5, 0, wxALL|wxEXPAND, 5 );
 
+	m_staticText14 = new wxStaticText( this, wxID_ANY, wxT("퀄리티"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText14->Wrap( -1 );
+	fgSizer2->Add( m_staticText14, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	m_panel11->SetSizer( bSizer18 );
-	m_panel11->Layout();
-	bSizer18->Fit( m_panel11 );
-	bSizer16->Add( m_panel11, 0, wxEXPAND | wxALL, 5 );
-
-
-	bSizer16->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_panel12 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer17;
-	bSizer17 = new wxBoxSizer( wxVERTICAL );
-
-	m_button9 = new wxButton( m_panel12, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer17->Add( m_button9, 0, wxALL, 5 );
+	m_spinCtrl8 = new wxSpinCtrl( this, ID_QUALITY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxTE_PROCESS_ENTER, 0, 100, 1 );
+	fgSizer2->Add( m_spinCtrl8, 0, wxALL, 5 );
 
 
-	m_panel12->SetSizer( bSizer17 );
-	m_panel12->Layout();
-	bSizer17->Fit( m_panel12 );
-	bSizer16->Add( m_panel12, 0, wxALL|wxEXPAND, 5 );
+	bSizer19->Add( fgSizer2, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer22;
+	bSizer22 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_gauge1 = new wxGauge( this, ID_PROGRESS_GAUGE, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
+	m_gauge1->SetValue( 0 );
+	bSizer22->Add( m_gauge1, 0, wxALL|wxEXPAND, 5 );
+
+	m_staticText15 = new wxStaticText( this, ID_PROGRESS_LABEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText15->Wrap( -1 );
+	bSizer22->Add( m_staticText15, 0, wxALL, 5 );
 
 
-	this->SetSizer( bSizer16 );
+	bSizer19->Add( bSizer22, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer21;
+	bSizer21 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_button9 = new wxButton( this, ID_SAVE, wxT("저장"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer21->Add( m_button9, 1, wxALL|wxEXPAND, 5 );
+
+	m_button10 = new wxButton( this, ID_CANCEL, wxT("취소"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer21->Add( m_button10, 1, wxALL|wxEXPAND, 5 );
+
+
+	bSizer19->Add( bSizer21, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+
+	this->SetSizer( bSizer19 );
 	this->Layout();
+	bSizer19->Fit( this );
 
 	this->Centre( wxBOTH );
 }
 
-MyFrame6::~MyFrame6()
+UIEncodingDialog::~UIEncodingDialog()
 {
-}
-
-MyFrame4::MyFrame4( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
-{
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-	m_mgr.SetManagedWindow(this);
-	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
-
-	m_panel10 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_mgr.AddPane( m_panel10, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Movable( false ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
-
-	wxBoxSizer* bSizer12;
-	bSizer12 = new wxBoxSizer( wxVERTICAL );
-
-	m_ribbonBar3 = new wxRibbonBar( m_panel10, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRIBBON_BAR_DEFAULT_STYLE );
-	m_ribbonBar3->SetArtProvider(new wxRibbonDefaultArtProvider);
-	m_ribbonPage5 = new wxRibbonPage( m_ribbonBar3, wxID_ANY, wxT("MyRibbonPage") , wxNullBitmap , 0 );
-	m_ribbonPanel5 = new wxRibbonPanel( m_ribbonPage5, wxID_ANY, wxT("MyRibbonPanel") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonPanel6 = new wxRibbonPanel( m_ribbonPage5, wxID_ANY, wxT("MyRibbonPanel") , wxNullBitmap , wxDefaultPosition, wxDefaultSize, wxRIBBON_PANEL_DEFAULT_STYLE );
-	m_ribbonBar3->Realize();
-
-	bSizer12->Add( m_ribbonBar3, 1, wxEXPAND, 5 );
-
-
-	m_panel10->SetSizer( bSizer12 );
-	m_panel10->Layout();
-	bSizer12->Fit( m_panel10 );
-	m_panel11 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	m_mgr.AddPane( m_panel11, wxAuiPaneInfo() .Left() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
-
-	m_genericDirCtrl1 = new wxGenericDirCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER, wxEmptyString, 0 );
-
-	m_genericDirCtrl1->ShowHidden( false );
-	m_mgr.AddPane( m_genericDirCtrl1, wxAuiPaneInfo() .Right() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ) );
-
-
-	m_mgr.Update();
-	this->Centre( wxBOTH );
-}
-
-MyFrame4::~MyFrame4()
-{
-	m_mgr.UnInit();
-
 }

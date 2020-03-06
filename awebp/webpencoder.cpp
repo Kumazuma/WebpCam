@@ -44,7 +44,6 @@ const char* const  typestr[] = {
 	"VP8_ENC_ERROR_USER_ABORT",               // abort request by user
 	"VP8_ENC_ERROR_LAST"
 };
-
 WebpEncoder::~WebpEncoder()
 {
 
@@ -57,7 +56,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	wxSize imgSize = imageStore.GetImageSize();
 	uint32_t timestamp = 0;
 	//WebP Config세팅
-	m_config.quality = 80.f;
+	m_config.quality = m_quality;
 	m_config.thread_level = 1;//멀티 스레드 사용
 	m_config.lossless = 0;//손실포맷
 	m_config.low_memory = 0;
@@ -153,5 +152,10 @@ wxString WebpEncoder::GetFileFilter()
 wxString WebpEncoder::GetFileExtension()
 {
 	return wxT("webp");
+}
+
+void WebpEncoder::SetQuality(int val)
+{
+	m_quality = val;
 }
 

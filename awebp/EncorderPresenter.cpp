@@ -1,5 +1,6 @@
 ﻿#include "wx/wxprec.h"
 #include "EncorderPresenter.h"
+#include "webmencoder.h"
 #include "webpencoder.h"
 #include "event.h"
 wxIMPLEMENT_DYNAMIC_CLASS(EncoderPresenter, wxEvtHandler);
@@ -13,10 +14,6 @@ EncoderPresenter::EncoderPresenter(wxEvtHandler* view, IImageStore& imageStore):
 
 EncoderPresenter::~EncoderPresenter()
 {
-	if (m_encoder != nullptr)
-	{
-		delete m_encoder;
-	}
 	if (m_threadHelper != nullptr)
 	{
 		auto thread = m_threadHelper->GetThread();
@@ -26,20 +23,35 @@ EncoderPresenter::~EncoderPresenter()
 	}
 }
 
-void EncoderPresenter::SetFileFormat(EncodeType type)
-{
-	//TODO: Not Implement
-}
-
 wxString EncoderPresenter::GetFileFilter()
 {
 	return m_encoder->GetFileFilter();
 }
 
+void EncoderPresenter::SetEncoderToWebp()
+{
+	
+	m_encoder.reset(new WebpEncoder());
+
+}
+
+void EncoderPresenter::SetEncoderToWebm()
+{
+	m_encoder.reset(new WebmEncoder());
+}
+
+void EncoderPresenter::SetQuality(int value)
+{
+	m_quality = value;
+}
+
 class EncodeThread :public wxThreadHelper
 {
 public:
-	EncodeThread(wxEvtHandler* handler,const wxString& filePath, IEncoder* encoder, IImageStore* store):
+	EncodeThread(wxEvtHandler* handler,
+		const wxString& filePath,
+		std::shared_ptr<IEncoder>& encoder,
+		IImageStore& store):
 		m_encoder(encoder),
 		m_store(store),
 		m_filePath(filePath),
@@ -50,15 +62,16 @@ public:
 protected:
 	void* Entry() override;
 private:
-	IEncoder* m_encoder;
-	IImageStore* m_store;
+	std::shared_ptr<IEncoder> m_encoder;
+	IImageStore& m_store;
 	wxString m_filePath;
 	wxEvtHandler* m_handler;
 };
 
 void EncoderPresenter::SaveAnimImage(const wxString& filePath)
 {
-	m_threadHelper = new EncodeThread(this, filePath, m_encoder, &m_imageStore);
+	m_encoder->SetQuality(m_quality);
+	m_threadHelper = new EncodeThread(this, filePath, m_encoder, m_imageStore);
 	m_threadHelper->CreateThread();
 	m_threadHelper->GetThread()->Run();
 }
@@ -76,8 +89,6 @@ void EncoderPresenter::StopEncode()
 		delete m_threadHelper;
 		m_threadHelper = nullptr;
 	}
-	delete m_encoder;
-	m_encoder = nullptr;
 }
 
 void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
@@ -96,6 +107,6 @@ void EncoderPresenter::OnFinishEncode(wxCommandEvent& event)
 
 void* EncodeThread::Entry()
 {
-	m_encoder->Encode(m_handler, m_filePath,*m_store);
+	m_encoder->Encode(m_handler, m_filePath, m_store);
 	return nullptr;
 }
