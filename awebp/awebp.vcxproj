@@ -76,12 +76,20 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(ReferencePath)</ReferencePath>
+    <LibraryPath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\include;$(IncludePath)</IncludePath>
+    <ExecutablePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <ReferencePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(ReferencePath)</ReferencePath>
+    <LibraryPath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\include;$(IncludePath)</IncludePath>
+    <ExecutablePath>D:\project\WebpCam\awebp\ffmpeg-msw64-dev\lib;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -172,6 +180,7 @@
     <ClCompile Include="temporalfileimagestore.cpp" />
     <ClCompile Include="UIDesign.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="webmencoder.cpp" />
     <ClCompile Include="webpencoder.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -111,6 +111,9 @@
     <ClCompile Include="editrenderwidget-scrollbar.cpp">
       <Filter>소스 파일\edit</Filter>
     </ClCompile>
+    <ClCompile Include="webmencoder.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h">
