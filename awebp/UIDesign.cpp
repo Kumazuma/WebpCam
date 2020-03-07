@@ -255,13 +255,13 @@ UIEncodingDialog::UIEncodingDialog( wxWindow* parent, wxWindowID id, const wxStr
 	wxBoxSizer* bSizer22;
 	bSizer22 = new wxBoxSizer( wxHORIZONTAL );
 
+	m_staticText15 = new wxStaticText( this, ID_PROGRESS_LABEL, wxT("0/0(0%)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText15->Wrap( -1 );
+	bSizer22->Add( m_staticText15, 0, wxALL, 5 );
+
 	m_gauge1 = new wxGauge( this, ID_PROGRESS_GAUGE, 100, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL );
 	m_gauge1->SetValue( 0 );
 	bSizer22->Add( m_gauge1, 0, wxALL|wxEXPAND, 5 );
-
-	m_staticText15 = new wxStaticText( this, ID_PROGRESS_LABEL, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText15->Wrap( -1 );
-	bSizer22->Add( m_staticText15, 0, wxALL, 5 );
 
 
 	bSizer19->Add( bSizer22, 0, wxEXPAND, 5 );

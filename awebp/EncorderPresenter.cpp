@@ -101,7 +101,7 @@ void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
 void EncoderPresenter::OnFinishEncode(wxCommandEvent& event)
 {
 	m_progress = m_imageStore.GetCount();
-	wxCommandEvent* e = new wxCommandEvent(EVT_RefreshView);
+	wxCommandEvent* e = new wxCommandEvent(EVT_FINISH_JOB);
 	this->QueueEvent(e);
 }
 
