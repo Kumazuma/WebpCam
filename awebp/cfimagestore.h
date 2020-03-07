@@ -9,11 +9,13 @@
 #include <wx/mstream.h>
 class CISSaveThread : public wxThreadHelper
 {
+	wxMutex& m_mutex;
 	wxFileOutputStream& m_fOStream;
 	std::vector<size_t>& m_bytesCounts;
 	wxMessageQueue<std::pair<wxImage*, uint32_t>>& m_mqueue;
 public:
 	CISSaveThread(
+		wxMutex& m_mutex,
 		wxFileOutputStream& fOStream,
 		std::vector<size_t>& offsets,
 		wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue);
@@ -32,11 +34,16 @@ protected:
 	virtual IImageStore* BuildStore() override;
 
 private:
+	wxMutex m_mutex;
 	wxSize m_imageSize;
+	wxFile m_file;
+	wxString m_fileName;
+	
+	wxFileOutputStream m_fileOStream;
+	wxMessageQueue<std::pair<wxImage*, uint32_t>> m_mqueue;
 	std::vector<uint32_t> m_durations;
 	std::vector<size_t> m_bytesCounts;
-	wxMessageQueue<std::pair<wxImage*, uint32_t>> m_mqueue;
 	CISSaveThread m_backgroundThread;
-	wxString m_fileName;
-	wxFileOutputStream m_fileOStream;
+	
+	
 };

@@ -2,11 +2,27 @@
 #include "cfimagestore.h"
 #include <wx/log.h>
 #include <optional>
+#include <cmath>
 #ifndef __WXMSW__
 #include <unistd.h>
 #endif
 wxAtomicInt g_p = 0;
-
+template<typename T>
+constexpr uint8_t bitcountof() {
+	return sizeof(T) * 8;
+}
+template<typename T>
+constexpr uint8_t bitcountof(T m) {
+	return bitcountof<T>();
+}
+template<typename T>
+constexpr T hiword(T m) {
+	return m >> (bitcountof(m) / 2);
+}
+template<typename T>
+constexpr T loword(T m) {
+	return m ^ (hiword(m) << (bitcountof(m) / 2));
+}
 class MappedFile
 {
 public:
@@ -33,6 +49,7 @@ public:
 		const wxSize& imageSize,
 		const std::vector<size_t>& bytesCounts,
 		const std::vector<uint32_t>& durations);
+	CachedImageStorage(size_t fileSize, const wxSize& imgSize);
 	~CachedImageStorage();
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual  std::pair<wxImage, uint32_t> Get(size_t index);
@@ -40,7 +57,7 @@ public:
 	virtual size_t GetCount() const;
 	virtual wxSize GetImageSize() const;
 	virtual void Clear() override{  }
-	virtual bool IsSupportedEdit()override { return true; }
+	virtual bool IsSupportedEdit()override { return false; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to);
 	virtual bool InsertImages(IImageStore*& image, size_t to) override;
 	virtual std::optional<uint32_t> GetFrameDuration(size_t index) override;
@@ -48,9 +65,11 @@ public:
 	virtual uint32_t GetTotalDuration()const override;
 };
 CISSaveThread::CISSaveThread(
+	wxMutex& mutex,
 	wxFileOutputStream& fOStream,
 	std::vector<size_t>& bytesCounts,
 	wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue):
+	m_mutex(mutex),
 	m_fOStream(fOStream),
 	m_bytesCounts(bytesCounts),
 	m_mqueue(mqueue)
@@ -59,6 +78,7 @@ CISSaveThread::CISSaveThread(
 
 void* CISSaveThread::Entry()
 {
+	m_mutex.Lock();
 	int i = 0;
 	wxFileOffset preOffset = 0;
 	while (true)
@@ -70,9 +90,7 @@ void* CISSaveThread::Entry()
 			break;
 		}
 		i++;
-		wxString tempName = wxString::Format(wxT("%d.tmp"), i);
-		
-		
+
 		auto s = data.first->GetSize();
 		auto bits = data.first->GetData();
 		m_fOStream.WriteAll(bits, s.x * s.y * 3l);
@@ -82,17 +100,17 @@ void* CISSaveThread::Entry()
 		preOffset = ts;
 		delete data.first;
 	}
-	
-	m_fOStream.Close();
+	m_mutex.Unlock();
 	return nullptr;
 }
 
 CachedImageStorageBuilder::CachedImageStorageBuilder(const wxSize& imageSize):
-	m_fileName(wxFileName::CreateTempFileName(wxT("webpcam"))),
+	m_mutex(),
+	m_fileName(wxFileName::CreateTempFileName(wxT("webpcam"),&m_file)),
 	m_imageSize(imageSize),
-	m_fileOStream(m_fileName),
+	m_fileOStream(m_file),
 	m_mqueue(),
-	m_backgroundThread(m_fileOStream, m_bytesCounts, m_mqueue)
+	m_backgroundThread(m_mutex, m_fileOStream, m_bytesCounts, m_mqueue)
 {
 	m_backgroundThread.CreateThread();
 	m_backgroundThread.GetThread()->Run();
@@ -106,13 +124,16 @@ CachedImageStorageBuilder::~CachedImageStorageBuilder()
 		m_mqueue.Post(std::pair<wxImage*, uint32_t>(nullptr, 0));
 		thread->Wait();
 	}
-	m_fileOStream.GetFile()->Detach();
+	m_mutex.Lock();
 	m_fileOStream.Close();
 	m_fileOStream.UnRef();
 	if (m_fileName.empty() == false)
 	{
+		m_file.Close();
+		m_file.Detach();
 		wxRemoveFile(m_fileName);
 	}
+	m_mutex.Unlock();
 }
 
 void CachedImageStorageBuilder::PushBack(const wxImage& image, uint32_t duration)
@@ -134,9 +155,15 @@ IImageStore* CachedImageStorageBuilder::BuildStore()
 		m_mqueue.Post(std::pair<wxImage*, uint32_t>(nullptr, 0));
 		thread->Wait();
 	}
-	m_fileOStream.GetFile()->Detach();
+	m_mutex.Lock();
 	m_fileOStream.Close();
 	m_fileOStream.UnRef();
+	if (m_fileName.empty() == false)
+	{
+		m_file.Close();
+		m_file.Detach();
+	}
+	m_mutex.Unlock();
 	wxString temp = m_fileName;
 	m_fileName.Clear();
 	return new CachedImageStorage(temp, m_imageSize, m_bytesCounts, m_durations);
@@ -206,6 +233,69 @@ CachedImageStorage::CachedImageStorage(
 #endif
 }
 
+
+CachedImageStorage::CachedImageStorage(size_t fileSize, const wxSize& imgSize):
+	m_fileName(wxFileName::CreateTempFileName(wxT("webpcam"))), m_imageSize(imgSize), m_durations(), m_mappedFile(nullptr)
+{
+	//TODO:이미지 매핑
+#ifdef __WXMSW__
+	m_hFile = CreateFileW(m_fileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
+		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	for (int i = 0; i < fileSize / sizeof(uint64_t); i++)
+	{
+		uint64_t b = 0;
+		if (!WriteFile(m_hFile, &b, sizeof(uint64_t), nullptr, nullptr))
+		{
+			wchar_t* text = nullptr;
+			auto err = GetLastError();
+			FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+				nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+			wxMessageBox(text);
+		}
+	}
+	FlushFileBuffers(m_hFile);
+	DWORD high = fileSize >> (bitcountof(fileSize)/2);
+	DWORD low = fileSize;
+	//if (high == 0 && low == 0)
+	if (m_hFile == INVALID_HANDLE_VALUE)
+	{
+		wchar_t* text = nullptr;
+		auto err = GetLastError();
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+		wxMessageBox(text);
+	}
+	m_hMap = CreateFileMappingW(m_hFile, NULL, PAGE_READWRITE, high, low, NULL);
+	if (m_hMap == NULL)
+	{
+		wchar_t* text = nullptr;
+		auto err = GetLastError();
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+		wxMessageBox(text);
+		if (err == 1006)
+		{
+
+		}
+		else
+		{
+
+		}
+
+	}
+	m_mappedFile = (uint8_t*)MapViewOfFile(m_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+	if (!m_mappedFile)
+	{
+		wchar_t* text = nullptr;
+		auto err = GetLastError();
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+		wxMessageBox(text);
+
+	}
+#endif
+}
+
 CachedImageStorage::~CachedImageStorage()
 {
 #ifdef __WXMSW__
@@ -215,6 +305,7 @@ CachedImageStorage::~CachedImageStorage()
 #endif
 	wxRemoveFile(m_fileName);
 }
+
 
 IImageStoreBuilder* CachedImageStorage::CreateBuilder(const wxSize& imageSize)
 {
@@ -249,8 +340,15 @@ wxSize CachedImageStorage::GetImageSize() const
 
 IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
 {
-	wxString fileName = wxFileName::CreateTempFileName(wxT("webpcam"));
-	auto storage = new CachedImageStorage(fileName, m_imageSize, std::vector<size_t>(), std::vector<uint32_t>());
+	return nullptr;
+	size_t fileSize = 0;
+	{
+		auto page = m_pages[to - 1];
+		fileSize = page[0] + page[1];
+		page = m_pages[from];
+		fileSize -= page[0];
+	}
+	auto storage = new CachedImageStorage(fileSize, m_imageSize);
 	size_t offset = 0;
 	for (size_t i = from; i < to; i++)
 	{
@@ -280,6 +378,7 @@ IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
 
 bool CachedImageStorage::InsertImages(IImageStore*& image, size_t to)
 {
+	return false;
 	CachedImageStorage* obj = dynamic_cast<CachedImageStorage*>(image);
 	if (obj != nullptr)
 	{
