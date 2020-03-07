@@ -311,7 +311,7 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			handler->QueueEvent(event);
 			return;
 		}
-		av_init_packet(m_pkt);
+		
 		t = avcodec_receive_packet(m_context, m_pkt);
 		if (t == AVERROR(EAGAIN))
 		{
@@ -348,13 +348,17 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	av_write_trailer(m_formatContext);
 	avio_closep(&m_formatContext->pb);
 	avcodec_free_context(&m_context);
+	m_context = nullptr;
 	av_frame_free(&rgbFrame);
 	av_frame_free(&m_pictureEncoded);
+	m_pictureEncoded = nullptr;
+
 	sws_freeContext(swsContext);
 	
-
+	
 	/* free the stream */
 	avformat_free_context(m_formatContext);
+	m_formatContext = nullptr;
 	auto* event = new wxCommandEvent(EVT_FINISH_ENCODE);
 	handler->QueueEvent(event);
 }
@@ -388,7 +392,7 @@ int WebmEncoder::receivePacket(IImageStore& imageStore, wxEvtHandler* handler)
 		{
 			return -1;
 		}
-		av_init_packet(m_pkt);
+		
 		ret = avcodec_receive_packet(m_context, m_pkt);
 		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
 		{
