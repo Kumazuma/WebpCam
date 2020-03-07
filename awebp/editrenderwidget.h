@@ -47,7 +47,7 @@ namespace Edit
 		}
 		void RefreshView();
 		void MoveView(wxPoint delta);
-		void UpdateCropRect(wxPoint delta);
+		bool UpdateCropRect(wxPoint delta);
 		void SetPresenter(EditFramePresenter* presenter);
 		void PlayAnimImage();
 	protected:

@@ -13,6 +13,7 @@ protected:
 public:
 	EditFramePresenter():m_model(nullptr) {}
 	EditFramePresenter(wxWindow* parent, IImageStore* imageStore, const wxSize& imageSize);
+	virtual ~EditFramePresenter();
 	bool GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration);
 	std::optional<uint32_t> GetFrameDuration(size_t index);
 	IImageStore& GetImageStore();

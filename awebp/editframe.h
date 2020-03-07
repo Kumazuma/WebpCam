@@ -20,7 +20,6 @@ protected:
 	void OnRefreshView(wxCommandEvent& event);
 	void OnRbarBtnDeleteFrames(wxRibbonToolBarEvent& event);
 	void OnRbarBtnResizeFrames(wxRibbonToolBarEvent& event);
-	void OnSelectFramePaint(wxPaintEvent& event);
 	void OnListItemSelected(wxCommandEvent& event);
 	void OnRbarBtnUndo(wxRibbonButtonBarEvent& event);
 	void OnRbarBtnRedo(wxRibbonButtonBarEvent& event);
@@ -30,8 +29,7 @@ protected:
 	void OnAnimProcessAFrame(wxCommandEvent& event);
 	void OnPropertyValueChanged(wxPropertyGridEvent& event);
 	void OnRBarBtnCropFrame(wxRibbonToolBarEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
-	void OnKeyUp(wxKeyEvent& event);
+	void OnUpdateImageStore(wxCommandEvent&);
 };
 class EditForm : public UIEditForm
 {

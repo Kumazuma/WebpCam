@@ -36,6 +36,11 @@ EncodingDialog::EncodingDialog(wxWindow* parent, IImageStore& store):
 			FindWindowById(ID_SAVE)->Disable();
 			m_presenter.SaveAnimImage(saveFileDialog.GetPath());
 		}, ID_SAVE);
+	this->Bind(wxEVT_BUTTON,
+		[this](wxCommandEvent&)
+		{
+			Close();
+		}, wxID_CANCEL);
 }
 
 EncodingDialog::~EncodingDialog()
@@ -83,13 +88,17 @@ void EncodingDialog::OnFinishEncode(wxCommandEvent&)
 
 void EncodingDialog::OnClosing(wxCloseEvent& event)
 {
-	if (event.CanVeto() && m_presenter.GetEncodeProgress() != m_presenter.GetImagesCount())
+	
+	if (event.CanVeto() && //닫는 것을 거부할 수 있어야 하고
+		m_presenter.Encoding() && //인코딩 중이여야 하고
+		m_presenter.GetEncodeProgress() != m_presenter.GetImagesCount())//완료가 안 되어 있어야 한다.
 	{
-		auto res = (wxStandardID)
+		auto res =
 			wxMessageBox (wxT("정말로 종료하시겠습니까?"), wxT("인코딩"),
 				wxYES | wxNO | wxCENTER |wxICON_QUESTION, this);
 		if (res == wxNO)
 		{
+			event.Skip();
 			event.Veto();
 			return;
 		}
@@ -98,7 +107,11 @@ void EncodingDialog::OnClosing(wxCloseEvent& event)
 			m_presenter.StopEncode();
 		}
 	}
-	event.Skip();
+	else
+	{
+
+	}
+	Destroy();
 	
 }
 
@@ -114,8 +127,10 @@ void EncodingDialog::OnUpdateEncoder(wxCommandEvent& event)
 	{
 	case 0:
 		m_presenter.SetEncoderToWebp();
+		break;
 	case 1:
 		m_presenter.SetEncoderToWebm();
+		break;
 	}
 }
 

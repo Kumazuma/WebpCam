@@ -14,7 +14,6 @@ extern "C" {
 #define SCALE_FLAGS SWS_BICUBIC
 #pragma comment(lib, "avcodec.lib")
 #pragma comment(lib, "swscale.lib")
-#pragma comment(lib, "swresample.lib")
 #pragma comment(lib, "avformat.lib")
 #pragma comment(lib, "avutil.lib")
 WebmEncoder::WebmEncoder():
@@ -27,7 +26,7 @@ WebmEncoder::WebmEncoder():
 	
 	
 }
-uint32_t GetMin(std::vector<uint32_t> values)
+uint32_t GetMax(std::vector<uint32_t> values)
 {
 	if (values.empty())
 		return -1;
@@ -46,7 +45,7 @@ uint32_t GetMin(std::vector<uint32_t> values)
 				it++;
 			}
 			
-			temp.push_back((first < second) ? first  : second);
+			temp.push_back((first < second) ? second   : first);
 		}
 		values = std::move(temp);
 	}
@@ -61,7 +60,7 @@ uint32_t GetAVG(IImageStore& store)
 	}
 	return sum / store.GetCount();
 }
-uint32_t GetMin(IImageStore& store)
+uint32_t GetMax(IImageStore& store)
 {
 	std::vector<uint32_t> durations;
 	for (int i = 0; i < store.GetCount(); i++)
@@ -69,7 +68,7 @@ uint32_t GetMin(IImageStore& store)
 		uint32_t d = *store.GetFrameDuration(i);
 		durations.push_back(d);
 	}
-	return GetMin(std::move(durations));
+	return GetMax(std::move(durations));
 }
 uint32_t GetGCD(uint32_t u, uint32_t v)
 {
@@ -135,6 +134,16 @@ WebmEncoder::~WebmEncoder()
 	{
 		avcodec_free_context(&m_context);
 	}
+	if (m_formatContext)
+	{
+		avformat_free_context(m_formatContext);
+	}
+
+	
+
+
+
+	
 }
 
 void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore)
@@ -148,6 +157,8 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	
 	m_formatContext->oformat->video_codec = AV_CODEC_ID_VP9;
 	m_formatContext->oformat->audio_codec = AV_CODEC_ID_NONE;
+	m_formatContext->audio_codec = nullptr;
+	
 	m_stream = avformat_new_stream(m_formatContext, nullptr);
 	BEGIN_ERROR_HANDLE(m_stream, IsNULL);
 	wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("비디오 인코드 스트림을 만들 수 없습니다."));
@@ -155,16 +166,15 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_stream->id = m_formatContext->nb_streams - 1;
 	int ret = 0;
 	auto imgSize = imageStore.GetImageSize();
-	const auto LCM = GetLCM(imageStore);
 	const auto AVG = GetAVG(imageStore);
-	const auto MIN = GetMin(imageStore);
-
+	const auto MAX = GetMax(imageStore);
+	const auto totalDuration = imageStore.GetTotalDuration();
 	m_context->codec_id = AV_CODEC_ID_VP9;
 	m_context->pix_fmt = AV_PIX_FMT_YUV420P;
-
+	
 	m_context->width = imgSize.GetWidth();
 	m_context->height = imgSize.GetHeight();
-	m_context->bit_rate = (1024 * 3000) * (m_quality / 100.f);
+	m_context->bit_rate = 1024 * ((3000 * m_quality) / 1000) * 10;
 
 	m_context->time_base = { 1, 1000 };
 	m_context->framerate.den = (int)AVG;
@@ -172,12 +182,11 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 
 	m_stream->time_base = { 1, 1000 };
 	m_stream->avg_frame_rate = { 1000,(int)AVG };
-	m_stream->r_frame_rate = { 1000, (int)MIN };
-	m_stream->duration = imageStore.GetCount() * 50;
+	m_stream->r_frame_rate = { 1000, (int)MAX };
+	m_stream->duration = totalDuration;
 	
 	m_context->qmin = 1;
-	m_context->qmax = 20;
-	m_context->max_b_frames = 1;
+	m_context->qmax = 60;
 	m_context->gop_size = imageStore.GetCount();
 	m_context->thread_count = wxThread::GetCPUCount();
 	
@@ -187,7 +196,8 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	avcodec_open2(m_context, m_codecEncode, nullptr);
 	avcodec_parameters_from_context(m_stream->codecpar, m_context);
 	m_formatContext->video_codec = m_codecEncode;
-	m_formatContext->duration = imageStore.GetCount() * 50;
+	m_formatContext->duration = totalDuration;
+	
 	BEGIN_ERROR_HANDLE(avio_open(&m_formatContext->pb, filePath.ToUTF8().data(), AVIO_FLAG_READ_WRITE),< 0);
 	wxLogGeneric(wxLogLevelValues::wxLOG_Error, wxT("파일 열기에 실패했습니다."));
 	END_ERROR_HANDLE();
@@ -226,7 +236,15 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	uint32_t timestamp = 0;
 	for (int i = 0; i < imageStore.GetCount(); i++)
 	{
-		
+		if (m_requestedStop)
+		{
+			sws_freeContext(swsContext);
+			av_frame_free(&rgbFrame);
+			avio_closep(&m_formatContext->pb);
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		wxImage image = imageStore.Get(i).first;
 		if (!image.IsOk())
 		{
@@ -249,7 +267,10 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			//큐가 꽉차서 못 넣는 것이면 패킷을 처리한 후에 다시 시도한다.
 			if (ret == AVERROR(EAGAIN))
 			{
-				receivePacket(LCM, imageStore, handler);
+				if (receivePacket(imageStore, handler) < 0)
+				{
+					break;
+				}
 				continue;
 			}
 			else if (ret == AVERROR_EOF)
@@ -272,15 +293,24 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 				return;
 			}
 		}
-		receivePacket(LCM, imageStore, handler);
+		receivePacket( imageStore, handler);
 	}
-	//끝나고 나서 마지막 빈 프레임 하나를 삽입한다.
-	m_pictureEncoded->pts = timestamp;
-	avcodec_send_frame(m_context, m_pictureEncoded);
-	receivePacket(LCM, imageStore, handler);
-
+	////끝나고 나서 마지막 빈 프레임 하나를 삽입한다.
+	//m_pictureEncoded->pts = timestamp;
+	//avcodec_send_frame(m_context, m_pictureEncoded);
+	//receivePacket( imageStore, handler);
+	//avcodec_flush_buffers(m_context);
 	int t = avcodec_send_frame(m_context, NULL);
 	while (t >= 0) {
+		if (m_requestedStop)
+		{
+			sws_freeContext(swsContext);
+			av_frame_free(&rgbFrame);
+			avio_closep(&m_formatContext->pb);
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		av_init_packet(m_pkt);
 		t = avcodec_receive_packet(m_context, m_pkt);
 		if (t == AVERROR(EAGAIN))
@@ -295,19 +325,25 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 		else if (t < 0) {
 			break;
 		}
+		if (m_pkt->data == nullptr)
+		{
+			break;
+		}
 		m_lastI++;
 		auto* event = new wxCommandEvent(EVT_ADDED_A_FRAME);
 		event->SetInt(m_lastI);
 		handler->QueueEvent(event);
-		if(m_pkt->pts != imageStore.GetCount())
-			m_pkt->duration = *imageStore.GetFrameDuration(m_pkt->pts);
+		
 		av_packet_rescale_ts(m_pkt, m_context->time_base, m_stream->time_base); 
+		auto t = imageStore.GetFrameDuration(m_lastI);
+
+		m_pkt->duration = t.value_or(-1);
 		m_pkt->stream_index = m_stream->index;
 		av_interleaved_write_frame(m_formatContext, m_pkt);
 		av_packet_unref(m_pkt);
 	}
 
-	avcodec_flush_buffers(m_context);
+	
 	avformat_flush(m_formatContext);
 	av_write_trailer(m_formatContext);
 	avio_closep(&m_formatContext->pb);
@@ -335,7 +371,7 @@ void WebmEncoder::StopEncode()
 
 wxString WebmEncoder::GetFileFilter()
 {
-	return wxT("webm 동영상파일 파일 (*.webm)|*.webm");
+	return wxT("webm 동영상파일 (*.webm)|*.webm");
 }
 
 wxString WebmEncoder::GetFileExtension()
@@ -343,12 +379,15 @@ wxString WebmEncoder::GetFileExtension()
 	return wxString();
 }
 
-int WebmEncoder::receivePacket(const uint32_t LCM, IImageStore& imageStore, wxEvtHandler* handler)
+int WebmEncoder::receivePacket(IImageStore& imageStore, wxEvtHandler* handler)
 {
 	int ret = 0;
 	while (ret >= 0)
 	{
-		
+		if (m_requestedStop)
+		{
+			return -1;
+		}
 		av_init_packet(m_pkt);
 		ret = avcodec_receive_packet(m_context, m_pkt);
 		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
@@ -367,8 +406,8 @@ int WebmEncoder::receivePacket(const uint32_t LCM, IImageStore& imageStore, wxEv
 		
 		/* rescale output packet timestamp values from codec to stream timebase */
 		av_packet_rescale_ts(m_pkt, m_context->time_base, m_stream->time_base);
-		if (m_pkt->pts != imageStore.GetCount())
-			m_pkt->duration = *imageStore.GetFrameDuration(m_pkt->pts);
+		auto t = imageStore.GetFrameDuration(m_lastI);
+		m_pkt->duration = t.value_or(-1);
 		m_pkt->stream_index = m_stream->index;
 		if (auto err = av_interleaved_write_frame(m_formatContext, m_pkt) != 0)
 		{

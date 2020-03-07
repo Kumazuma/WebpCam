@@ -17,4 +17,5 @@ protected:
 	void OnClosing(wxCloseEvent& event);
 	void OnUpdateQuality(wxSpinEvent&);
 	void OnUpdateEncoder(wxCommandEvent&);
+	
 };

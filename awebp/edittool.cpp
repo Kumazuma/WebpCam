@@ -1,31 +1,20 @@
 ﻿#include "wx/wxprec.h"
 #include "edittool.h"
 #include "webp/decode.h"
-void EditDeleteFrameTool::Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
+void EditDeleteFrameTool::Execute(IImageStore*&  imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem)
 {
-	if (imageStore->IsSupportedEdit())
-	{
-		auto newStore = imageStore->RemoveImages(start, end);
-		historyItem = new HistoryItemDeleteFrame(newStore, start, end);
-		return;
-	}
-	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
 	auto tempSaveBuilder = imageStore->CreateBuilder(imageStore->GetImageSize());
-	for (int i = 0;i < imageStore->GetCount(); i++)
+	for (int i = 0; i < imageStore->GetCount(); i++)
 	{
-		auto item = imageStore->Get(i);
-		auto store = tempSaveBuilder;
 		if (i < start || end <= i)
 		{
-			store = builder;
-			//builder->PushBack(item.first, item.second);
+			auto item = imageStore->Get(i);
+			tempSaveBuilder->PushBack(item.first, item.second);
 		}
-		store->PushBack(item.first, item.second);
 	}
-	delete imageStore;
 	
-	historyItem = new HistoryItemDeleteFrame(IImageStoreBuilder::BuildStore(tempSaveBuilder), start, end);
-	imageStore = IImageStoreBuilder::BuildStore(builder);
+	historyItem = new HistoryItemDeleteFrame(imageStore, start, end);
+	imageStore = IImageStoreBuilder::BuildStore(tempSaveBuilder);
 }
 
 HistoryItemDeleteFrame::HistoryItemDeleteFrame(IImageStore* imageStore, size_t start, size_t end):
@@ -42,63 +31,22 @@ HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
 
 void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 {
-	if (imageStore->InsertImages(m_imageStore, m_start))
-	{
-		return;
-	}
-	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
-	int j = 0;
-	if (imageStore->GetCount() == 0)
-	{
-		for (j = 0; j < m_imageStore->GetCount(); j++)
-		{
-			auto item = m_imageStore->Get(j);
-			builder->PushBack(item.first, item.second);
-		}
-	}
-	for (int i = 0; i < imageStore->GetCount(); i++)
-	{
-		if (i == m_start)
-		{
-			for (j = 0; j < m_imageStore->GetCount(); j++)
-			{
-				auto item = m_imageStore->Get(j);
-				builder->PushBack(item.first, item.second);
-			}
-		}
-		auto item = imageStore->Get(i);
-		builder->PushBack(item.first, item.second);
-	}
-	
-	delete imageStore;
-	imageStore =IImageStoreBuilder::BuildStore(builder);
+	auto* store = imageStore;
+	imageStore = m_imageStore;
+	m_imageStore = store;
 }
 
 void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 {
-	if (imageStore->IsSupportedEdit())
-	{
-		auto newStore = imageStore->RemoveImages(m_start, m_end);
-		m_imageStore = newStore;
-		return;
-	}
-	auto builder = imageStore->CreateBuilder(imageStore->GetImageSize());
-	for (int i = 0; i < imageStore->GetCount(); i++)
-	{
-		auto item = imageStore->Get(i);
-		if (i < m_start || m_end <= i)
-		{
-			builder->PushBack(item.first, item.second);
-		}
-	}
-	delete imageStore;
-	imageStore =IImageStoreBuilder::BuildStore(builder);
+	auto* store = imageStore;
+	imageStore = m_imageStore;
+	m_imageStore = store;
 }
 
 wxString HistoryItemDeleteFrame::GetDescription() const
 {
 	wxString description;
-	description << wxT("프레임 삭제(갯수:") << m_imageStore->GetCount() << wxT(")");
+	description << wxT("프레임 삭제(갯수:") << (m_end - m_start) << wxT(")");
 	return description;
 }
 

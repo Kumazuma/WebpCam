@@ -272,7 +272,7 @@ UIEncodingDialog::UIEncodingDialog( wxWindow* parent, wxWindowID id, const wxStr
 	m_button9 = new wxButton( this, ID_SAVE, wxT("저장"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer21->Add( m_button9, 1, wxALL|wxEXPAND, 5 );
 
-	m_button10 = new wxButton( this, ID_CANCEL, wxT("취소"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button10 = new wxButton( this, wxID_CANCEL, wxT("취소"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer21->Add( m_button10, 1, wxALL|wxEXPAND, 5 );
 
 

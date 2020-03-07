@@ -57,6 +57,8 @@ CaptureFrame::CaptureFrame() :
 	choice->Append(wxT("12"), (void*)FPS::_12);
 	choice->Append(wxT("15"), (void*)FPS::_15);
 	choice->Append(wxT("20"), (void*)FPS::_20);
+	choice->Append(wxT("24"), (void*)FPS::_24);
+	choice->SetSelection(0);
 	FindWindowById(ID_BTN_STOP)->Disable();
 	this->Bind(EVT_RefreshView, &CaptureFrame::OnRefleshView, this);
 }

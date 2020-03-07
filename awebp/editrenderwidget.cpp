@@ -545,11 +545,14 @@ void Edit::EditRenderWidget::OnMouseMotion(wxMouseEvent& event)
 	else if(m_selectedImage.IsOk() && m_direction != DirectionState::None)
 	{
 		wxPoint delta = event.GetPosition()  - *m_prevMousePosition;
-		UpdateCropRect(delta);
-		//화면 갱신
-		ReloadPaintResource();
-		Paint();
-		m_prevMousePosition = event.GetPosition();
+		if (UpdateCropRect(delta))
+		{
+			//화면 갱신
+			ReloadPaintResource();
+			Paint();
+			m_prevMousePosition = event.GetPosition();
+		}
+		
 	}
 	else
 	{
@@ -680,7 +683,7 @@ void Edit::EditRenderWidget::MoveView(wxPoint delta)
 		//this->GetScrollHelper()->AdjustScrollbars();
 	}
 }
-void Edit::EditRenderWidget::UpdateCropRect(wxPoint delta)
+bool Edit::EditRenderWidget::UpdateCropRect(wxPoint delta)
 {
 	if (m_selectedImage.IsOk())
 	{
@@ -705,8 +708,13 @@ void Edit::EditRenderWidget::UpdateCropRect(wxPoint delta)
 			m_direction = DirectionState::None;
 			m_prevMousePosition.reset();
 		}
+		if (m_presenter->GetCropRect() == temp)
+		{
+			return false;
+		}
 		m_presenter->SetCropRect(temp);
 	}
+	return true;
 }
 void Edit::EditRenderWidget::SetPresenter(EditFramePresenter* presenter)
 {
