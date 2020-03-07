@@ -65,7 +65,6 @@
 #define ID_PROGRESS_LABEL 1020
 #define ID_PROGRESS_GAUGE 1021
 #define ID_SAVE 1022
-#define ID_CANCEL 1023
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class UIEditFrame

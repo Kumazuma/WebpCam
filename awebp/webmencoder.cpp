@@ -134,6 +134,16 @@ WebmEncoder::~WebmEncoder()
 	{
 		avcodec_free_context(&m_context);
 	}
+	if (m_formatContext)
+	{
+		avformat_free_context(m_formatContext);
+	}
+
+	
+
+
+
+	
 }
 
 void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageStore& imageStore)
@@ -226,7 +236,15 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	uint32_t timestamp = 0;
 	for (int i = 0; i < imageStore.GetCount(); i++)
 	{
-		
+		if (m_requestedStop)
+		{
+			sws_freeContext(swsContext);
+			av_frame_free(&rgbFrame);
+			avio_closep(&m_formatContext->pb);
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		wxImage image = imageStore.Get(i).first;
 		if (!image.IsOk())
 		{
@@ -249,7 +267,10 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 			//큐가 꽉차서 못 넣는 것이면 패킷을 처리한 후에 다시 시도한다.
 			if (ret == AVERROR(EAGAIN))
 			{
-				receivePacket( imageStore, handler);
+				if (receivePacket(imageStore, handler) < 0)
+				{
+					break;
+				}
 				continue;
 			}
 			else if (ret == AVERROR_EOF)
@@ -281,6 +302,15 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	//avcodec_flush_buffers(m_context);
 	int t = avcodec_send_frame(m_context, NULL);
 	while (t >= 0) {
+		if (m_requestedStop)
+		{
+			sws_freeContext(swsContext);
+			av_frame_free(&rgbFrame);
+			avio_closep(&m_formatContext->pb);
+			auto* event = new wxCommandEvent(EVT_FAILED_ENCODE);
+			handler->QueueEvent(event);
+			return;
+		}
 		av_init_packet(m_pkt);
 		t = avcodec_receive_packet(m_context, m_pkt);
 		if (t == AVERROR(EAGAIN))
@@ -341,7 +371,7 @@ void WebmEncoder::StopEncode()
 
 wxString WebmEncoder::GetFileFilter()
 {
-	return wxT("webm 동영상파일 파일 (*.webm)|*.webm");
+	return wxT("webm 동영상파일 (*.webm)|*.webm");
 }
 
 wxString WebmEncoder::GetFileExtension()
@@ -354,7 +384,10 @@ int WebmEncoder::receivePacket(IImageStore& imageStore, wxEvtHandler* handler)
 	int ret = 0;
 	while (ret >= 0)
 	{
-		
+		if (m_requestedStop)
+		{
+			return -1;
+		}
 		av_init_packet(m_pkt);
 		ret = avcodec_receive_packet(m_context, m_pkt);
 		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)

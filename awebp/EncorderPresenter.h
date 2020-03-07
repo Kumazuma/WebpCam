@@ -26,6 +26,7 @@ public:
 	void SetQuality(int value);
 	void SaveAnimImage(const wxString& filePath);
 	void StopEncode();
+	bool Encoding();
 protected:
 	void OnAddedAFrame(wxCommandEvent& event);
 	void OnFinishEncode(wxCommandEvent& event);

@@ -91,6 +91,18 @@ void EncoderPresenter::StopEncode()
 	}
 }
 
+bool EncoderPresenter::Encoding()
+{
+	if (!m_threadHelper)
+		return false;
+	auto thread = m_threadHelper->GetThread();
+	if (!thread)
+		return false;
+	if (!thread->IsRunning())
+		return false;
+	return true;
+}
+
 void EncoderPresenter::OnAddedAFrame(wxCommandEvent& event)
 {
 	m_progress = event.GetInt();
