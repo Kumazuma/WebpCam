@@ -13,6 +13,7 @@ public:
 	~EncodingDialog();
 protected:
 	void OnRefreshView(wxCommandEvent& event);
+	void OnFinishEncode(wxCommandEvent&);
 	void OnClosing(wxCloseEvent& event);
 	void OnUpdateQuality(wxSpinEvent&);
 	void OnUpdateEncoder(wxCommandEvent&);

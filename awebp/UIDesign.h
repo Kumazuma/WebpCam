@@ -62,8 +62,8 @@
 #define ID_BTN_CLOSE 1017
 #define ID_FILE_TYPE 1018
 #define ID_QUALITY 1019
-#define ID_PROGRESS_GAUGE 1020
-#define ID_PROGRESS_LABEL 1021
+#define ID_PROGRESS_LABEL 1020
+#define ID_PROGRESS_GAUGE 1021
 #define ID_SAVE 1022
 #define ID_CANCEL 1023
 
@@ -197,8 +197,8 @@ class UIEncodingDialog : public wxDialog
 		wxChoice* m_choice5;
 		wxStaticText* m_staticText14;
 		wxSpinCtrl* m_spinCtrl8;
-		wxGauge* m_gauge1;
 		wxStaticText* m_staticText15;
+		wxGauge* m_gauge1;
 		wxButton* m_button9;
 		wxButton* m_button10;
 

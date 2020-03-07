@@ -8,6 +8,7 @@ EncodingDialog::EncodingDialog(wxWindow* parent, IImageStore& store):
 {
 	Center();
 	m_presenter.Bind(EVT_RefreshView, &EncodingDialog::OnRefreshView, this);
+	m_presenter.Bind(EVT_FINISH_JOB, &EncodingDialog::OnFinishEncode, this);
 	FindWindowById(ID_FILE_TYPE)->Bind(wxEVT_COMMAND_CHOICE_SELECTED, &EncodingDialog::OnUpdateEncoder, this);
 	FindWindowById(ID_QUALITY)->Bind(wxEVT_COMMAND_SPINCTRL_UPDATED, &EncodingDialog::OnUpdateQuality, this);
 	try
@@ -53,12 +54,31 @@ void EncodingDialog::OnRefreshView(wxCommandEvent& event)
 	labelText << progress << "/" << total
 		<< "(" << progress * 100 / total << "%)";
 	label->SetLabel(labelText);
+	this->SetSize(this->GetBestSize());
 	this->Layout();
 	if (progress == total)
 	{
-		wxMessageBox(wxT("완료되었습니다"), wxT("완료"), wxOK | wxCENTRE | wxICON_INFORMATION, this);
-		Close();
+		
 	}
+}
+
+void EncodingDialog::OnFinishEncode(wxCommandEvent&)
+{
+	auto gauge = wxDynamicCast(FindWindowById(ID_PROGRESS_GAUGE), wxGauge);
+	auto label = wxDynamicCast(FindWindowById(ID_PROGRESS_LABEL), wxStaticText);
+	int progress = m_presenter.GetEncodeProgress();
+	int total = m_presenter.GetImagesCount();
+	wxString labelText;
+	gauge->SetValue(progress);
+	gauge->SetRange(total);
+	labelText << progress << "/" << total
+		<< "(" << progress * 100 / total << "%)";
+	label->SetLabel(labelText);
+	this->SetSize(this->GetBestSize());
+	this->Layout();
+
+	wxMessageBox(wxT("완료되었습니다"), wxT("완료"), wxOK | wxCENTRE | wxICON_INFORMATION, this);
+	Close();
 }
 
 void EncodingDialog::OnClosing(wxCloseEvent& event)
