@@ -79,7 +79,7 @@
     <ReferencePath>.\ffmpeg-msw64-dev\lib;$(ReferencePath)</ReferencePath>
     <LibraryPath>.\ffmpeg-msw64-dev\lib;$(LibraryPath)</LibraryPath>
     <IncludePath>.\ffmpeg-msw64-dev\include;$(IncludePath)</IncludePath>
-    <ExecutablePath>.\ffmpeg-msw64-dev\bin;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>.\ffmpeg-msw64-dev\lib;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
