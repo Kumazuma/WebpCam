@@ -69,16 +69,12 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_context->codec_id = AV_CODEC_ID_VP9;
 	m_context->pix_fmt = AV_PIX_FMT_YUV420P;
 
-	
-
 	m_context->width = imgSize.GetWidth();
 	m_context->height = imgSize.GetHeight();
 	m_context->bit_rate = (1024 * 3000) * (m_quality / 100.f);
 	m_context->time_base.den = 20;
 	m_context->time_base.num = 1;
 	
-	
-
 	m_context->time_base = { 1, 20 };;
 	m_context->framerate.den = 1;
 	m_context->framerate.num = 20;
@@ -88,7 +84,6 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_stream->r_frame_rate = m_stream->avg_frame_rate;
 	m_stream->duration = imageStore.GetCount() * 50;
 	
-
 	m_context->qmin = 0;
 	m_context->qmax = 60;
 	m_context->max_b_frames = 1;
@@ -116,8 +111,7 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_pictureEncoded->width = m_context->width;
 	m_pictureEncoded->height = m_context->height;
 	av_frame_get_buffer(m_pictureEncoded, 0);
-	
-	
+
 //RGB24에서 YUV420으로 바꾸기 위한 준비
 	AVFrame* rgbFrame = av_frame_alloc();
 	rgbFrame->format = AV_PIX_FMT_RGB24;
@@ -225,7 +219,6 @@ void WebmEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	av_frame_free(&rgbFrame);
 	av_frame_free(&m_pictureEncoded);
 	sws_freeContext(swsContext);
-	
 
 	/* free the stream */
 	avformat_free_context(m_formatContext);
@@ -287,9 +280,9 @@ int WebmEncoder::receivePacket(wxEvtHandler* handler)
 		}
 		else
 		{
-			
+			av_packet_unref(m_pkt);
 		}
-		av_packet_unref(m_pkt);
+		
 	}
 	return ret;
 }

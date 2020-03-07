@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include<wx/wx.h>
 #include<wx/vector.h>
 #include<wx/anidecod.h>
@@ -13,7 +13,8 @@ enum class FPS {
 	_10 = 1000/10,
 	_12 = 1000/12,
 	_15 = 1000/15,
-	_20 = 1000/20
+	_20 = 1000/20,
+	_24 = 1000/24
 };
 wxDECLARE_EVENT(EVT_PropertyChanged, wxCommandEvent);
 class Model
