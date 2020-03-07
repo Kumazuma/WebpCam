@@ -32,5 +32,5 @@ public:
 	wxString GetFileFilter() override;
 	wxString GetFileExtension() override;
 private:
-	int receivePacket(const uint32_t LCM, IImageStore& imageStore, wxEvtHandler* handler);
+	int receivePacket(IImageStore& imageStore, wxEvtHandler* handler);
 };

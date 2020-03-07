@@ -45,6 +45,7 @@ public:
 	virtual bool InsertImages(IImageStore*& image, size_t to) override;
 	virtual std::optional<uint32_t> GetFrameDuration(size_t index) override;
 	virtual void SetFrameDuration(size_t index, uint32_t duration) override;
+	virtual uint32_t GetTotalDuration()const override;
 };
 CISSaveThread::CISSaveThread(
 	wxFileOutputStream& fOStream,
@@ -326,4 +327,14 @@ std::optional<uint32_t> CachedImageStorage::GetFrameDuration(size_t index)
 void CachedImageStorage::SetFrameDuration(size_t index, uint32_t duration)
 {
 	m_durations[index] = duration;
+}
+#include<algorithm>
+uint32_t CachedImageStorage::GetTotalDuration() const
+{
+	uint32_t s = 0;
+	for (auto it : m_durations)
+	{
+		s += it;
+	}
+	return s;
 }

@@ -10,6 +10,10 @@ EditFramePresenter::EditFramePresenter(wxWindow* parent, IImageStore* imageStore
 	m_model.SetCropRect(m_model.GetImageStore()->GetImageSize());
 }
 
+EditFramePresenter::~EditFramePresenter()
+{
+}
+
 bool EditFramePresenter::GetImage(size_t index, wxImage& OUT image, uint32_t& OUT duration)
 {
 	auto imageStore = m_model.GetImageStore();
@@ -71,7 +75,7 @@ bool EditFramePresenter::DeleteFrame(size_t start, size_t end)
 		AddHistoryItem(historyItem);
 	}
 
-	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	this->QueueEvent(new wxCommandEvent(EVT_UPDATE_IMAGESTORE));
 	return res;
 }
 
@@ -86,7 +90,7 @@ bool EditFramePresenter::ResizeImage(const wxSize& reImageSize)
 		AddHistoryItem(historyItem);
 	}
 
-	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	this->QueueEvent(new wxCommandEvent(EVT_UPDATE_IMAGESTORE));
 	return res;
 }
 
@@ -106,7 +110,7 @@ bool EditFramePresenter::CropImage()
 		AddHistoryItem(historyItem);
 	}
 	m_model.SetCropRect(m_model.GetImageStore()->GetImageSize());
-	this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+	this->QueueEvent(new wxCommandEvent(EVT_UPDATE_IMAGESTORE));
 	return false;
 }
 
@@ -197,7 +201,7 @@ void EditFramePresenter::Undo()
 		auto item = history[cursor];
 		item->Undo(m_model.GetImageStore());
 		m_model.SetEditHistoryCursor(cursor - 1);
-		this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+		this->QueueEvent(new wxCommandEvent(EVT_UPDATE_IMAGESTORE));
 	}
 }
 
@@ -210,7 +214,7 @@ void EditFramePresenter::Redo()
 		auto item = history[cursor];
 		item->Redo(m_model.GetImageStore());
 		m_model.SetEditHistoryCursor(cursor);
-		this->QueueEvent(new wxCommandEvent(EVT_RefreshView));
+		this->QueueEvent(new wxCommandEvent(EVT_UPDATE_IMAGESTORE));
 	}
 }
 

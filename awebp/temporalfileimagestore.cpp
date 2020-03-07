@@ -111,6 +111,17 @@ FileImageStore::~FileImageStore()
 	
 }
 
+uint32_t FileImageStore::GetTotalDuration() const
+{
+	uint32_t s = 0;
+	for (auto& it : m_store)
+	{
+		s += it.second;
+	}
+	return s;
+}
+
+
 void FileImageStore::SetFrameDuration(size_t index, uint32_t duration)
 {
 	m_store[index].second = duration;

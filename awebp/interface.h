@@ -12,6 +12,7 @@ struct IImageStore
 	virtual wxSize GetImageSize() const = 0;
 	virtual void Clear() = 0;
 	virtual void SetFrameDuration(size_t index, uint32_t duration) = 0;
+	virtual uint32_t GetTotalDuration()const = 0;
 //부가적인 기능
 	virtual bool IsSupportedEdit() { return false; }
 	virtual IImageStore* RemoveImages(size_t from, size_t to) { return nullptr; }
