@@ -13,12 +13,10 @@ struct IImageStore
 	virtual void Clear() = 0;
 	virtual void SetFrameDuration(size_t index, uint32_t duration) = 0;
 	virtual uint32_t GetTotalDuration()const = 0;
-//부가적인 기능
-	virtual bool IsSupportedEdit() { return false; }
-	virtual IImageStore* RemoveImages(size_t from, size_t to) { return nullptr; }
-	virtual bool InsertImages(IImageStore*& store, size_t to) { return false; }
-	virtual std::optional<uint32_t> GetFrameDuration(size_t index) {return std::optional<uint32_t>();}
-
+	virtual std::optional<uint32_t> GetFrameDuration(size_t index) = 0;
+	virtual size_t GetSize() = 0;
+	virtual void LoadToMemory() {};
+	virtual void UnloadFromMemory() {};
 //해당 이미지 저장소와 동일한 빌더를 생성한다.
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) = 0;
 

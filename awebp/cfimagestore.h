@@ -10,13 +10,13 @@
 class CISSaveThread : public wxThreadHelper
 {
 	wxMutex& m_mutex;
-	wxFileOutputStream& m_fOStream;
+	HFILE& m_hFile;
 	std::vector<size_t>& m_bytesCounts;
 	wxMessageQueue<std::pair<wxImage*, uint32_t>>& m_mqueue;
 public:
 	CISSaveThread(
 		wxMutex& m_mutex,
-		wxFileOutputStream& fOStream,
+		HFILE& hFile,
 		std::vector<size_t>& offsets,
 		wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue);
 protected:
@@ -36,10 +36,8 @@ protected:
 private:
 	wxMutex m_mutex;
 	wxSize m_imageSize;
-	wxFile m_file;
+	HANDLE m_hFile;
 	wxString m_fileName;
-	
-	wxFileOutputStream m_fileOStream;
 	wxMessageQueue<std::pair<wxImage*, uint32_t>> m_mqueue;
 	std::vector<uint32_t> m_durations;
 	std::vector<size_t> m_bytesCounts;

@@ -3,6 +3,8 @@
 #include <wx/log.h>
 #include <optional>
 #include <cmath>
+#include <random>
+#include<wx/stdpaths.h>
 #ifndef __WXMSW__
 #include <unistd.h>
 #endif
@@ -22,6 +24,34 @@ constexpr T hiword(T m) {
 template<typename T>
 constexpr T loword(T m) {
 	return m ^ (hiword(m) << (bitcountof(m) / 2));
+}
+wxString GetTempFile(const wxString& prefix, wxFile* file = nullptr)
+{
+	std::random_device rn;
+	std::mt19937_64 rnd(rn());
+
+	//< 2단계. 분포 설정 ( 정수 )
+	std::uniform_int_distribution<long> range(0, LONG_MAX);
+
+	auto& path = wxStandardPaths::Get();
+	wxFileName name;
+	do
+	{
+		name.SetName(wxString::Format(wxT("%s%08X.%08X"), prefix, range(rn), (long)time(nullptr)));
+		name.SetExt(wxT("tmp"));
+		name.SetPath(path.GetTempDir());
+	} while (name.Exists());
+	
+	if (file != nullptr)
+	{
+		if (file->Open(name.GetFullPath(), wxFile::write_excl)== false)
+		{
+			file->Seek(0);
+			wxLogGeneric(wxLOG_Error, wxString() << file->GetLastError());
+			return wxT("");
+		}
+	}
+	return name.GetFullPath();
 }
 class MappedFile
 {
@@ -49,7 +79,6 @@ public:
 		const wxSize& imageSize,
 		const std::vector<size_t>& bytesCounts,
 		const std::vector<uint32_t>& durations);
-	CachedImageStorage(size_t fileSize, const wxSize& imgSize);
 	~CachedImageStorage();
 	virtual IImageStoreBuilder* CreateBuilder(const wxSize& imageSize) override;
 	virtual  std::pair<wxImage, uint32_t> Get(size_t index);
@@ -57,20 +86,20 @@ public:
 	virtual size_t GetCount() const;
 	virtual wxSize GetImageSize() const;
 	virtual void Clear() override{  }
-	virtual bool IsSupportedEdit()override { return false; }
-	virtual IImageStore* RemoveImages(size_t from, size_t to);
-	virtual bool InsertImages(IImageStore*& image, size_t to) override;
+	virtual void LoadToMemory() override;
+	virtual void UnloadFromMemory() override;
 	virtual std::optional<uint32_t> GetFrameDuration(size_t index) override;
 	virtual void SetFrameDuration(size_t index, uint32_t duration) override;
 	virtual uint32_t GetTotalDuration()const override;
+	virtual size_t GetSize();
 };
 CISSaveThread::CISSaveThread(
 	wxMutex& mutex,
-	wxFileOutputStream& fOStream,
+	HFILE& hFile,
 	std::vector<size_t>& bytesCounts,
 	wxMessageQueue<std::pair<wxImage*, uint32_t>>& mqueue):
 	m_mutex(mutex),
-	m_fOStream(fOStream),
+	m_hFile(hFile),
 	m_bytesCounts(bytesCounts),
 	m_mqueue(mqueue)
 {
@@ -93,11 +122,21 @@ void* CISSaveThread::Entry()
 
 		auto s = data.first->GetSize();
 		auto bits = data.first->GetData();
-		m_fOStream.WriteAll(bits, s.x * s.y * 3l);
+		DWORD size = s.x * s.y * 3;
+		DWORD totalWriteCount = 0;
+		
+		do {
+			DWORD writeCount = 0;
+			WriteFile((HANDLE)m_hFile,
+				bits + totalWriteCount,
+				size - totalWriteCount,
+				&writeCount,
+				nullptr);
+			totalWriteCount += writeCount;
 
-		auto ts = m_fOStream.TellO();
-		m_bytesCounts.push_back(ts - preOffset);
-		preOffset = ts;
+		} while (size != totalWriteCount);
+		
+		m_bytesCounts.push_back(size);
 		delete data.first;
 	}
 	m_mutex.Unlock();
@@ -106,12 +145,15 @@ void* CISSaveThread::Entry()
 
 CachedImageStorageBuilder::CachedImageStorageBuilder(const wxSize& imageSize):
 	m_mutex(),
-	m_fileName(wxFileName::CreateTempFileName(wxT("webpcam"),&m_file)),
+	m_fileName(GetTempFile(wxT("webpcam"))),
 	m_imageSize(imageSize),
-	m_fileOStream(m_file),
 	m_mqueue(),
-	m_backgroundThread(m_mutex, m_fileOStream, m_bytesCounts, m_mqueue)
+	m_backgroundThread(m_mutex, (HFILE&)m_hFile, m_bytesCounts, m_mqueue)
 {
+	m_hFile = CreateFileW(m_fileName.wc_str(), 
+		GENERIC_READ | GENERIC_WRITE,0,
+		nullptr, OPEN_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL, NULL);
 	m_backgroundThread.CreateThread();
 	m_backgroundThread.GetThread()->Run();
 }
@@ -125,14 +167,12 @@ CachedImageStorageBuilder::~CachedImageStorageBuilder()
 		thread->Wait();
 	}
 	m_mutex.Lock();
-	m_fileOStream.Close();
-	m_fileOStream.UnRef();
-	if (m_fileName.empty() == false)
+	if (m_hFile)
 	{
-		m_file.Close();
-		m_file.Detach();
+		CloseHandle(m_hFile);
 		wxRemoveFile(m_fileName);
 	}
+	
 	m_mutex.Unlock();
 }
 
@@ -156,13 +196,9 @@ IImageStore* CachedImageStorageBuilder::BuildStore()
 		thread->Wait();
 	}
 	m_mutex.Lock();
-	m_fileOStream.Close();
-	m_fileOStream.UnRef();
-	if (m_fileName.empty() == false)
-	{
-		m_file.Close();
-		m_file.Detach();
-	}
+	if (m_hFile)
+		CloseHandle(m_hFile);
+	m_hFile = nullptr;
 	m_mutex.Unlock();
 	wxString temp = m_fileName;
 	m_fileName.Clear();
@@ -172,7 +208,12 @@ IImageStore* CachedImageStorageBuilder::BuildStore()
 CachedImageStorage::CachedImageStorage(
 	wxString fileName, const wxSize& imageSize, 
 	const std::vector<size_t>& bytesCounts, const std::vector<uint32_t>& durations):
-	m_fileName(fileName),m_imageSize(imageSize), m_durations(durations) , m_mappedFile(nullptr)
+	m_fileName(fileName),
+	m_imageSize(imageSize),
+	m_durations(durations),
+	m_hFile(nullptr),
+	m_hMap(nullptr),
+	m_mappedFile(nullptr)
 {
 	size_t offset = 0;
 	for (auto bytesCount: bytesCounts)
@@ -182,49 +223,36 @@ CachedImageStorage::CachedImageStorage(
 	}
 	//TODO:이미지 매핑
 #ifdef __WXMSW__
-	m_hFile = CreateFileW(m_fileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
-		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	DWORD high = 0;
-	DWORD low = GetFileSize(m_hFile, &high);
-	//if (high == 0 && low == 0)
-		low |= 0x20000000;
-	if (m_hFile == INVALID_HANDLE_VALUE)
+	try
+	{
+		m_hFile = CreateFileW(m_fileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (m_hFile == INVALID_HANDLE_VALUE)
+			throw GetLastError();
+		DWORD high = 0;
+		DWORD low = GetFileSize(m_hFile, &high);
+		m_hMap = CreateFileMappingW(m_hFile, NULL, PAGE_READWRITE, high, low, NULL);
+		if (m_hMap == NULL)
+			throw GetLastError();
+		m_mappedFile = (uint8_t*)MapViewOfFile(m_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+		if (!m_mappedFile)
+			throw GetLastError();
+	}
+	catch (DWORD code)
 	{
 		wchar_t* text = nullptr;
-		auto err = GetLastError();
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
+			nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+		wxLogGeneric(wxLOG_Error, text);
+		if(m_hMap)
+			CloseHandle(m_hMap);
+		if (m_hFile)
+			CloseHandle(m_hFile);
+		m_mappedFile = nullptr;
+		m_hFile = nullptr;
+		m_hMap = nullptr;
+		m_durations.clear();
+		m_pages.clear();
 	}
-	m_hMap = CreateFileMappingW(m_hFile, NULL, PAGE_READWRITE, high, low, NULL);
-	if (m_hMap == NULL)
-	{
-		wchar_t* text = nullptr;
-		auto err = GetLastError();
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
-		if (err == 1006)
-		{
-
-		}
-		else
-		{
-			
-		}
-
-	}
-	m_mappedFile = (uint8_t*)MapViewOfFile(m_hMap, FILE_MAP_ALL_ACCESS,0,0,0);
-	if (!m_mappedFile)
-	{
-		wchar_t* text = nullptr;
-		auto err = GetLastError();
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
-
-	}
-	
 #else
 	wxStructStat strucStat;
 	wxStat(m_fileName, &strucStat);
@@ -233,75 +261,15 @@ CachedImageStorage::CachedImageStorage(
 #endif
 }
 
-
-CachedImageStorage::CachedImageStorage(size_t fileSize, const wxSize& imgSize):
-	m_fileName(wxFileName::CreateTempFileName(wxT("webpcam"))), m_imageSize(imgSize), m_durations(), m_mappedFile(nullptr)
-{
-	//TODO:이미지 매핑
-#ifdef __WXMSW__
-	m_hFile = CreateFileW(m_fileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
-		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	for (int i = 0; i < fileSize / sizeof(uint64_t); i++)
-	{
-		uint64_t b = 0;
-		if (!WriteFile(m_hFile, &b, sizeof(uint64_t), nullptr, nullptr))
-		{
-			wchar_t* text = nullptr;
-			auto err = GetLastError();
-			FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-				nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-			wxMessageBox(text);
-		}
-	}
-	FlushFileBuffers(m_hFile);
-	DWORD high = fileSize >> (bitcountof(fileSize)/2);
-	DWORD low = fileSize;
-	//if (high == 0 && low == 0)
-	if (m_hFile == INVALID_HANDLE_VALUE)
-	{
-		wchar_t* text = nullptr;
-		auto err = GetLastError();
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
-	}
-	m_hMap = CreateFileMappingW(m_hFile, NULL, PAGE_READWRITE, high, low, NULL);
-	if (m_hMap == NULL)
-	{
-		wchar_t* text = nullptr;
-		auto err = GetLastError();
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
-		if (err == 1006)
-		{
-
-		}
-		else
-		{
-
-		}
-
-	}
-	m_mappedFile = (uint8_t*)MapViewOfFile(m_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-	if (!m_mappedFile)
-	{
-		wchar_t* text = nullptr;
-		auto err = GetLastError();
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
-		wxMessageBox(text);
-
-	}
-#endif
-}
-
 CachedImageStorage::~CachedImageStorage()
 {
 #ifdef __WXMSW__
-	UnmapViewOfFile(m_mappedFile);
-	CloseHandle(m_hMap);
-	CloseHandle(m_hFile);
+	if(m_mappedFile)
+		UnmapViewOfFile(m_mappedFile);
+	if(m_hMap)
+		CloseHandle(m_hMap);
+	if(m_hFile)
+		CloseHandle(m_hFile);
 #endif
 	wxRemoveFile(m_fileName);
 }
@@ -315,9 +283,13 @@ IImageStoreBuilder* CachedImageStorage::CreateBuilder(const wxSize& imageSize)
 std::pair<wxImage, uint32_t> CachedImageStorage::Get(size_t index)
 {
 	auto s = m_pages[index];
-	wxMemoryInputStream memIStream(m_mappedFile + s[0], s[1]);
-	wxImage image(m_imageSize, m_mappedFile + s[0], true);
-
+	bool isUnloadedData = m_mappedFile == nullptr;
+	
+	if (isUnloadedData)
+		LoadToMemory();
+	unsigned char* ptr = m_mappedFile + s[0];
+	wxImage image(m_imageSize, ptr, true);
+	
 	return std::pair<wxImage, uint32_t>(image,m_durations[index]);
 }
 
@@ -338,82 +310,46 @@ wxSize CachedImageStorage::GetImageSize() const
 	return m_imageSize;
 }
 
-IImageStore* CachedImageStorage::RemoveImages(size_t from, size_t to)
+void CachedImageStorage::LoadToMemory()
 {
-	return nullptr;
-	size_t fileSize = 0;
+	if (m_mappedFile)
+		return;
+	if (!m_hFile)
+		return;
+	try
 	{
-		auto page = m_pages[to - 1];
-		fileSize = page[0] + page[1];
-		page = m_pages[from];
-		fileSize -= page[0];
+		DWORD high = 0;
+		DWORD low = GetFileSize(m_hFile, &high);
+		m_hMap = CreateFileMappingW(m_hFile, NULL, PAGE_READWRITE, high, low, NULL);
+		if (m_hMap == NULL)
+			throw GetLastError();
+		m_mappedFile = (uint8_t*)MapViewOfFile(m_hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
+		if (!m_mappedFile)
+			throw GetLastError();
 	}
-	auto storage = new CachedImageStorage(fileSize, m_imageSize);
-	size_t offset = 0;
-	for (size_t i = from; i < to; i++)
+	catch (DWORD code)
 	{
-		auto& page = m_pages[i];
-		storage->m_durations.push_back(m_durations[0]);
-		storage->m_pages.push_back({ offset, page[1] });
-		memcpy(storage->m_mappedFile + offset, m_mappedFile + page[0], page[1]);
-		offset += page[1];
+		wchar_t* text = nullptr;
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+			nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&text, 0, nullptr);
+		wxLogGeneric(wxLOG_Error, text);
+		if (m_hMap)
+			CloseHandle(m_hMap);
+		if (m_hFile)
+			CloseHandle(m_hFile);
+		m_mappedFile = nullptr;
+		m_hMap = nullptr;
 	}
-	size_t source = m_pages[from][0];
-	auto lastPage = *m_pages.rbegin();
-	size_t dec = m_pages[to -1][0] - m_pages[from][0];
-	
-	for (size_t i = to; i < m_pages.size(); i++)
-	{
-
-		auto& page = m_pages[i];
-		size_t oldOffset = page[0];
-		page[0] = page[0] - dec;
-		memcpy(m_mappedFile + page[0], m_mappedFile + oldOffset, page[1]);
-	}
-	m_pages.erase(m_pages.begin() + from , m_pages.begin() + to);
-	auto base = m_durations.begin();
-	m_durations.erase(base + from, base + to);
-	return storage;
 }
 
-bool CachedImageStorage::InsertImages(IImageStore*& image, size_t to)
+void CachedImageStorage::UnloadFromMemory()
 {
-	return false;
-	CachedImageStorage* obj = dynamic_cast<CachedImageStorage*>(image);
-	if (obj != nullptr)
-	{
-		auto lastPage = *obj->m_pages.rbegin();
-		size_t objMemSize = lastPage[0] + lastPage[1];
-		size_t endCount = (m_pages.size() - 1) - to;
-		uint8_t* ptr = nullptr;
-		size_t to_offset = 0;
-		if(m_pages.size() != to)
-			to_offset = m_pages[to][0];
-		else if(m_pages.size() != 0)
-			to_offset = m_pages[to- 1][0] + m_pages[to - 1][1];
-		for (auto it = m_pages.rbegin(); it != m_pages.rend() - to; it++)
-		{
-			auto& page = *it;
-			ptr = m_mappedFile + page[0];
-			memcpy(ptr + objMemSize , ptr, page[1]);
-			page[0] += objMemSize;
-		}
-		for (auto& it : obj->m_pages)
-		{
-			it[0] += to_offset;
-		}
-		memcpy(m_mappedFile + to_offset, obj->m_mappedFile, objMemSize);
-		size_t offset = 0;
-		size_t i = 0;
-		m_pages.insert(m_pages.begin() + to, obj->m_pages.begin(), obj->m_pages.end());
-		m_durations.insert(m_durations.begin() + to, obj->m_durations.begin(), obj->m_durations.end());
-		return true;
-	}
-	else
-	{
-
-	}
-	return false;
+	if (m_mappedFile)
+		UnmapViewOfFile(m_mappedFile);
+	if (m_hMap)
+		CloseHandle(m_hMap);
+	m_mappedFile = nullptr;
+	m_hMap = nullptr;
 }
 
 std::optional<uint32_t> CachedImageStorage::GetFrameDuration(size_t index)
@@ -436,4 +372,12 @@ uint32_t CachedImageStorage::GetTotalDuration() const
 		s += it;
 	}
 	return s;
+}
+
+size_t CachedImageStorage::GetSize()
+{
+	auto it = m_pages.rbegin();
+	if (it == m_pages.rend())
+		return 0;
+	return it->at(0) + it->at(1);
 }

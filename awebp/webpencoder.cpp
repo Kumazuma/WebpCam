@@ -64,7 +64,7 @@ void WebpEncoder::Encode(wxEvtHandler* handler, const wxString filePath, IImageS
 	m_config.method = 6;//압축률 최대
 	//키프레임 최소와 최대;
 	m_encoderOption.kmin = 1;
-	m_encoderOption.kmax = 40;
+	m_encoderOption.kmax = 3;
 	//인코더를 초기화
 	m_encoder = WebPAnimEncoderNew(imgSize.GetWidth(), imgSize.GetHeight(),&m_encoderOption);
 	//프레임을 초기화한다

@@ -16,13 +16,13 @@ private:
 class EditDeleteFrameTool : public IEditTool
 {
 public:
-	void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
+	void Execute(IImageStore*& imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
 };
 class EditResizeTool : public IEditTool
 {
 public:
 	EditResizeTool(const wxSize& to);
-	void Execute(IImageStore*& OUT imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
+	void Execute(IImageStore*& imageStore, size_t start, size_t end, IHistoryItem*& OUT historyItem) override;
 private:
 	wxSize m_sizeResizeTo;
 };

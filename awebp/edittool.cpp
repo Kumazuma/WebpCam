@@ -12,16 +12,16 @@ void EditDeleteFrameTool::Execute(IImageStore*&  imageStore, size_t start, size_
 			tempSaveBuilder->PushBack(item.first, item.second);
 		}
 	}
-	
-	historyItem = new HistoryItemDeleteFrame(imageStore, start, end);
+	auto* temp = imageStore;
 	imageStore = IImageStoreBuilder::BuildStore(tempSaveBuilder);
+	historyItem = new HistoryItemDeleteFrame(temp, start, end);
 }
 
 HistoryItemDeleteFrame::HistoryItemDeleteFrame(IImageStore* imageStore, size_t start, size_t end):
 	m_imageStore(imageStore), m_start(start), m_end(end)
 
 {
-
+	m_imageStore->UnloadFromMemory();
 }
 
 HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
@@ -31,6 +31,8 @@ HistoryItemDeleteFrame::~HistoryItemDeleteFrame()
 
 void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	auto* store = imageStore;
 	imageStore = m_imageStore;
 	m_imageStore = store;
@@ -38,6 +40,8 @@ void HistoryItemDeleteFrame::Undo(IImageStore*& imageStore)
 
 void HistoryItemDeleteFrame::Redo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	auto* store = imageStore;
 	imageStore = m_imageStore;
 	m_imageStore = store;
@@ -55,7 +59,6 @@ EditResizeTool::EditResizeTool(const wxSize& to):
 {
 
 }
-#include<future>
 void EditResizeTool::Execute(
 	IImageStore*& OUT imageStore, 
 	size_t start, size_t end, 
@@ -69,14 +72,15 @@ void EditResizeTool::Execute(
 		item.first.Rescale(m_sizeResizeTo.GetWidth(), m_sizeResizeTo.GetHeight());
 		builder->PushBack(item.first, item.second);
 	}
-	historyItem = new HistoryItemResize(imageStore, m_sizeResizeTo);
+	auto* temp = imageStore;
 	imageStore = IImageStoreBuilder::BuildStore(builder);
+	historyItem = new HistoryItemResize(temp, m_sizeResizeTo);
 }
 
 HistoryItemResize::HistoryItemResize(IImageStore* imageStore, const wxSize& resizeTo):
 	m_imageStore(imageStore), m_sizeResizeTo(resizeTo)
 {
-
+	m_imageStore->UnloadFromMemory();
 }
 
 HistoryItemResize::~HistoryItemResize()
@@ -86,6 +90,8 @@ HistoryItemResize::~HistoryItemResize()
 
 void HistoryItemResize::Undo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	auto temp = imageStore;
 	imageStore = m_imageStore;
 	m_imageStore = temp;
@@ -93,6 +99,8 @@ void HistoryItemResize::Undo(IImageStore*& imageStore)
 
 void HistoryItemResize::Redo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	auto temp = imageStore;
 	imageStore = m_imageStore;
 	m_imageStore = temp;
@@ -115,15 +123,17 @@ void EditCropImageTool::Execute(IImageStore*& OUT imageStore, size_t start, size
 		auto croped = item.first.GetSubImage(m_crop);
 		builder->PushBack(croped, item.second);
 	}
-	historyItem = new HistoryCropImage(imageStore, m_crop);
+	auto* temp = imageStore;
 	imageStore = IImageStoreBuilder::BuildStore(builder);
+	historyItem = new HistoryCropImage(temp, m_crop);
+	
 
 }
 
 HistoryCropImage::HistoryCropImage(IImageStore* imageStore, const wxRect& crop):
 	m_imageStore(imageStore), m_crop(crop)
 {
-
+	m_imageStore->UnloadFromMemory();
 }
 
 HistoryCropImage::~HistoryCropImage()
@@ -133,11 +143,15 @@ HistoryCropImage::~HistoryCropImage()
 
 void HistoryCropImage::Undo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	std::swap(imageStore, m_imageStore);
 }
 
 void HistoryCropImage::Redo(IImageStore*& imageStore)
 {
+	imageStore->UnloadFromMemory();
+	m_imageStore->LoadToMemory();
 	std::swap(m_imageStore, imageStore);
 }
 
